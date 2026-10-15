@@ -111,17 +111,17 @@
   .tabs button,.seg button{font:600 .85rem 'Inter',sans-serif;letter-spacing:.04em;padding:9px 22px;border:0;border-radius:9px;background:none;color:var(--muted);cursor:pointer}
   .tabs button[aria-selected=true],.seg button[aria-pressed=true]{background:var(--teal);color:var(--bg)}
   button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
-  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:24px 18px;margin-bottom:32px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,264px);gap:32px 24px;margin-bottom:36px}
   .pick{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
-  .art{position:relative;width:100%;aspect-ratio:3/4;border-radius:14px;overflow:hidden;background:var(--panel);border:1px solid var(--border);transition:box-shadow .2s,border-color .2s}
+  .art{position:relative;width:100%;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:var(--panel);border:1px solid var(--border);transition:box-shadow .2s,border-color .2s}
   .art img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
   .noimg{display:grid;place-items:center;height:100%;font:600 3rem 'Fredoka',sans-serif;color:var(--gold-dim)}
-  .badge{position:absolute;top:8px;left:8px;font:500 .62rem 'IBM Plex Mono',monospace;padding:2px 6px;border-radius:5px;background:rgba(42,26,34,.8);border:1px solid var(--border);color:var(--gold)}
+  .badge{position:absolute;top:8px;left:8px;font:500 .72rem 'IBM Plex Mono',monospace;padding:2px 6px;border-radius:5px;background:rgba(42,26,34,.8);border:1px solid var(--border);color:var(--gold)}
   .pick:hover .art{border-color:var(--gold-dim)}
   .pick[aria-pressed=true] .art{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal),0 0 26px rgba(201,138,160,.35)}
-  .stars{font-size:.8rem;letter-spacing:2px;color:#5c4651}
+  .stars{font-size:1rem;letter-spacing:2px;color:#5c4651}
   .pick[aria-pressed=true] .stars{color:var(--spike)}
-  .pname{font:600 .9rem 'Fredoka',sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:center;color:var(--muted)}
+  .pname{font:600 1.1rem 'Fredoka',sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:center;color:var(--muted)}
   .pick[aria-pressed=true] .pname{color:var(--text)}
   .res{margin-top:24px}
   .ph{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
@@ -144,7 +144,17 @@
   .chip.ten{background:rgba(201,138,160,.14);border-color:var(--gold-dim)}
   .chip b{color:var(--text)}.chip.ten b{color:var(--spike)}
   .chip i{font-style:normal;color:var(--muted);font-size:.75rem}.chip em{font-style:normal;color:var(--spike)}
-  @media (max-width:600px){.chart{height:200px}.seg{margin-left:0}}
+  @media (max-width:600px){.chart{height:200px}.seg{margin-left:0}.cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+  #secret{user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+  dialog{width:min(360px,calc(100vw - 32px));padding:24px;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:16px;font-family:'Inter',sans-serif}
+  dialog::backdrop{background:rgba(26,14,20,.75)}
+  dialog h2{font:600 1.3rem 'Fredoka',sans-serif;margin:0 0 6px}
+  dialog p{margin:0 0 16px;color:var(--muted);font-size:.88rem;line-height:1.5}
+  dialog input{width:100%;padding:10px 12px;margin-bottom:14px;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;color:var(--text);font:500 .95rem 'IBM Plex Mono',monospace}
+  dialog input:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+  .dlgbtns{display:flex;gap:8px}
+  .dlgbtns button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font:600 .85rem 'Inter',sans-serif;cursor:pointer}
+  .dlgbtns button.go{background:var(--teal);color:var(--bg);border-color:var(--teal)}
 </style>
 
 </head>
@@ -158,11 +168,11 @@
 <div class="wrap">
   <header>
     <h1>Svarog Anaspeedlaxer</h1>
-    <p>On EVERYBODY's soul but mine ts works</p>
+    <p>On <span id="secret">EVERYBODY</span>'s soul but mine ts works</p>
   </header>
   <div class="tabs" role="tablist">
     <button role="tab" id="tc" aria-selected="true">CHARACTERS</button>
-    <button role="tab" id="tl" aria-selected="false">LIGHT CONES</button>
+    <button role="tab" id="tl" aria-selected="false">SIGNATURE WEAPONS</button>
   </div>
   <div class="cards" id="cards"></div>
   <section class="panel res" id="gp" hidden>
@@ -176,26 +186,36 @@
     <div class="chips" id="chips"></div>
   </section>
 </div>
+<dialog id="dlg">
+  <h2>Seed</h2>
+  <p>Graphs are built from today's date and this seed. Change it or reroll for a new set.</p>
+  <input id="seedIn" maxlength="24" autocomplete="off" aria-label="Seed">
+  <div class="dlgbtns"><button type="button" id="apply" class="go">Apply</button><button type="button" id="reroll">Reroll</button><button type="button" id="close">Close</button></div>
+</dialog>
 <script>
-// Add items here. t: 'c' = character, 'l' = light cone. img = file inside ../assets
+// Add items here. t: 'c' = character, 'l' = signature weapon. n = shown name. img = file inside ../assets
 const DATA=[
-  {t:'c',n:'Evanescia',img:'evanescia.png'},
-  {t:'c',n:'Pearl',img:'pearl.png'},
-  {t:'l',n:'Until the Flowers Bloom Again',img:'until-the-flowers-bloom-again.png'},
-  {t:'l',n:'Colors for Tomorrow',img:'colors-for-tomorrow.png'}
+  {t:'c',n:'Main',img:'main-c.png'},
+  {t:'c',n:'Rerun',img:'rerun-c.png'},
+  {t:'l',n:'Main',img:'main-l.png'},
+  {t:'l',n:'Rerun',img:'rerun-l.png'}
 ];
-const CFG={c:{soft:75,hard:90,tag:'CHAR',label:'Character'},l:{soft:66,hard:80,tag:'LC',label:'Light cone'}};
+const CFG={c:{soft:75,hard:90,tag:'CHAR',label:'Character'},l:{soft:66,hard:80,tag:'SIG',label:'Signature Weapon'}};
 const $=id=>document.getElementById(id);
-let tab='c',sel=null,mode='count',cur=null;
+let tab='c',sel=null,mode='count',cur=null,seed;
+const rand=()=>Math.random().toString(36).slice(2,8);
+function setSeed(v){seed=v;try{localStorage.setItem('svarog:seed',v)}catch(e){}}
+try{seed=localStorage.getItem('svarog:seed')}catch(e){}
+if(!seed)setSeed(rand());
 
 function xmur(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}
   h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return(h^h>>>16)>>>0}
 function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function today(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
 
-// Same item + same day = same graph
+// Graph depends only on today's date + the seed (secret menu: tap EVERYBODY 7 times)
 function build(it){
-  const {soft,hard}=CFG[it.t],r=mulberry(xmur(it.n+'|'+today()));
+  const {soft,hard}=CFG[it.t],r=mulberry(xmur(today()+'|'+seed));
   const SH=[60,80,93,87,68,56,32,19,11,6,3,2,1.5,1.5,1.5,1.5];
   const k=2+Math.floor(r()*3),lo=5,w=(soft-8-lo)/k,spikes=[];   // 2-4 random + 1 right before soft pity = 3-5
   for(let j=0;j<k;j++)spikes.push(Math.round(lo+j*w+w*(.2+.6*r())));
@@ -239,12 +259,12 @@ function draw(){
     return '<div class="col" title="Pity '+n+' · '+c+' · '+g.pct[i].toFixed(2)+'%"><i class="bar '+cls+'" style="height:'+(v/max*100)+'%"></i></div>'}).join('');
   $('xax').innerHTML='<span style="left:0">1</span><span style="left:'+((g.soft-.5)/g.hard*100)+'%;transform:translateX(-50%)">Soft pity ('+g.soft+')</span><span style="right:0">'+g.hard+'</span>';
 }
-function show(it){
-  cur=build(it);$('pill').textContent=it.n;draw();
+function show(it,quiet){
+  cur=build(it);$('pill').textContent=CFG[it.t].label+' · '+it.n;draw();
   $('chips').innerHTML=cur.plan.map(s=>'<div class="chip'+(s.x===10?' ten':'')+'"><b>x'+(s.x===10?'10':'1×'+s.n)+'</b><i>'+s.r+'</i><em>'+s.pc+'</em></div>').join('');
   $('steps').textContent=cur.plan.length+' steps calculated';
   $('gp').hidden=$('pp').hidden=false;
-  $('gp').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});
+  if(!quiet)$('gp').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});
 }
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;
   document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));if(cur)draw()});
@@ -252,6 +272,15 @@ document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{mode=b.datase
   $('tc').setAttribute('aria-selected',t==='c');$('tl').setAttribute('aria-selected',t==='l');
   $('gp').hidden=$('pp').hidden=true;showCards()});
 showCards();
+
+let taps=0,tapT;
+$('secret').onclick=()=>{clearTimeout(tapT);
+  if(++taps>=7){taps=0;$('seedIn').value=seed;$('dlg').showModal()}else tapT=setTimeout(()=>taps=0,2000)};
+function applySeed(v){v=v.trim().slice(0,24);if(!v)return;setSeed(v);$('seedIn').value=v;if(sel)show(sel,true)}
+$('apply').onclick=()=>applySeed($('seedIn').value);
+$('reroll').onclick=()=>applySeed(rand());
+$('close').onclick=()=>$('dlg').close();
+$('seedIn').onkeydown=e=>{if(e.key==='Enter')applySeed(e.target.value)};
 </script>
 </body>
 </html>
