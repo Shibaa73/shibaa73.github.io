@@ -205,9 +205,19 @@
 // Live banners come from the fan-made HoYoverse API (https://github.com/torikushiii/hoyoverse-api)
 const API='https://api.ennead.cc/mihoyo';
 let DATA=[],game='starrail',reqId=0;const cache={};
-// Sharper Star Rail art from StarRailRes (matched by name); the API's own icon is the fallback
+// Sharper art matched by name: Star Rail from StarRailRes, Genshin from genshin-db (images on Enka). The API's own icon is the fallback
 const RES=['https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/','https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/'];
+const GDB='https://genshin-db-api.vercel.app/api/v5/',ENKA='https://enka.network/ui/';
 let hsrArt=null;
+async function genshinArt(items){
+  await Promise.allSettled(items.map(async x=>{
+    const r=await fetch(GDB+(x.t==='c'?'characters':'weapons')+'?query='+encodeURIComponent(x.n));
+    if(!r.ok)return;const d=await r.json();
+    if(!d||String(d.name).toLowerCase()!==x.n.toLowerCase())return;   // ignore fuzzy mismatches
+    const f=x.t==='c'?d.images&&d.images.filename_gachaSplash:d.images&&d.images.filename_gacha;
+    if(f)x.hi=[ENKA+f+'.png'];
+  }));
+}
 async function getJSON(path){for(const b of RES){try{const r=await fetch(b+path);if(r.ok)return await r.json()}catch(e){}}throw new Error('art')}
 async function loadArt(){
   if(hsrArt)return hsrArt;
@@ -234,7 +244,8 @@ async function load(){
     if(!cache[game]){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),10000);
       const res=await fetch(API+'/'+game+'/calendar',{signal:ac.signal});clearTimeout(to);
       if(!res.ok)throw new Error(res.status);const items=parse(await res.json());
-      if(game==='starrail')try{const a=await loadArt();items.forEach(x=>{const p=a[x.t][x.n.toLowerCase()];if(p)x.hi=p})}catch(e){}
+      if(game==='starrail')try{const a=await loadArt();items.forEach(x=>{const p=a[x.t][x.n.toLowerCase()];if(p){x.hi=RES.map(r=>r+p);if(x.t==='l')x.cls='lc'}})}catch(e){}
+      else await genshinArt(items);
       cache[game]=items}
     if(id!==reqId)return;
     DATA=cache[game];showCards();
@@ -284,9 +295,9 @@ function card(it){
   b.className='pick';b.setAttribute('aria-pressed',sel===it);
   b.innerHTML='<span class="art"><span class="badge">'+c.tag+'</span></span><span class="stars">★★★★★</span><span class="pname"></span>';
   b.querySelector('.pname').textContent=it.n;
-  const srcs=(it.hi?RES.map(r=>r+it.hi):[]).concat(it.img||[]);let k=0;
+  const srcs=(it.hi||[]).concat(it.img||[]);let k=0;
   const img=new Image();img.alt='';img.decoding='async';img.referrerPolicy='no-referrer';img.src=srcs[0]||'';
-  if(it.hi&&it.t==='l')img.className='lc';
+  if(it.cls)img.className=it.cls;
   img.onerror=()=>{if(++k<srcs.length){img.src=srcs[k];return}
     const s=document.createElement('span');s.className='noimg';s.textContent=it.n[0];img.replaceWith(s)};
   b.querySelector('.art').prepend(img);
