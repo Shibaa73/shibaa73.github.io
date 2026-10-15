@@ -43,7 +43,7 @@
   }
   .watermark.left{left:-20px;}
   .watermark.right{right:-20px;width:280px;}
-  .wrap{max-width:880px;margin:0 auto;position:relative;z-index:1;}
+  .wrap{max-width:1386px;margin:0 auto;position:relative;z-index:1;}
   header{margin-bottom:48px;text-align:center;}
   h1{
     font-family:'Fredoka',sans-serif;
@@ -59,8 +59,14 @@
     margin:0;
     padding:0;
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(min(260px, 100%), 1fr));
-    gap:20px;
+    grid-template-columns:repeat(3, 1fr);
+    gap:48px;
+  }
+  @media (max-width:1279px){
+    .menu{grid-template-columns:repeat(2, 1fr);gap:24px;max-width:880px;margin:0 auto;}
+  }
+  @media (max-width:699px){
+    .menu{grid-template-columns:1fr;gap:20px;}
   }
   .menu li{display:flex;}
 
@@ -160,9 +166,15 @@
   -->
   <ul class="menu">
     <li>
-      <a class="card" href="Apps/GarticPhone.html">
+      <a class="card" href="Apps/garticphone.html">
         <h2>Gartic Phone</h2>
         <p>Random order generator for knock off.</p>
+      </a>
+    </li>
+    <li>
+      <a class="card" href="Apps/svarog.html">
+        <h2>Svarog Anaspeedlaxer</h2>
+        <p>On EVERYBODY's soul but mine ts works</p>
       </a>
     </li>
     <li>
