@@ -113,17 +113,16 @@
   button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
   .cards{display:grid;grid-template-columns:repeat(auto-fill,264px);gap:32px 24px;margin-bottom:36px}
   .pick{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit}
-  .art{position:relative;width:100%;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:var(--panel);border:1px solid var(--border);transition:box-shadow .2s,border-color .2s}
+  .art{position:relative;width:100%;aspect-ratio:3/4;border-radius:18px;overflow:hidden;background:linear-gradient(165deg,var(--c1,var(--panel)),var(--c2,var(--panel)));border:1px solid var(--edge,var(--border));box-shadow:0 12px 30px -16px var(--glow,transparent);transition:box-shadow .2s,border-color .2s}
   .art img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
   .art img.lc{transform:scale(1.05)}
   .noimg{display:grid;place-items:center;height:100%;font:600 3rem 'Fredoka',sans-serif;color:var(--gold-dim)}
-  .badge{position:absolute;top:8px;left:8px;font:500 .72rem 'IBM Plex Mono',monospace;padding:2px 6px;border-radius:5px;background:rgba(42,26,34,.8);border:1px solid var(--border);color:var(--gold)}
   .pick:hover .art{border-color:var(--gold-dim)}
-  .pick[aria-pressed=true] .art{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal),0 0 26px rgba(201,138,160,.35)}
-  .stars{font-size:1rem;letter-spacing:2px;color:#5c4651}
-  .pick[aria-pressed=true] .stars{color:var(--spike)}
-  .pname{font:600 1.1rem 'Fredoka',sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:center;color:var(--muted)}
-  .pick[aria-pressed=true] .pname{color:var(--text)}
+  .pick[aria-pressed=true] .art{border-color:var(--teal);box-shadow:0 0 0 1px var(--teal),0 0 26px var(--glow,rgba(201,138,160,.35))}
+  .stars{font-size:1rem;letter-spacing:2px;color:var(--txt,#5c4651);opacity:var(--txto,1);transition:opacity .2s}
+  .pick[aria-pressed=true] .stars{color:var(--txt,var(--spike));opacity:1}
+  .pname{font:600 1.1rem 'Fredoka',sans-serif;letter-spacing:.05em;text-transform:uppercase;text-align:center;color:var(--txt,var(--muted));opacity:var(--txto,1);transition:opacity .2s}
+  .pick[aria-pressed=true] .pname{color:var(--txt,var(--text));opacity:1}
   .res{margin-top:24px}
   .ph{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px}
   .ph h2{font:600 1.35rem 'Fredoka',sans-serif;margin:0}
@@ -290,14 +289,41 @@ function build(it){
   return{soft,hard,spikes,cnt,pct,plan};
 }
 
+// Tints the card with the image's most prominent colour, kept dark and muted so the art still reads
+function tint(src,el){
+  const i=new Image();i.crossOrigin='anonymous';   // if the host sends no CORS headers this just fails quietly
+  i.onload=()=>{try{
+    const W=40,H=56,cv=document.createElement('canvas');cv.width=W;cv.height=H;
+    const x=cv.getContext('2d',{willReadFrequently:true});x.drawImage(i,0,0,W,H);
+    const d=x.getImageData(0,0,W,H).data;let B={};
+    for(let strict=1;strict>=0&&!Object.keys(B).length;strict--){
+      for(let p=0;p<d.length;p+=4){
+        const r=d[p],g=d[p+1],b=d[p+2];if(d[p+3]<128)continue;
+        const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/510,sat=mx?(mx-mn)/mx:0;
+        if(strict&&(l<.15||l>.9||sat<.2))continue;      // skip black, white and grey
+        const k=(r>>5)<<6|(g>>5)<<3|b>>5,o=B[k]||(B[k]={n:0,w:0,r:0,g:0,b:0});
+        o.n++;o.w+=.3+sat;o.r+=r;o.g+=g;o.b+=b}}
+    const best=Object.values(B).sort((a,b)=>b.w-a.w)[0];if(!best)return;
+    const R=best.r/best.n/255,G=best.g/best.n/255,Bl=best.b/best.n/255,mx=Math.max(R,G,Bl),mn=Math.min(R,G,Bl),dl=mx-mn,l=(mx+mn)/2;
+    let h=0;if(dl){h=mx===R?((G-Bl)/dl)%6:mx===G?(Bl-R)/dl+2:(R-G)/dl+4;h=(h*60+360)%360}
+    const sat=dl?Math.min(1,dl/(1-Math.abs(2*l-1))):0,S=Math.round(Math.min(.5,Math.max(.25,sat*.6))*100),H0=Math.round(h);
+    el.style.setProperty('--c1','hsl('+H0+' '+S+'% 31%)');
+    el.style.setProperty('--c2','hsl('+H0+' '+S+'% 19%)');
+    el.style.setProperty('--txt','hsl('+H0+' 62% 74%)');el.style.setProperty('--txto','.5');
+    el.style.setProperty('--edge','hsl('+H0+' '+S+'% 42% / .6)');
+    el.style.setProperty('--glow','hsl('+H0+' 60% 65% / .45)');
+  }catch(e){}};
+  i.src=src;
+}
 function card(it){
   const c=CFG[it.t],b=document.createElement('button');
   b.className='pick';b.setAttribute('aria-pressed',sel===it);
-  b.innerHTML='<span class="art"><span class="badge">'+c.tag+'</span></span><span class="stars">★★★★★</span><span class="pname"></span>';
+  b.innerHTML='<span class="art"></span><span class="stars">★★★★★</span><span class="pname"></span>';
   b.querySelector('.pname').textContent=it.n;
   const srcs=(it.hi||[]).concat(it.img||[]);let k=0;
   const img=new Image();img.alt='';img.decoding='async';img.referrerPolicy='no-referrer';img.src=srcs[0]||'';
   if(it.cls)img.className=it.cls;
+  img.onload=()=>tint(img.currentSrc||img.src,b);
   img.onerror=()=>{if(++k<srcs.length){img.src=srcs[k];return}
     const s=document.createElement('span');s.className='noimg';s.textContent=it.n[0];img.replaceWith(s)};
   b.querySelector('.art').prepend(img);
