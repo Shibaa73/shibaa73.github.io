@@ -170,6 +170,13 @@
   .sinfo{margin-top:12px;}
   .sinfo a{color:var(--gold);}
   #cat{height:360px;}
+  .chartbox{position:relative;margin-top:18px;}
+  .rchart{width:100%;height:auto;display:block;touch-action:pan-y;}
+  .rchart text{fill:var(--muted);font:11px 'IBM Plex Mono',monospace;}
+  .rchart .g{stroke:var(--border);stroke-width:1;}
+  .rchart .ln{fill:none;stroke:var(--gold);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;}
+  .rchart .dot{fill:var(--gold);stroke:var(--panel);stroke-width:2;}
+  .tip{position:absolute;transform:translate(-50%,-150%);pointer-events:none;padding:4px 8px;border-radius:8px;background:var(--panel-2);border:1px solid var(--border);font:500 .75rem 'IBM Plex Mono',monospace;white-space:nowrap;}
   model-viewer{display:block;width:100%;height:280px;margin-top:2px;border-radius:10px;background:rgba(0,0,0,.18);cursor:pointer;--poster-color:transparent;--progress-bar-color:var(--gold);}
   .card .hint{font-size:.78rem;color:var(--gold-dim);}
   .home-btn{position:absolute;top:16px;left:16px;z-index:2;display:inline-flex;align-items:center;gap:6px;padding:8px 14px 8px 10px;background:var(--panel-2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-weight:500;font-size:.9rem;text-decoration:none;transition:border-color .15s ease,transform .1s ease;}
@@ -190,14 +197,14 @@
 <div class="wrap">
   <header>
     <h1>Whitecat Shine</h1>
-    <p>stats, plays and the cat</p>
+    <p>WAS</p>
   </header>
 
   <section class="sec"><h2>osu! rank</h2><div id="rank"></div></section>
   <section class="sec"><h2>Top plays <small id="win"></small></h2><div id="plays"></div></section>
   <section class="sec"><h2 id="sTitle">Last stream</h2><div id="stream"></div></section>
   <section class="sec">
-    <h2>The cat</h2>
+    <h2>Nyan</h2>
     <model-viewer id="cat" src="../assets/whitecat_-_osu.glb" alt="Whitecat 3D model" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="18deg" interaction-prompt="none" shadow-intensity="0.7" touch-action="pan-y"></model-viewer>
   </section>
 
@@ -213,12 +220,36 @@ const note=(id,text)=>$(id).replaceChildren(el('p','muted',text));
 const safe=u=>typeof u==='string'&&u.startsWith('https://')?u:'';
 const when=iso=>new Date(iso).toLocaleString([],{dateStyle:'medium',timeStyle:'short'});
 
+// Global rank over the last 90 days, drawn like osu!'s: better (lower) rank is higher up
+function rankChart(h){
+  const pts=(h||[]).map((v,i)=>[i,v]).filter(p=>p[1]>0);
+  if(pts.length<2)return null;
+  const n=h.length-1,W=700,H=190,L=62,R=10,T=14,B=26,ys=pts.map(p=>p[1]),mn=Math.min(...ys),mx=Math.max(...ys),span=Math.max(1,mx-mn);
+  const X=i=>L+i/n*(W-L-R),Y=v=>T+(v-mn)/span*(H-T-B);
+  const NS='http://www.w3.org/2000/svg',s=(tag,a)=>{const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);return e};
+  const svg=s('svg',{viewBox:'0 0 '+W+' '+H,class:'rchart',role:'img','aria-label':'Global rank, last 90 days'});
+  [0,.5,1].forEach(f=>{const y=T+f*(H-T-B);svg.append(s('line',{x1:L,x2:W-R,y1:y,y2:y,class:'g'}));
+    const t=s('text',{x:L-8,y:y+4,'text-anchor':'end'});t.textContent='#'+Math.round(mn+f*span).toLocaleString();svg.append(t)});
+  const d=pts.map((p,k)=>(k&&p[0]-pts[k-1][0]===1?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('');
+  svg.append(s('path',{d,class:'ln'}));
+  [['start',L,n+' days ago'],['end',W-R,'today']].forEach(([a,x,txt])=>{const t=s('text',{x,y:H-6,'text-anchor':a});t.textContent=txt;svg.append(t)});
+  const box=el('div','chartbox'),tip=el('div','tip'),dot=s('circle',{r:4,class:'dot'});
+  tip.hidden=true;dot.style.display='none';svg.append(dot);
+  svg.addEventListener('pointermove',e=>{
+    const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,i=Math.max(0,Math.min(n,Math.round((x-L)/(W-L-R)*n)));
+    const p=pts.reduce((a,b)=>Math.abs(b[0]-i)<Math.abs(a[0]-i)?b:a);
+    dot.setAttribute('cx',X(p[0]));dot.setAttribute('cy',Y(p[1]));dot.style.display='';
+    tip.hidden=false;tip.textContent='#'+p[1].toLocaleString()+' · '+new Date(Date.now()-(n-p[0])*864e5).toLocaleDateString([],{month:'short',day:'numeric'});
+    tip.style.left=(X(p[0])/W*100)+'%';tip.style.top=(Y(p[1])/H*100)+'%'});
+  svg.addEventListener('pointerleave',()=>{dot.style.display='none';tip.hidden=true});
+  box.append(svg,tip);return box;
+}
 function showRank(o){
   const box=el('div','rank');
   if(safe(o.avatar)){const i=el('img');i.src=o.avatar;i.alt='';box.append(i)}
   const d=el('div');d.append(el('b',null,o.rank?'#'+o.rank.toLocaleString():'Unranked'),
     el('span',null,[o.pp?Math.round(o.pp).toLocaleString()+'pp':'',o.countryRank?o.country+' #'+o.countryRank.toLocaleString():''].filter(Boolean).join(' · ')));
-  box.append(d);$('rank').replaceChildren(box);
+  box.append(d);const all=el('div');all.append(box);const c=rankChart(o.rankHistory);if(c)all.append(c);$('rank').replaceChildren(all);
 }
 function showPlays(d){
   $('win').textContent=d.window?when(d.window.from)+' to '+when(d.window.to)+(d.window.src==='best'?' (from his top plays)':''):'';
