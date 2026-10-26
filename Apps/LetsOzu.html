@@ -173,11 +173,10 @@
 
   <ul class="menu">
     <li>
-      <div class="card">
+      <a class="card" href="WhitecatShine.html">
         <h2>Whitecat Shrine</h2>
-        <model-viewer id="cat" src="../assets/whitecat_-_osu.glb" alt="Whitecat 3D model" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="18deg" interaction-prompt="none" shadow-intensity="0.7" touch-action="pan-y"></model-viewer>
-        <p class="hint">drag to rotate · click for sound</p>
-      </div>
+        <model-viewer id="cat" src="../assets/whitecat_-_osu.glb" alt="Whitecat 3D model" camera-controls auto-rotate auto-rotate-delay="0" rotation-per-second="18deg" interaction-prompt="none" shadow-intensity="0.7" touch-action="pan-y" tabindex="-1"></model-viewer>
+      </a>
     </li>
     <li>
       <div class="card">
@@ -197,13 +196,11 @@
 </div>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 <script>
-// click (not drag) on the cat = sound
-const cat=document.getElementById('cat'),snd=new Audio('../assets/WAS.mp3');snd.preload='auto';
-let down=null;
-const boop=()=>{snd.currentTime=0;snd.play().catch(()=>{})};
-cat.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
-cat.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<6)boop();down=null});
-cat.addEventListener('keydown',e=>{if(e.key==='Enter')boop()});
+// dragging the cat to rotate it must not open the page
+const shrine=document.querySelector('a.card');let down=null;
+shrine.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+shrine.addEventListener('click',e=>{if(down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])>6)e.preventDefault();down=null});
 </script>
+<script src="../assets/site.js"></script>
 </body>
 </html>
