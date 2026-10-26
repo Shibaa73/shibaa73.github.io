@@ -3,9 +3,12 @@
 (()=>{
 // inside the home page's frame the shell (index.html) already owns the music + volume button
 try{if(window.parent!==window&&window.parent.SITE&&window.parent.SITE.shell)return}catch(e){}
-const PLAYLIST='PLEimrAJXv9ps',VK='site:vol',IK='site:ids',TK='site:track';
+const PLAYLIST='PLEimrAJXv9ps',VK='site:vol2',IK='site:ids',TK='site:track';
 const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const vol=Object.assign({music:.4,sfx:.8},ls.get(VK)||{});
+// Optional per-song loudness fix: attenuate loud songs, e.g. GAIN={'dQw4w9WgXcQ':0.6}. (Can't be measured automatically from a YouTube embed.)
+const GAIN={};
+let title='';
+const vol=Object.assign({music:.1,sfx:1},ls.get(VK)||{});
 window.SITE={shell:true,playSfx(src){const a=new Audio(src);a.volume=vol.sfx;a.play().catch(()=>{});return a}};
 
 /* ---------- volume button + menu ---------- */
@@ -15,7 +18,9 @@ st.textContent=`#siteVol{position:fixed;top:16px;right:16px;z-index:50;font-fami
 #siteVol>button:hover{border-color:var(--gold-dim,#8f5c6b)}
 #siteVol button:focus-visible,#siteVol input:focus-visible{outline:2px solid var(--teal,#c98aa0);outline-offset:3px}
 #siteVol svg{width:20px;height:20px}
-#siteMenu{position:absolute;top:46px;right:0;width:220px;padding:16px;display:grid;gap:14px;background:var(--panel,#3a2531);border:1px solid var(--border,rgba(255,220,230,.09));border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.35);color:var(--text,#f3e6ea)}
+#siteNow{display:grid;gap:2px;font-size:.78rem;color:var(--muted,#a58891)}
+#siteNow b{font-weight:500;font-size:.85rem;color:var(--text,#f3e6ea);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#siteMenu{position:absolute;top:46px;right:0;width:260px;padding:16px;display:grid;gap:14px;background:var(--panel,#3a2531);border:1px solid var(--border,rgba(255,220,230,.09));border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.35);color:var(--text,#f3e6ea)}
 #siteMenu[hidden]{display:none}
 #siteMenu label{display:grid;gap:6px;font-size:.82rem;color:var(--muted,#a58891)}
 #siteMenu label span{display:flex;justify-content:space-between}
@@ -24,6 +29,7 @@ document.head.append(st);
 const box=document.createElement('div');box.id='siteVol';
 box.innerHTML=`<button type="button" aria-label="Volume" aria-expanded="false" aria-controls="siteMenu"></button>
 <div id="siteMenu" hidden>
+  <div id="siteNow"><span>Now playing</span><b id="siteTitle"></b></div>
   <label><span>Music <b id="vmV"></b></span><input id="vm" type="range" min="0" max="100"></label>
   <label><span>SFX <b id="vsV"></b></span><input id="vs" type="range" min="0" max="100"></label>
 </div>`;
@@ -38,15 +44,18 @@ btn.onclick=()=>toggle(menu.hidden);
 document.addEventListener('pointerdown',e=>{if(!box.contains(e.target))toggle(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')toggle(false)});
 vm.oninput=()=>{vol.music=vm.value/100;ls.set(VK,vol);sync();
-  if(!p)return;p.setVolume(vm.value);
-  if(vol.music===0){p.pauseVideo();playing=false}else if(!playing)begin(true)};
+  if(!p)return;p.setVolume(level());
+  if(vol.music===0){p.pauseVideo();playing=false}else if(!playing)begin(true);
+  setNow()};
 vs.oninput=()=>{vol.sfx=vs.value/100;ls.set(VK,vol);sync()};
 sync();
 
 /* ---------- background music ---------- */
 let p=null,ready=false,playing=false,cur=null,ids=ls.get(IK)||[],errs=0,tries=0;
 const rnd=()=>{const pool=ids.filter(i=>i!==cur);return pool.length?pool[Math.floor(Math.random()*pool.length)]:ids[0]};
-function play(id,t){cur=id;p.loadVideoById({videoId:id,startSeconds:t||0});p.setVolume(vol.music*100)}
+const level=()=>Math.round(vol.music*100*Math.min(1,GAIN[cur]||1));
+function setNow(){const e=box.querySelector('#siteTitle'),t=vol.music===0?'Music is off':playing&&title?title:'Click anywhere to start';e.textContent=t;e.title=t}
+function play(id,t){cur=id;p.loadVideoById({videoId:id,startSeconds:t||0});p.setVolume(level())}
 function begin(force){
   if(!ready||!ids.length||vol.music===0||(playing&&!force))return;
   const s=ls.get(TK);   // keep the same song going when moving between pages
@@ -60,14 +69,15 @@ window.onYouTubeIframeAPIReady=()=>{
   p=new YT.Player('siteYt',{width:200,height:200,
     playerVars:{listType:'playlist',list:PLAYLIST,controls:0,disablekb:1,playsinline:1},
     events:{
-      onReady:()=>{ready=true;p.setVolume(vol.music*100);begin();learn()},
+      onReady:()=>{ready=true;p.setVolume(level());begin();learn()},
       onStateChange:e=>{const S=YT.PlayerState;
-        if(e.data===S.PLAYING){playing=true;errs=0}
+        if(e.data===S.PLAYING){playing=true;errs=0;try{title=p.getVideoData().title||''}catch(x){}setNow()}
         else if(e.data===S.ENDED){playing=false;play(rnd())}   // random next song, forever
         else if(e.data===S.CUED&&!ids.length)learn()},
       onError:()=>{playing=false;if(++errs<8&&ids.length>1)play(rnd())}
     }});
 };
+setNow();
 const yt=document.createElement('div');
 yt.style.cssText='position:fixed;left:0;bottom:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
 yt.innerHTML='<div id="siteYt"></div>';document.body.append(yt);
