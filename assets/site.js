@@ -1,10 +1,12 @@
 /* Shared on every page: background music (random track from a YouTube playlist, loops forever)
    and the volume button/menu (top right). SITE.playSfx(url) plays a sound at the SFX volume. */
 (()=>{
+// inside the home page's frame the shell (index.html) already owns the music + volume button
+try{if(window.parent!==window&&window.parent.SITE&&window.parent.SITE.shell)return}catch(e){}
 const PLAYLIST='PLEimrAJXv9ps',VK='site:vol',IK='site:ids',TK='site:track';
 const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const vol=Object.assign({music:.4,sfx:.8},ls.get(VK)||{});
-window.SITE={playSfx(src){const a=new Audio(src);a.volume=vol.sfx;a.play().catch(()=>{});return a}};
+window.SITE={shell:true,playSfx(src){const a=new Audio(src);a.volume=vol.sfx;a.play().catch(()=>{});return a}};
 
 /* ---------- volume button + menu ---------- */
 const st=document.createElement('style');
