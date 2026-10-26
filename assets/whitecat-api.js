@@ -30,7 +30,7 @@ async function osu(env){
     title:s.beatmapset.title,artist:s.beatmapset.artist,diff:s.beatmap.version,pp:s.pp,acc:s.accuracy*100,grade:s.rank,
     mods:(s.mods||[]).map(m=>m.acronym||m).join(''),cover:s.beatmapset.covers&&s.beatmapset.covers['list@2x'],url:'https://osu.ppy.sh/b/'+s.beatmap.id}));
   const st=u.statistics||{};
-  return{osu:{name:u.username,id:u.id,avatar:u.avatar_url,country:u.country_code,rank:st.global_rank,countryRank:st.country_rank,pp:st.pp},
+  return{osu:{name:u.username,id:u.id,avatar:u.avatar_url,country:u.country_code,rank:st.global_rank,countryRank:st.country_rank,pp:st.pp,rankHistory:(u.rank_history&&u.rank_history.data)||[]},
     window:scores.length?{from:new Date(from).toISOString(),to:new Date(to).toISOString(),src}:null,plays};
 }
 async function twitch(env){
