@@ -233,12 +233,12 @@
   <section class="sec" id="menu">
     <h2>Play</h2>
     <div class="fld"><label for="nick">Your name</label><input id="nick" maxlength="20" autocomplete="off"></div>
-    <div class="row"><button class="btn go" id="create" type="button">Create lobby</button>
+    <div class="row"><button class="btn go" id="solo" type="button">Play solo</button><button class="btn go" id="create" type="button">Create lobby</button>
       <input class="codein" id="code" maxlength="5" placeholder="CODE" aria-label="Lobby code" autocomplete="off"><button class="btn" id="join" type="button">Join</button></div>
     <p class="muted" id="status"></p>
   </section>
   <section class="sec" id="lobby" hidden>
-    <h2>Lobby <span class="pill" id="lcode"></span><button class="btn sm" id="copy" type="button">Copy invite link</button></h2>
+    <h2><span id="ltxt">Lobby</span> <span class="pill" id="lcode"></span><button class="btn sm" id="copy" type="button">Copy invite link</button></h2>
     <div id="plist"></div>
     <div class="opts" id="cfgf"></div>
     <div class="row">
@@ -267,13 +267,13 @@
   </section>
 </div>
 <script>
-const API='https://ozu-server.shibagd73.workers.dev/';   // your Ozu server URL (see ozu-server/src/index.js)
+const API='https://ozu-server.shibagd73.workers.dev'.replace(/\/+$/,'');   // your Ozu server URL (see ozu-server/src/index.js)
 const $=id=>document.getElementById(id);
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const FIELDS={song:'Song name · 3 pts',artist:'Artist · 2 pts',mapper:'Mapper · 1 pt',ar:'AR · 1 pt',bpm:'BPM · 1 pt',sr:'SR · 1 pt',pp:'PP · 1 pt'};
 const TYPES={clip_map:'Guess the map (song name)',audio_map:'Guess the map from the sound only',clip_bpm:'Guess the BPM',clip_pp:'Guess the PP',bg_map:'Guess the map from its background'};
 const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff]+/g,' ').trim();
-let ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null;
+let solo=false,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null;
 const tx=o=>ws&&ws.readyState===1&&ws.send(JSON.stringify(o));
 const sfx=()=>Math.round((window.SITE&&SITE.sfxLevel?SITE.sfxLevel():1)*100);
 const duck=b=>{try{window.SITE&&SITE.duck&&SITE.duck(b)}catch(e){}};
@@ -310,14 +310,14 @@ $('pp').onclick=()=>{if(!ytReady)return;const on=yt.getPlayerState()===1;on?yt.p
 /* ---------- connection ---------- */
 function connect(c,create){
   if(API.includes('YOURNAME'))return status('Not connected yet: paste your server URL into API in this page’s script.');
-  const name=$('nick').value.trim();if(!name)return status('Type a name first.');
+  const name=$('nick').value.trim()||(solo?'Player':'');if(!name){solo=false;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
   status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
   ws.onopen=()=>tx({t:'join',name,create});
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
     else if(m.t==='err')status(m.m);else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
-  ws.onclose=()=>{ws=null;st=null;me=null;lastKey=null;duck(false);show('menu')};
+  ws.onclose=()=>{solo=false;ws=null;st=null;me=null;lastKey=null;duck(false);show('menu')};
   ws.onerror=()=>status('Couldn’t connect to the server.');
 }
 function leave(){if(ws)ws.close()}
@@ -328,12 +328,15 @@ function players(box,fn){box.replaceChildren(...st.players.map(p=>{const d=el('d
 const hearts=n=>n>0?'♥'.repeat(n):'out';
 function renderLobby(){
   show('lobby');$('lcode').textContent=code;const c=st.cfg,host=st.host===me;
+  $('ltxt').textContent=solo?'Solo':'Lobby';$('lcode').hidden=$('copy').hidden=solo;
+  $('c_mode').querySelector('option[value=bomb]').disabled=solo;
   players($('plist'),{info:p=>''});
   $('cfgf').replaceChildren(...Object.keys(FIELDS).map(k=>{const l=el('label'),i=el('input');i.type='checkbox';i.id='c_'+k;i.checked=c.fields[k];i.disabled=!host;i.onchange=push;l.append(i,FIELDS[k].split(' ·')[0]);return l}));
   const set=(id,v)=>{const e=$(id);if(document.activeElement!==e)e.value=v;e.disabled=!host};
   set('c_mode',c.mode);set('c_time',c.time);set('c_rounds',c.rounds);set('c_lives',c.lives);$('c_wait').checked=c.waitFirst;$('c_wait').disabled=!host;
-  $('start').hidden=!host;const need=c.mode==='bomb'&&st.players.length<2;$('start').disabled=need;
-  $('hint').textContent=host?(need?'Bomb mode needs at least 2 players.':'Share the code or invite link, then start.'):'Waiting for the host to start…';
+  $('start').hidden=!host;const need=!solo&&c.mode==='bomb'&&st.players.length<2;$('start').disabled=need;
+  $('hint').textContent=host?(need?'Bomb mode needs at least 2 players.':(solo?'Pick your settings, then start.':'Share the code or invite link, then start.')):'Waiting for the host to start…';
+  if(solo&&host&&c.mode==='bomb'){$('c_mode').value='classic';push()}   // solo is classic only
 }
 function push(){tx({t:'settings',cfg:{mode:$('c_mode').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,waitFirst:$('c_wait').checked,
   fields:Object.fromEntries(Object.keys(FIELDS).map(k=>[k,$('c_'+k).checked]))}})}
@@ -373,15 +376,21 @@ function renderGame(){
 function renderEnd(){
   show('end');const bomb=st.cfg.mode==='bomb',list=[...st.players].sort((a,b)=>bomb?b.lives-a.lives:b.score-a.score);
   $('final').replaceChildren(...list.map((p,i)=>{const d=el('div','pl'+(i===0?' cur':'')),n=el('span',null,(i===0?'🏆 ':(i+1)+'. ')+p.name+(p.id===me?' (you)':''));d.append(n,el('i',null,bomb?hearts(p.lives):p.score+' pts'));return d}));
-  $('again').hidden=st.host!==me;
+  $('again').hidden=st.host!==me;$('again').textContent=solo?'Play again':'Back to lobby';
 }
 function render(){const ph=st.phase;ph==='lobby'?renderLobby():ph==='end'?renderEnd():renderGame()}
 setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.phase==='reveal'||st.phase==='turnReveal',t=reveal?0:timeLeft(q);
   $('bar').style.width=Math.max(0,Math.min(100,t/tot*100))+'%'},100);
 
 /* ---------- buttons ---------- */
-$('create').onclick=async()=>{try{if(API.includes('YOURNAME'))return connect('XXXXX');const r=await fetch(API+'/new');connect((await r.json()).code,true)}catch(e){status('Couldn’t reach the server.')}};
-$('join').onclick=()=>{const c=$('code').value.trim().toUpperCase();c.length===5?connect(c,false):status('Enter the 5-letter lobby code.')};
+async function makeLobby(isSolo){
+  try{if(API.includes('YOURNAME'))return connect('XXXXX');
+    const r=await fetch(API+'/new');if(!r.ok)throw new Error('server answered '+r.status);
+    const d=await r.json();solo=isSolo;connect(d.code,true)}
+  catch(e){solo=false;status('Couldn’t reach the server ('+(e.message||e)+').')}
+}
+$('create').onclick=()=>makeLobby(false);$('solo').onclick=()=>makeLobby(true);
+$('join').onclick=()=>{solo=false;const c=$('code').value.trim().toUpperCase();c.length===5?connect(c,false):status('Enter the 5-letter lobby code.')};
 $('leave').onclick=$('leave2').onclick=leave;
 $('start').onclick=()=>tx({t:'start'});$('again').onclick=()=>tx({t:'again'});
 ['c_mode','c_time','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
