@@ -194,7 +194,7 @@
   .opts input{accent-color:var(--teal)}
   .bar{height:6px;background:var(--panel-2);border-radius:3px;overflow:hidden;margin-bottom:14px}.bar i{display:block;height:100%;width:100%;background:var(--gold)}
   .clip{position:relative;aspect-ratio:16/9;overflow:hidden;background:#000;border-radius:12px}
-  .zoom{position:absolute;left:50%;top:50%;width:166.667%;height:166.667%;transform:translate(-50%,-50%)}   /* zoomed in: the outer 20% of every side is cut off */
+  .zoom{position:absolute;left:50%;top:50%;width:150%;height:150%;transform:translate(-50%,-50%)}   /* zoomed in: the outer ~17% of every side is cut off */
   .zoom iframe{width:100%;height:100%;border:0;display:block}
   .shield{position:absolute;inset:0;z-index:2}                                                          /* blocks hover (title/links) and clicks on the video */
   .clip.reveal .zoom{width:100%;height:100%}
@@ -257,6 +257,7 @@
     <div class="bar"><i id="bar"></i></div>
     <div class="clip" id="clip"><div class="zoom"><div id="yt"></div></div><div class="cover" id="cover"></div><div class="shield"></div></div>
     <div class="ctl" id="ctl"><button class="btn" id="pp" type="button">Pause</button><input id="seek" type="range" min="0" max="15" step="0.1" value="0" aria-label="Position in clip"></div>
+    <div class="ctl" id="vctl"><label for="cvol" style="color:var(--muted);font-size:.85rem">Clip volume</label><input id="cvol" type="range" min="0" max="100" step="1"><b id="cvolV" style="min-width:4ch;text-align:right;font-size:.85rem"></b></div>
     <div id="form"></div>
     <div class="row"><button class="btn go" id="submit" type="button">Submit</button></div>
     <div id="res"></div>
@@ -280,7 +281,8 @@ const sfx=()=>Math.round((window.SITE&&SITE.sfxLevel?SITE.sfxLevel():1)*100);
 const duck=b=>{try{window.SITE&&SITE.duck&&SITE.duck(b)}catch(e){}};
 addEventListener('pagehide',()=>duck(false));
 const status=t=>$('status').textContent=t||'';
-const err=t=>{const e=$('gerr');e.textContent=t||'';e.hidden=!t};   // visible on every screen (the status line only exists on the menu)
+const err=t=>{const e=$('gerr');e.textContent=t||'';e.hidden=!t};
+let draftT=null,draftSent=false;   // visible on every screen (the status line only exists on the menu)
 
 /* ---------- autocomplete: start of the text or of any word, never the middle of a word ---------- */
 function attachAc(inp,key){
@@ -300,12 +302,16 @@ function attachAc(inp,key){
 
 /* ---------- clip player: zoomed in (outer 20% cut), covered by a shield, looped inside its 15 s window ---------- */
 let yt=null,ytReady=false,pend=null;
+let cvol=30;try{const v=localStorage.getItem('ozu:cvol');if(v!==null)cvol=Math.max(0,Math.min(100,+v||0))}catch(e){}   // clip volume, on top of the site's SFX slider
+const clipVol=()=>Math.round(sfx()*cvol/100);
+$('cvol').value=cvol;$('cvolV').textContent=cvol+'%';
+$('cvol').oninput=e=>{cvol=+e.target.value;$('cvolV').textContent=cvol+'%';try{localStorage.setItem('ozu:cvol',cvol)}catch(x){}if(ytReady)try{yt.setVolume(clipVol())}catch(x){}};
 window.onYouTubeIframeAPIReady=()=>{yt=new YT.Player('yt',{width:'100%',height:'100%',
   playerVars:{controls:0,disablekb:1,fs:0,modestbranding:1,rel:0,iv_load_policy:3,playsinline:1,cc_load_policy:0},
   events:{onReady:()=>{ytReady=true;if(pend)pend()}}})};
 {const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.append(s)}
-function playClip(c){V=c;const go=()=>{yt.loadVideoById({videoId:c.id,startSeconds:c.start});yt.setVolume(sfx())};ytReady?go():pend=go}
-setInterval(()=>{if(!ytReady||!V)return;const t=yt.getCurrentTime();if(t>=V.end-.15||t<V.start-1)yt.seekTo(V.start,true);$('seek').value=Math.max(0,Math.min(15,t-V.start))},250);
+function playClip(c){V=c;const go=()=>{yt.loadVideoById({videoId:c.id,startSeconds:c.start});yt.setVolume(clipVol())};ytReady?go():pend=go}
+setInterval(()=>{if(!ytReady||!V)return;const t=yt.getCurrentTime();if(t>=V.end-.15||t<V.start-1)yt.seekTo(V.start,true);yt.setVolume(clipVol());$('seek').value=Math.max(0,Math.min(15,t-V.start))},250);
 $('seek').oninput=e=>{if(V)yt.seekTo(V.start+ +e.target.value,true)};
 $('pp').onclick=()=>{if(!ytReady)return;const on=yt.getPlayerState()===1;on?yt.pauseVideo():yt.playVideo();$('pp').textContent=on?'Play':'Pause'};
 
@@ -344,8 +350,11 @@ function renderLobby(){
 }
 function push(){tx({t:'settings',cfg:{mode:$('c_mode').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,waitFirst:$('c_wait').checked,
   fields:Object.fromEntries(Object.keys(FIELDS).map(k=>[k,$('c_'+k).checked]))}})}
+function draftNow(){if(!st||st.cfg.mode!=='classic'||st.phase!=='round'||sent||!ws||ws.readyState!==1)return;
+  tx({t:'draft',v:Object.fromEntries(st.q.fields.map(k=>[k,($('g_'+k)||{}).value||'']))})}
+$('form').addEventListener('input',()=>{clearTimeout(draftT);draftT=setTimeout(draftNow,200)});
 function newQuestion(q){
-  lastKey=q.key;sent=false;$('res').replaceChildren();$('pp').textContent='Pause';$('clip').classList.remove('reveal');
+  lastKey=q.key;sent=false;draftSent=false;$('res').replaceChildren();$('pp').textContent='Pause';$('clip').classList.remove('reveal');
   const bomb=st.cfg.mode==='bomb',keys=bomb?['a']:q.fields;
   $('form').replaceChildren(...keys.map(k=>{const d=el('div','fld'),l=el('label',null,bomb?TYPES[q.type]:FIELDS[k]),i=el('input');i.id='g_'+k;i.autocomplete='off';
     if(bomb?(q.type==='clip_bpm'||q.type==='clip_pp'):['ar','bpm','sr','pp'].includes(k)){i.type='text';i.inputMode='decimal'}
@@ -372,7 +381,9 @@ function renderGame(){
     ['','Your guess','Answer','Pts'].forEach(h=>rt.append(el('div','h',h)));
     q.fields.forEach(k=>{const p=mine?mine.pts[k]:0,m=k==='song'?3:k==='artist'?2:1;
       rt.append(el('div',null,k),el('div',null,mine&&mine.guess[k]?String(mine.guess[k]):'—'),el('div',null,String(R.answer[k])),el('div','pt '+(p>=m?'ok':p>0?'':'no'),p.toFixed(m>1?0:2)+'/'+m))});
-    res.append(rt,el('p','muted','This round: '+R.res.map(r=>r.name+' +'+r.total).join(' · ')))}
+    res.append(rt,el('p','muted','This round: '+R.res.map(r=>r.name+' +'+r.total).join(' · ')));
+    if(st.host===me){const nb=el('button','btn go',q.i>=st.cfg.rounds?'Show final results':'Next round');nb.type='button';nb.id='next';nb.style.marginTop='14px';nb.onclick=()=>{nb.disabled=true;tx({t:'next'})};res.append(nb)}
+    else res.append(el('p','muted','Waiting for the host to continue…'))}
   if(st.phase==='turnReveal'){const R=st.reveal,who=(st.players.find(p=>p.id===R.cur)||{}).name||'Player';
     res.append(el('p','big',R.ok?'✔ '+who+' got it':'✖ '+who+(R.guess==null?' ran out of time':' missed')+' and loses a life'),
       el('p','muted','Answer: '+R.answer.artist+' – '+R.answer.song+' · '+R.answer.bpm+' BPM'+(R.answer.pp?' · '+R.answer.pp+'pp':'')))}
@@ -384,6 +395,7 @@ function renderEnd(){
 }
 function render(){const ph=st.phase;ph==='lobby'?renderLobby():ph==='end'?renderEnd():renderGame()}
 setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.phase==='reveal'||st.phase==='turnReveal',t=reveal?0:timeLeft(q);
+  if(!reveal&&!sent&&!draftSent&&st.cfg.mode==='classic'&&st.phase==='round'&&t<=.8){draftSent=true;draftNow()}   // timer about to run out: hand in what is typed
   $('bar').style.width=Math.max(0,Math.min(100,t/tot*100))+'%'},100);
 
 /* ---------- buttons ---------- */
