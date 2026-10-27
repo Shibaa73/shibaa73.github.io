@@ -194,7 +194,7 @@
   .opts input{accent-color:var(--teal)}
   .bar{height:6px;background:var(--panel-2);border-radius:3px;overflow:hidden;margin-bottom:14px}.bar i{display:block;height:100%;width:100%;background:var(--gold)}
   .clip{position:relative;aspect-ratio:16/9;overflow:hidden;background:#000;border-radius:12px}
-  .zoom{position:absolute;left:50%;top:50%;width:150%;height:150%;transform:translate(-50%,-50%)}   /* zoomed in: the outer ~17% of every side is cut off */
+  .zoom{position:absolute;left:50%;top:50%;width:156%;height:156%;transform:translate(-50%,-50%)}   /* zoomed in to 156% */
   .zoom iframe{width:100%;height:100%;border:0;display:block}
   .shield{position:absolute;inset:0;z-index:2}                                                          /* blocks hover (title/links) and clicks on the video */
   .clip.reveal .zoom{width:100%;height:100%}
@@ -234,8 +234,9 @@
   <section class="sec" id="menu">
     <h2>Play</h2>
     <div class="fld"><label for="nick">Your name</label><input id="nick" maxlength="20" autocomplete="off"></div>
-    <div class="row"><button class="btn go" id="solo" type="button">Play solo</button><button class="btn go" id="create" type="button">Create lobby</button>
+    <div class="row"><button class="btn go" id="daily" type="button">Daily ozu</button><button class="btn go" id="solo" type="button">Unlimited mode</button><button class="btn go" id="create" type="button">Create lobby</button>
       <input class="codein" id="code" maxlength="5" placeholder="CODE" aria-label="Lobby code" autocomplete="off"><button class="btn" id="join" type="button">Join</button></div>
+    <p class="muted">Daily ozu: 5 rounds, the same clips for everyone, a new set every day at midnight (Rome time).</p>
     <p class="muted" id="status"></p>
   </section>
   <section class="sec" id="lobby" hidden>
@@ -256,7 +257,7 @@
     <h2><span id="rd"></span><small id="sc"></small></h2>
     <div class="bar"><i id="bar"></i></div>
     <div class="clip" id="clip"><div class="zoom"><div id="yt"></div></div><div class="cover" id="cover"></div><div class="shield"></div></div>
-    <div class="ctl" id="ctl"><button class="btn" id="pp" type="button">Pause</button><input id="seek" type="range" min="0" max="15" step="0.1" value="0" aria-label="Position in clip"></div>
+    <div class="ctl" id="ctl"><button class="btn" id="pp" type="button">Pause</button><input id="seek" type="range" min="0" max="20" step="0.1" value="0" aria-label="Position in clip"></div>
     <div class="ctl" id="vctl"><label for="cvol" style="color:var(--muted);font-size:.85rem">Clip volume</label><input id="cvol" type="range" min="0" max="100" step="1"><b id="cvolV" style="min-width:4ch;text-align:right;font-size:.85rem"></b></div>
     <div id="form"></div>
     <div class="row"><button class="btn go" id="submit" type="button">Submit</button></div>
@@ -267,6 +268,9 @@
     <h2>Final</h2><div id="final"></div>
     <div class="row"><button class="btn go" id="again" type="button">Back to lobby</button><button class="btn" id="leave2" type="button">Leave</button></div>
   </section>
+  <section class="sec" id="lb">
+    <h2>Daily leaderboard <small id="lbInfo"></small></h2><div id="lbList"></div>
+  </section>
 </div>
 <script>
 const API='https://ozu-server.shibagd73.workers.dev'.replace(/\/+$/,'');   // your Ozu server URL (see ozu-server/src/index.js)
@@ -275,7 +279,7 @@ const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=nu
 const FIELDS={song:'Song name · 3 pts',artist:'Artist · 2 pts',mapper:'Mapper · 1 pt',ar:'AR · 1 pt',bpm:'BPM · 1 pt',sr:'SR · 1 pt',pp:'PP · 1 pt'};
 const TYPES={clip_map:'Guess the map (song name)',audio_map:'Guess the map from the sound only',clip_bpm:'Guess the BPM',clip_pp:'Guess the PP',bg_map:'Guess the map from its background'};
 const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff]+/g,' ').trim();
-let solo=false,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null;
+let daily=false,lbEnd=0,solo=false,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null;
 const tx=o=>{if(ws&&ws.readyState===1){ws.send(JSON.stringify(o));return true}err('Lost the connection to the server. Press Leave and join again.');return false};
 const sfx=()=>Math.round((window.SITE&&SITE.sfxLevel?SITE.sfxLevel():1)*100);
 const duck=b=>{try{window.SITE&&SITE.duck&&SITE.duck(b)}catch(e){}};
@@ -300,7 +304,7 @@ function attachAc(inp,key){
     else if(e.key==='Escape')ul.hidden=true});
 }
 
-/* ---------- clip player: zoomed in (outer 20% cut), covered by a shield, looped inside its 15 s window ---------- */
+/* ---------- clip player: zoomed in (outer 20% cut), covered by a shield, looped inside its 20 s window ---------- */
 let yt=null,ytReady=false,pend=null;
 let cvol=30;try{const v=localStorage.getItem('ozu:cvol');if(v!==null)cvol=Math.max(0,Math.min(100,+v||0))}catch(e){}   // clip volume, on top of the site's SFX slider
 const clipVol=()=>Math.round(sfx()*cvol/100);
@@ -311,35 +315,47 @@ window.onYouTubeIframeAPIReady=()=>{yt=new YT.Player('yt',{width:'100%',height:'
   events:{onReady:()=>{ytReady=true;if(pend)pend()}}})};
 {const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.append(s)}
 function playClip(c){V=c;const go=()=>{yt.loadVideoById({videoId:c.id,startSeconds:c.start});yt.setVolume(clipVol())};ytReady?go():pend=go}
-setInterval(()=>{if(!ytReady||!V)return;const t=yt.getCurrentTime();if(t>=V.end-.15||t<V.start-1)yt.seekTo(V.start,true);yt.setVolume(clipVol());$('seek').value=Math.max(0,Math.min(15,t-V.start))},250);
+setInterval(()=>{if(!ytReady||!V)return;const t=yt.getCurrentTime();if(t>=V.end-.15||t<V.start-1)yt.seekTo(V.start,true);yt.setVolume(clipVol());$('seek').value=Math.max(0,Math.min(20,t-V.start))},250);
 $('seek').oninput=e=>{if(V)yt.seekTo(V.start+ +e.target.value,true)};
 $('pp').onclick=()=>{if(!ytReady)return;const on=yt.getPlayerState()===1;on?yt.pauseVideo():yt.playVideo();$('pp').textContent=on?'Play':'Pause'};
 
 /* ---------- connection ---------- */
 function connect(c,create){
   if(API.includes('YOURNAME'))return status('Not connected yet: paste your server URL into API in this page’s script.');
-  const name=$('nick').value.trim()||(solo?'Player':'');if(!name){solo=false;return status('Type a name first.')}
+  const name=$('nick').value.trim()||(solo?'Player':'');if(!name){solo=daily=false;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
   err('');status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
-  ws.onopen=()=>tx({t:'join',name,create});
+  ws.onopen=()=>tx({t:'join',name,create,daily});
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
     else if(m.t==='err'){status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
-  ws.onclose=()=>{const was=me;solo=false;ws=null;st=null;me=null;lastKey=null;duck(false);show('menu');err(was?'Disconnected from the server.':'Couldn’t connect to the server.')};
+  ws.onclose=()=>{const was=me;solo=daily=false;ws=null;st=null;me=null;lastKey=null;duck(false);show('menu');err(was?'Disconnected from the server.':'Couldn’t connect to the server.')};
   ws.onerror=()=>status('Couldn’t connect to the server.');
 }
-function leave(){const w=ws;ws=null;st=null;me=null;lastKey=null;solo=false;V=null;duck(false);err('');status('');
+function leave(){const w=ws;ws=null;st=null;me=null;lastKey=null;solo=daily=false;V=null;duck(false);err('');status('');
   if(w){w.onclose=w.onerror=w.onmessage=null;try{w.close()}catch(e){}}
   try{if(ytReady)yt.pauseVideo()}catch(e){}show('menu')}
-function show(id){['menu','lobby','game','end'].forEach(s=>$(s).hidden=s!==id);duck(id==='game')}
+function show(id){['menu','lobby','game','end'].forEach(s=>$(s).hidden=s!==id);duck(id==='game');
+  const lb=id==='menu'||id==='end';$('lb').hidden=!lb;if(lb)loadLb()}
+/* ---------- daily leaderboard ---------- */
+const hms=s=>{s=Math.max(0,Math.round(s));return[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')};
+async function loadLb(){
+  try{const r=await fetch(API+'/daily');if(!r.ok)throw new Error(r.status);const d=await r.json();lbEnd=Date.now()+d.secondsLeft*1000;
+    const mine=($('nick').value||'').trim();
+    $('lbList').replaceChildren(...(d.board.length?d.board.map((b,i)=>{const row=el('div','pl'+(b.name===mine?' cur':''));row.append(el('span',null,(i+1)+'. '+b.name),el('i',null,b.score.toFixed(2)+' pts'));return row}):[el('p','muted','No scores yet today. Be the first!')]));
+    $('lbInfo').textContent='new set in '+hms(d.secondsLeft)}
+  catch(e){lbEnd=0;$('lbInfo').textContent='';$('lbList').replaceChildren(el('p','muted','Couldn’t load the leaderboard.'))}
+}
+setInterval(()=>{if(!lbEnd||$('lb').hidden)return;const s=(lbEnd-Date.now())/1000;$('lbInfo').textContent='new set in '+hms(s);if(s<-1){lbEnd=0;loadLb()}},1000);
 
 /* ---------- screens ---------- */
 function players(box,fn){box.replaceChildren(...st.players.map(p=>{const d=el('div','pl'+(fn.cls?fn.cls(p):'')),n=el('span',null,(p.id===st.host?'★ ':'')+p.name+(p.id===me?' (you)':''));d.append(n,el('i',null,fn.info(p)));return d}))}
 const hearts=n=>n>0?'♥'.repeat(n):'out';
 function renderLobby(){
   show('lobby');$('lcode').textContent=code;const c=st.cfg,host=st.host===me;
-  $('ltxt').textContent=solo?'Solo':'Lobby';$('lcode').hidden=$('copy').hidden=solo;
+  $('ltxt').textContent=solo?'Unlimited mode':'Lobby';$('lcode').hidden=$('copy').hidden=solo;
   $('c_mode').querySelector('option[value=bomb]').disabled=solo;
+  ['c_mode','c_time','c_lives','c_wait'].forEach(id=>{const l=$(id).closest('label');if(l)l.style.display=solo?'none':''});   // unlimited mode: only rounds and the guess fields
   players($('plist'),{info:p=>''});
   $('cfgf').replaceChildren(...Object.keys(FIELDS).map(k=>{const l=el('label'),i=el('input');i.type='checkbox';i.id='c_'+k;i.checked=c.fields[k];i.disabled=!host;i.onchange=push;l.append(i,FIELDS[k].split(' ·')[0]);return l}));
   const set=(id,v)=>{const e=$(id);if(document.activeElement!==e)e.value=v;e.disabled=!host};
@@ -353,6 +369,7 @@ function push(){tx({t:'settings',cfg:{mode:$('c_mode').value,time:$('c_time').va
 function draftNow(){if(!st||st.cfg.mode!=='classic'||st.phase!=='round'||sent||!ws||ws.readyState!==1)return;
   tx({t:'draft',v:Object.fromEntries(st.q.fields.map(k=>[k,($('g_'+k)||{}).value||'']))})}
 $('form').addEventListener('input',()=>{clearTimeout(draftT);draftT=setTimeout(draftNow,200)});
+function stopClip(){V=null;pend=null;try{if(ytReady)yt.pauseVideo()}catch(e){}$('pp').textContent='Play'}
 function newQuestion(q){
   lastKey=q.key;sent=false;draftSent=false;$('res').replaceChildren();$('pp').textContent='Pause';$('clip').classList.remove('reveal');
   const bomb=st.cfg.mode==='bomb',keys=bomb?['a']:q.fields;
@@ -369,8 +386,9 @@ const timeLeft=q=>q.endsAt?(q.endsAt-(Date.now()+off))/1000:q.left-(q.running?(D
 function renderGame(){
   show('game');const q=st.q,bomb=st.cfg.mode==='bomb',reveal=st.phase==='reveal'||st.phase==='turnReveal',myTurn=bomb&&q.cur===me&&st.phase==='turn';
   if(q.key!==lastKey)newQuestion(q);
+  if(reveal)stopClip();   // round over: the clip stops
   const you=st.players.find(p=>p.id===me)||{};
-  $('rd').textContent=bomb?'Turn '+q.i+' · '+((st.players.find(p=>p.id===q.cur)||{}).name||'')+(myTurn?' (you!)':''):'Round '+q.i+' / '+st.cfg.rounds;
+  $('rd').textContent=bomb?'Turn '+q.i+' · '+((st.players.find(p=>p.id===q.cur)||{}).name||'')+(myTurn?' (you!)':''):(daily?'Daily ozu · ':'')+'Round '+q.i+' / '+st.cfg.rounds;
   $('sc').textContent=bomb?hearts(you.lives):you.score+' pts';
   players($('board'),{cls:p=>(bomb&&p.id===q.cur?' cur':'')+(bomb&&p.lives<=0?' out':''),info:p=>bomb?hearts(p.lives):p.score+' pts'+(p.done&&!reveal?' ✓':'')});
   const locked=reveal||sent||(bomb&&!myTurn);
@@ -389,9 +407,9 @@ function renderGame(){
       el('p','muted','Answer: '+R.answer.artist+' – '+R.answer.song+' · '+R.answer.bpm+' BPM'+(R.answer.pp?' · '+R.answer.pp+'pp':'')))}
 }
 function renderEnd(){
-  show('end');const bomb=st.cfg.mode==='bomb',list=[...st.players].sort((a,b)=>bomb?b.lives-a.lives:b.score-a.score);
+  show('end');stopClip();const bomb=st.cfg.mode==='bomb',list=[...st.players].sort((a,b)=>bomb?b.lives-a.lives:b.score-a.score);
   $('final').replaceChildren(...list.map((p,i)=>{const d=el('div','pl'+(i===0?' cur':'')),n=el('span',null,(i===0?'🏆 ':(i+1)+'. ')+p.name+(p.id===me?' (you)':''));d.append(n,el('i',null,bomb?hearts(p.lives):p.score+' pts'));return d}));
-  $('again').hidden=st.host!==me;$('again').textContent=solo?'Play again':'Back to lobby';
+  $('again').hidden=st.host!==me||daily;$('again').textContent=solo?'Play again':'Back to lobby';
 }
 function render(){const ph=st.phase;ph==='lobby'?renderLobby():ph==='end'?renderEnd():renderGame()}
 setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.phase==='reveal'||st.phase==='turnReveal',t=reveal?0:timeLeft(q);
@@ -399,14 +417,15 @@ setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.p
   $('bar').style.width=Math.max(0,Math.min(100,t/tot*100))+'%'},100);
 
 /* ---------- buttons ---------- */
-async function makeLobby(isSolo){
+async function makeLobby(kind){
+  if(kind==='daily'&&!$('nick').value.trim())return status('Type a name first: it shows on the leaderboard.');
   try{if(API.includes('YOURNAME'))return connect('XXXXX');
     const r=await fetch(API+'/new');if(!r.ok)throw new Error('server answered '+r.status);
-    const d=await r.json();solo=isSolo;connect(d.code,true)}
-  catch(e){solo=false;status('Couldn’t reach the server ('+(e.message||e)+').')}
+    const d=await r.json();solo=kind==='solo';daily=kind==='daily';connect(d.code,true)}
+  catch(e){solo=daily=false;status('Couldn’t reach the server ('+(e.message||e)+').')}
 }
-$('create').onclick=()=>makeLobby(false);$('solo').onclick=()=>makeLobby(true);
-$('join').onclick=()=>{solo=false;const c=$('code').value.trim().toUpperCase();c.length===5?connect(c,false):status('Enter the 5-letter lobby code.')};
+$('create').onclick=()=>makeLobby('lobby');$('solo').onclick=()=>makeLobby('solo');$('daily').onclick=()=>makeLobby('daily');
+$('join').onclick=()=>{solo=daily=false;const c=$('code').value.trim().toUpperCase();c.length===5?connect(c,false):status('Enter the 5-letter lobby code.')};
 $('leave').onclick=$('leave2').onclick=leave;
 $('start').onclick=()=>{err('');tx({t:'start'})};$('again').onclick=()=>{err('');tx({t:'again'})};
 ['c_mode','c_time','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
@@ -417,6 +436,7 @@ $('submit').onclick=()=>{if(sent||!st)return;const bomb=st.cfg.mode==='bomb';sen
   tx(bomb?{t:'answer',v}:{t:'guess',v});$('submit').hidden=true;$('form').querySelectorAll('input').forEach(i=>i.disabled=true)};
 addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.closest('#form')&&!document.querySelector('.ac:not([hidden]) li.on'))$('submit').onclick()});
 {try{$('nick').value=localStorage.getItem('ozu:nick')||''}catch(e){}const l=new URLSearchParams(location.search).get('lobby');if(l)$('code').value=l.toUpperCase().slice(0,5)}
+loadLb();
 </script>
 
 <script src="../assets/site.js"></script>
