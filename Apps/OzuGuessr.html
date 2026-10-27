@@ -229,6 +229,7 @@
     <h1>Ozu Guessr</h1>
     <p>Those who know...</p>
   </header>
+  <p id="gerr" role="alert" hidden style="margin:0 0 16px;padding:10px 14px;border:1px solid var(--gold-dim);border-radius:10px;background:var(--panel-2);font-size:.9rem"></p>
 
   <section class="sec" id="menu">
     <h2>Play</h2>
@@ -274,11 +275,12 @@ const FIELDS={song:'Song name · 3 pts',artist:'Artist · 2 pts',mapper:'Mapper 
 const TYPES={clip_map:'Guess the map (song name)',audio_map:'Guess the map from the sound only',clip_bpm:'Guess the BPM',clip_pp:'Guess the PP',bg_map:'Guess the map from its background'};
 const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff]+/g,' ').trim();
 let solo=false,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null;
-const tx=o=>ws&&ws.readyState===1&&ws.send(JSON.stringify(o));
+const tx=o=>{if(ws&&ws.readyState===1){ws.send(JSON.stringify(o));return true}err('Lost the connection to the server. Press Leave and join again.');return false};
 const sfx=()=>Math.round((window.SITE&&SITE.sfxLevel?SITE.sfxLevel():1)*100);
 const duck=b=>{try{window.SITE&&SITE.duck&&SITE.duck(b)}catch(e){}};
 addEventListener('pagehide',()=>duck(false));
 const status=t=>$('status').textContent=t||'';
+const err=t=>{const e=$('gerr');e.textContent=t||'';e.hidden=!t};   // visible on every screen (the status line only exists on the menu)
 
 /* ---------- autocomplete: start of the text or of any word, never the middle of a word ---------- */
 function attachAc(inp,key){
@@ -312,15 +314,17 @@ function connect(c,create){
   if(API.includes('YOURNAME'))return status('Not connected yet: paste your server URL into API in this page’s script.');
   const name=$('nick').value.trim()||(solo?'Player':'');if(!name){solo=false;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
-  status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
+  err('');status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
   ws.onopen=()=>tx({t:'join',name,create});
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
-    else if(m.t==='err')status(m.m);else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
-  ws.onclose=()=>{solo=false;ws=null;st=null;me=null;lastKey=null;duck(false);show('menu')};
+    else if(m.t==='err'){status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
+  ws.onclose=()=>{const was=me;solo=false;ws=null;st=null;me=null;lastKey=null;duck(false);show('menu');err(was?'Disconnected from the server.':'Couldn’t connect to the server.')};
   ws.onerror=()=>status('Couldn’t connect to the server.');
 }
-function leave(){if(ws)ws.close()}
+function leave(){const w=ws;ws=null;st=null;me=null;lastKey=null;solo=false;V=null;duck(false);err('');status('');
+  if(w){w.onclose=w.onerror=w.onmessage=null;try{w.close()}catch(e){}}
+  try{if(ytReady)yt.pauseVideo()}catch(e){}show('menu')}
 function show(id){['menu','lobby','game','end'].forEach(s=>$(s).hidden=s!==id);duck(id==='game')}
 
 /* ---------- screens ---------- */
@@ -392,7 +396,7 @@ async function makeLobby(isSolo){
 $('create').onclick=()=>makeLobby(false);$('solo').onclick=()=>makeLobby(true);
 $('join').onclick=()=>{solo=false;const c=$('code').value.trim().toUpperCase();c.length===5?connect(c,false):status('Enter the 5-letter lobby code.')};
 $('leave').onclick=$('leave2').onclick=leave;
-$('start').onclick=()=>tx({t:'start'});$('again').onclick=()=>tx({t:'again'});
+$('start').onclick=()=>{err('');tx({t:'start'})};$('again').onclick=()=>{err('');tx({t:'again'})};
 ['c_mode','c_time','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
 $('copy').onclick=async()=>{const url=location.href.replace(/Apps\/OzuGuessr\.html.*$/,'index.html#Apps/OzuGuessr.html?lobby='+code);
   try{await navigator.clipboard.writeText(url);$('copy').textContent='Copied!'}catch(e){prompt('Invite link',url)}setTimeout(()=>$('copy').textContent='Copy invite link',1500)};
