@@ -213,7 +213,7 @@
 (()=>{
 if(location.protocol==='file:')return;   // frames can't be controlled from local files: plain links then
 const view=document.getElementById('view'),homeBtn=document.getElementById('shellHome');
-const root=location.pathname.replace(/[^/]*$/,''),OK=/^Apps\/[\w.-]+\.html$/;
+const root=location.pathname.replace(/[^/]*$/,''),OK=/^Apps\/[\w.-]+\.html(\?[\w=&.-]*)?$/;
 const show=on=>{view.hidden=homeBtn.hidden=!on;document.documentElement.classList.toggle('app-open',on)};
 let trail=[],going=false;   // pages visited inside the frame, so Back goes to the previous one
 function open(rel){if(!OK.test(rel))return;trail=[rel];show(true);view.src=rel}
@@ -223,12 +223,12 @@ view.addEventListener('load',()=>{
   let w,d;try{w=view.contentWindow;d=w.document}catch(e){return}
   if(!d||w.location.href==='about:blank')return;
   const st=d.createElement('style');st.textContent='.home-btn{display:none!important}';d.head.append(st);   // the shell has its own Home button
-  w.SITE={playSfx:s=>window.SITE.playSfx(new URL(s,w.location.href).href)};                             // sounds use the SFX slider
+  w.SITE={playSfx:s=>window.SITE.playSfx(new URL(s,w.location.href).href),sfxLevel:()=>window.SITE.sfxLevel(),duck:b=>window.SITE.duck(b)};                             // sounds use the SFX slider
   ['pointerdown','keydown'].forEach(ev=>d.addEventListener(ev,()=>window.dispatchEvent(new Event(ev)),true)); // first click inside an app can start the music
   d.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a[href]');if(!a)return;
     const u=new URL(a.href,w.location.href);
     if(u.origin===location.origin&&(u.pathname===root||u.pathname===root+'index.html')){e.preventDefault();home()}});
-  const rel=w.location.pathname.slice(root.length);
+  const rel=w.location.pathname.slice(root.length)+w.location.search;
   if(w.location.pathname.startsWith(root)&&OK.test(rel)){
     if(!going&&trail[trail.length-1]!==rel)trail.push(rel);
     going=false;history.replaceState(null,'','#'+rel);   // bookmarkable
