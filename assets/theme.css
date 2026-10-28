@@ -1,0 +1,61 @@
+/* Shared look for every page (loaded after each page's own <style>, so it wins):
+   ambient approach circles, hit-circle logo in titles, lifted cards and buttons, staggered entrances, ripples, focus glow. */
+:root{--pink:#ff7ab3;--pink-2:#e0679a;--mint:#8fd19e;--coral:#e58a9a;--amber:#f0b94a;--panel-3:#503446;--ease:cubic-bezier(.2,.8,.3,1)}
+html{scroll-behavior:smooth}
+::selection{background:rgba(255,122,179,.35)}
+*{scrollbar-color:var(--gold-dim) transparent}
+.ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.ambient i{position:absolute;border-radius:50%;border:2px solid rgba(255,122,179,.16);animation:t-drift 22s ease-in-out infinite alternate,t-approach 7s ease-out infinite}
+.ambient i:nth-child(1){width:340px;height:340px;left:-90px;top:12vh}
+.ambient i:nth-child(2){width:220px;height:220px;right:6vw;top:8vh;animation-duration:26s,9s;animation-delay:-6s,-3s}
+.ambient i:nth-child(3){width:420px;height:420px;right:-140px;bottom:-60px;animation-duration:30s,11s;animation-delay:-12s,-5s}
+@keyframes t-drift{from{translate:0 0}to{translate:34px -26px}}
+@keyframes t-approach{0%{scale:1.5;opacity:0}20%{opacity:1}100%{scale:1;opacity:.25}}
+@keyframes t-ring{0%{transform:scale(1.5);opacity:0}25%{opacity:1}100%{transform:scale(1);opacity:0}}
+@keyframes t-rise{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes t-slide{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes t-rp{to{transform:scale(1);opacity:0}}
+
+/* title: hit-circle logo with an approach ring */
+header h1{display:inline-flex;align-items:center;justify-content:center;gap:.28em;flex-wrap:wrap;user-select:none}
+.logo{position:relative;flex:none;width:.7em;height:.7em;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffb3d2,var(--pink-2));box-shadow:0 0 0 .07em rgba(255,255,255,.85),0 8px 24px rgba(224,103,154,.45);display:grid;place-items:center}
+.logo::before{content:'1';font:600 .36em 'Fredoka',sans-serif;color:#fff}
+.logo::after{content:'';position:absolute;inset:-.34em;border-radius:50%;border:.05em solid rgba(255,122,179,.8);animation:t-ring 3.2s ease-out infinite}
+header p{letter-spacing:.01em}
+
+/* cards (menu pages) */
+.card{position:relative;overflow:hidden;transition:transform .22s var(--ease),border-color .2s,box-shadow .25s,background .2s!important}
+.card::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;border:2px solid rgba(255,122,179,.28);scale:.6;opacity:0;transition:scale .5s var(--ease),opacity .3s;pointer-events:none}
+a.card:hover{transform:translateY(-5px);border-color:rgba(255,122,179,.55);box-shadow:0 14px 30px rgba(224,103,154,.16);background:var(--panel-3)}
+a.card:hover::after{scale:1.15;opacity:1}
+a.card:active{transform:translateY(-1px) scale(.985)}
+a.card h2{transition:color .2s}a.card:hover h2{color:var(--pink)}
+.card.soon{opacity:.8}
+.card .cardimg{transition:transform .5s var(--ease)}a.card:hover .cardimg{transform:scale(1.03)}
+
+/* panels and sections */
+.panel,.sec{box-shadow:0 14px 40px rgba(0,0,0,.18);border-radius:18px;animation:t-rise .5s var(--ease) both}
+.panel:nth-child(2),.sec:nth-of-type(2){animation-delay:.08s}.panel:nth-child(3),.sec:nth-of-type(3){animation-delay:.16s}.sec:nth-of-type(4){animation-delay:.24s}.sec:nth-of-type(5){animation-delay:.32s}
+footer{opacity:.9}
+
+/* buttons, inputs */
+button,.btn,.home-btn{transition:transform .14s var(--ease),border-color .15s,background .2s,box-shadow .25s,color .2s}
+button:not(:disabled):hover{transform:translateY(-1px)}
+button:not(:disabled):active{transform:scale(.96)}
+button.primary:hover,.dlgbtns button.go:hover,.tabs button[aria-selected=true]{box-shadow:0 6px 18px rgba(224,103,154,.28)}
+button:disabled{cursor:not-allowed}
+.home-btn:hover{translate:-3px 0;border-color:var(--gold-dim)}
+input:not([type=range]):not([type=checkbox]):not([type=radio]),select{transition:border-color .15s,box-shadow .2s}
+input:not([type=range]):not([type=checkbox]):not([type=radio]):focus{border-color:var(--pink)!important;box-shadow:0 0 0 4px rgba(255,122,179,.14);outline:none}
+input[type=range],input[type=checkbox]{accent-color:var(--pink)}
+.chips li,.play,.chip{transition:transform .2s var(--ease),border-color .2s}
+.chips li{animation:t-slide .35s var(--ease) both}
+a.play:hover{transform:translateX(3px)}
+.rp{position:absolute;border-radius:50%;background:rgba(255,255,255,.26);transform:scale(0);animation:t-rp .6s ease-out forwards;pointer-events:none}
+dialog[open]{animation:t-rise .3s var(--ease) both}
+.watermark{filter:saturate(1.1)}
+
+@media (prefers-reduced-motion:reduce){
+  .ambient{display:none}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
