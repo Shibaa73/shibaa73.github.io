@@ -232,6 +232,12 @@ select,.row input[type=number]{background:var(--panel-2);border:1px solid var(--
 .score.bump{animation:pop .5s var(--ease)}
 .dim{opacity:.55}
 .admst{font-size:.84rem;color:var(--muted)}.admst.ok{color:var(--mint)}.admst.bad{color:var(--coral)}
+
+/* fixes: backgrounds shown whole (16:9 box, letterboxed if the image differs), suggestions above the Submit button */
+.cover{background-size:contain}
+#form{position:relative;z-index:5}
+#form .fld:focus-within{z-index:20}
+.ac{box-shadow:0 12px 28px rgba(0,0,0,.5)}
 </style>
 </head>
 <body>
@@ -423,7 +429,7 @@ function leave(){const w=ws;ws=null;st=null;me=null;lastKey=null;kind=null;V=nul
   try{if(ytReady)yt.pauseVideo()}catch(e){}show('menu')}
 let scr=null;
 function show(id){
-  ['menu','lobby','game','end'].forEach(s=>$(s).hidden=s!==id);duck(id==='game');
+  ['menu','lobby','game','end'].forEach(s=>$(s).hidden=s!==id);duck(id==='game'&&!(st&&st.q&&(st.q.type==='bg'||st.q.type==='bg_map')));   // the site music keeps playing during background questions (no clip audio)
   const lb=id==='menu'||id==='end';$('lb').hidden=!lb;
   if(scr!==id){scr=id;for(const s of [$(id),lb?$('lb'):null]){if(!s)continue;s.classList.remove('enter');void s.offsetWidth;[...s.children].forEach((c,i)=>c.style.setProperty('--i',i));s.classList.add('enter');setTimeout(()=>s.classList.remove('enter'),1000)}
     if(lb)loadLb();if(id==='menu')setBgState()}
