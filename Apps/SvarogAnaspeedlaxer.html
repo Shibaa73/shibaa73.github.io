@@ -159,7 +159,7 @@
   .dlgbtns button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font:600 .85rem 'Inter',sans-serif;cursor:pointer}
   .dlgbtns button.go{background:var(--teal);color:var(--bg);border-color:var(--teal)}
 </style>
-
+<link rel="stylesheet" href="../assets/theme.css">
 </head>
 <body>
 <a class="home-btn" href="../index.html" aria-label="Torna alla home">
@@ -366,5 +366,6 @@ $('reroll').onclick=()=>applySeed(rand());
 $('close').onclick=()=>$('dlg').close();
 $('seedIn').onkeydown=e=>{if(e.key==='Enter')applySeed(e.target.value)};
 </script>
+<script src="../assets/theme.js"></script>
 </body>
 </html>
