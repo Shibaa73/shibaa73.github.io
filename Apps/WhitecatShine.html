@@ -185,6 +185,7 @@
   .home-btn:focus-visible{outline:2px solid var(--teal);outline-offset:3px;}
   .home-btn svg{width:16px;height:16px;stroke:var(--gold);}
 </style>
+<link rel="stylesheet" href="../assets/theme.css">
 </head>
 <body>
 <a class="home-btn" href="../index.html" aria-label="Torna alla home">
@@ -296,5 +297,6 @@ cat.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
 cat.addEventListener('pointerup',e=>{if(down&&Math.hypot(e.clientX-down[0],e.clientY-down[1])<6)sfx('../assets/WAS.mp3');down=null});
 </script>
 <script src="../assets/site.js"></script>
+<script src="../assets/theme.js"></script>
 </body>
 </html>
