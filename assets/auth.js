@@ -11,13 +11,19 @@ const OZU_API='https://ozu-server.shibagd73.workers.dev';   // the Ozu server: i
 try{if(window.parent!==window&&window.parent.SITE_AUTH){window.SITE_AUTH=window.parent.SITE_AUTH;return}}catch(e){}
 const configured=!/YOUR-/.test(SUPABASE_URL+SUPABASE_ANON_KEY);
 const subs=new Set();let sb=null;
-const A=window.SITE_AUTH={configured,user:null,name:null,ready:!configured,
+const safeUrl=u=>typeof u==='string'&&/^https:\/\/[\w.-]+\/storage\/v1\/object\/public\/avatars\/[\w\/.-]+(\?v=\d+)?$/.test(u)?u:null;
+const A=window.SITE_AUTH={configured,user:null,name:null,avatar:null,ready:!configured,avatars:async()=>new Map(),
   onChange(f){subs.add(f);if(A.ready)try{f(A)}catch(e){}return()=>subs.delete(f)},
   async token(){if(!sb)return null;try{const {data}=await sb.auth.getSession();return data.session?data.session.access_token:null}catch(e){return null}},
   open(mode){if(configured)openModal(mode||'login')},
   async logout(){if(sb)await sb.auth.signOut()}};
 const fire=()=>subs.forEach(f=>{try{f(A)}catch(e){}});
 if(!configured)return;
+let readyRes;const readyP=new Promise(r=>readyRes=r);
+const avc=new Map();   // username -> picture url (or null), for leaderboards and lobbies
+A.avatars=async names=>{await readyP;const out=new Map(),need=[];for(const n of names){if(avc.has(n))out.set(n,avc.get(n));else need.push(n)}
+  if(need.length&&sb){try{const {data,error}=await sb.from('profiles').select('username,avatar_url').in('username',need);if(!error){for(const n of need)avc.set(n,null);(data||[]).forEach(r=>avc.set(r.username,safeUrl(r.avatar_url)))}}catch(e){}}
+  for(const n of names)out.set(n,avc.get(n)||null);return out};
 
 /* ---------- styles ---------- */
 const css=document.createElement('style');
@@ -50,6 +56,9 @@ css.textContent=`
 .ac-msg.ok{background:rgba(143,209,158,.12);border-color:rgba(143,209,158,.4);color:#a8e0b4}
 .ac-sec{width:100%;padding:9px;border-radius:10px;border:1px solid var(--border,rgba(255,220,230,.09));background:var(--panel-2,#452c3a);color:var(--text,#f3e6ea);font:600 .82rem 'Inter',sans-serif;cursor:pointer;transition:border-color .15s,transform .14s}.ac-sec:hover{border-color:var(--gold-dim,#8f5c6b)}.ac-sec:active{transform:scale(.97)}
 .ac-go.danger{background:linear-gradient(135deg,#ef7a8c,#c24a63);color:#fff;box-shadow:0 6px 18px rgba(194,74,99,.3)}.ac-sec.danger{color:#f0b3bf}
+.av.img,.ac-av.img{background-size:cover;background-position:center;color:transparent}
+.ac-pic{display:flex;align-items:center;gap:12px}.ac-pic .ac-av{width:52px;height:52px;font-size:1.3rem}.ac-pic div{display:grid;gap:6px;flex:1}
+#acPicMsg{color:#f0b3bf;min-height:0}
 .ac-x{float:right;border:0;background:none;color:var(--muted,#a58891);font-size:1.4rem;line-height:1;cursor:pointer;padding:0 4px}
 @keyframes acin{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}@keyframes acfade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
@@ -66,13 +75,32 @@ btn.onclick=()=>{if(A.user)toggleMenu();else openModal('login')};
 document.body.append(btn);
 let menu=null;
 function closeMenu(){if(menu){menu.remove();menu=null}}
-function toggleMenu(){if(menu)return closeMenu();menu=el(`<div id="acMenu"><small>Signed in as</small><b>${esc(A.name||'…')}</b><small>${esc(A.user.email||'')}</small><button class="ac-sec" id="acPw" type="button">Change password</button><button class="ac-sec danger" id="acDel" type="button">Delete account</button><button class="ac-go" id="acOut" type="button">Log out</button></div>`);
+function toggleMenu(){if(menu)return closeMenu();menu=el(`<div id="acMenu"><div class="ac-pic"><span class="ac-av${A.avatar?' img':''}" style="--h:${hue(A.name||'')};${A.avatar?`background-image:url('${A.avatar}')`:''}">${A.avatar?'':esc((A.name||'?')[0].toUpperCase())}</span><div><b>${esc(A.name||'…')}</b><small>${esc(A.user.email||'')}</small></div></div>
+    <button class="ac-sec" id="acPic" type="button">Change picture</button>${A.avatar?'<button class="ac-sec" id="acPicDel" type="button">Remove picture</button>':''}<small id="acPicMsg"></small><input id="acFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden><button class="ac-sec" id="acPw" type="button">Change password</button><button class="ac-sec danger" id="acDel" type="button">Delete account</button><button class="ac-go" id="acOut" type="button">Log out</button></div>`);
   if(btn.style.right)menu.style.right=btn.style.right;
   menu.querySelector('#acOut').onclick=async()=>{closeMenu();await A.logout()};
+  const pm=t=>{const e=menu&&menu.querySelector('#acPicMsg');if(e)e.textContent=t||''};
+  menu.querySelector('#acPic').onclick=()=>menu.querySelector('#acFile').click();
+  menu.querySelector('#acFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;pm('Uploading…');try{await uploadAvatar(f);toast('Picture updated.')}catch(x){pm(String(x.message||x))}};
+  const rm=menu.querySelector('#acPicDel');if(rm)rm.onclick=async()=>{pm('Removing…');try{await removeAvatar();toast('Picture removed.')}catch(x){pm(String(x.message||x))}};
   menu.querySelector('#acPw').onclick=()=>{openModal('newpass')};menu.querySelector('#acDel').onclick=()=>{openModal('delete')};document.body.append(menu)}
 document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!btn.contains(e.target))closeMenu()});
+async function uploadAvatar(file){
+  if(!file||!/^image\//.test(file.type))throw new Error('Pick an image file.');
+  const bmp=await createImageBitmap(file),S=256,c=document.createElement('canvas');c.width=c.height=S;const m=Math.min(bmp.width,bmp.height);
+  c.getContext('2d').drawImage(bmp,(bmp.width-m)/2,(bmp.height-m)/2,m,m,0,0,S,S);   // centred square crop, 256x256
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));if(!blob)throw new Error('Couldn’t read that image.');
+  const path=A.user.id+'/avatar.jpg';
+  let r=await sb.storage.from('avatars').upload(path,blob,{upsert:true,contentType:'image/jpeg'});if(r.error)throw r.error;
+  const url=SUPABASE_URL.replace(/\/+$/,'')+'/storage/v1/object/public/avatars/'+path+'?v='+Date.now();
+  r=await sb.from('profiles').update({avatar_url:url}).eq('id',A.user.id);if(r.error)throw r.error;
+  A.avatar=safeUrl(url);avc.delete(A.name);paint();fire()}
+async function removeAvatar(){
+  await sb.storage.from('avatars').remove([A.user.id+'/avatar.jpg']);
+  const r=await sb.from('profiles').update({avatar_url:null}).eq('id',A.user.id);if(r.error)throw r.error;
+  A.avatar=null;avc.delete(A.name);paint();fire()}
 function paint(){
-  if(A.user){const n=A.name||'…';btn.style.setProperty('--h',hue(n));btn.innerHTML=`<span class="av">${esc(n[0].toUpperCase())}</span><span class="n">${esc(n)}</span>`;btn.setAttribute('aria-label','Account: '+n)}
+  if(A.user){const n=A.name||'…';btn.style.setProperty('--h',hue(n));btn.innerHTML=`<span class="av${A.avatar?' img':''}"${A.avatar?` style="background-image:url('${A.avatar}')"`:''}>${A.avatar?'':esc(n[0].toUpperCase())}</span><span class="n">${esc(n)}</span>`;btn.setAttribute('aria-label','Account: '+n)}
   else{btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg><span class="n">Log in</span>';btn.setAttribute('aria-label','Log in or register')}
   if(menu){closeMenu();if(A.user)toggleMenu()}}
 paint();
@@ -80,14 +108,17 @@ paint();
 /* ---------- supabase ---------- */
 async function setSession(s){
   A.user=s?s.user:null;A.name=null;
-  if(A.user){try{const {data}=await sb.from('profiles').select('username').eq('id',A.user.id).maybeSingle();A.name=data&&data.username||(A.user.user_metadata&&A.user.user_metadata.username)||null}catch(e){}}
+  A.avatar=null;
+  if(A.user){try{let r=await sb.from('profiles').select('username,avatar_url').eq('id',A.user.id).maybeSingle();
+      if(r.error)r=await sb.from('profiles').select('username').eq('id',A.user.id).maybeSingle();   // picture column not created yet (old SQL)
+      const data=r.data;A.name=data&&data.username||(A.user.user_metadata&&A.user.user_metadata.username)||null;A.avatar=safeUrl(data&&data.avatar_url)}catch(e){}}
   A.ready=true;paint();fire();
   if(A.user&&modal&&modal.dataset.done!=='1'){modal.dataset.done='1';toast('Welcome, '+(A.name||'player')+'!')}}
 const sc=document.createElement('script');sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
 sc.onload=async()=>{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-  const {data}=await sb.auth.getSession();await setSession(data.session);
+  const {data}=await sb.auth.getSession();await setSession(data.session);readyRes();
   sb.auth.onAuthStateChange((ev,s)=>{if(ev==='INITIAL_SESSION')return;setTimeout(()=>setSession(s),0)})};
-sc.onerror=()=>{A.ready=true;fire()};
+sc.onerror=()=>{A.ready=true;readyRes();fire()};
 document.head.append(sc);
 
 /* ---------- login / register window ---------- */
@@ -125,6 +156,7 @@ function render(){
     const c=b.querySelector('#acConf'),k=b.querySelector('#acKill');c.oninput=()=>{k.disabled=!me||c.value.trim().toLowerCase()!==me.toLowerCase()};
     k.onclick=async()=>{busy(true);try{const tok=await A.token();
         const r=await fetch(OZU_API+'/account/erase',{method:'POST',headers:{authorization:'Bearer '+tok}});if(!r.ok&&r.status!==400)throw new Error('Couldn’t remove your scores (server answered '+r.status+'). Nothing was deleted.');
+        try{await sb.storage.from('avatars').remove([A.user.id+'/avatar.jpg'])}catch(e){}   // the picture goes too
         const {error}=await sb.rpc('delete_my_account');if(error)throw error;
         await sb.auth.signOut();closeModal();toast('Your account was deleted.')}
       catch(e){busy(false);st.msg=String(e.message||e);st.ok=false;render()}};

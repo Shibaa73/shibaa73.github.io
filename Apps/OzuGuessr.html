@@ -271,6 +271,7 @@ select,.row input[type=number]{background:var(--panel-2);border:1px solid var(--
 @keyframes fuse{from{transform:rotate(-12deg) scale(1)}to{transform:rotate(12deg) scale(1.15)}}
 @keyframes boom{0%{transform:scale(1)}40%{transform:scale(2.2);opacity:1}100%{transform:scale(2.8);opacity:0}}
 @keyframes t-ring{0%{transform:scale(1.15);opacity:0}25%{opacity:1}100%{transform:scale(1);opacity:0}}
+.av.img{background-size:cover;background-position:center;color:transparent}
 </style>
 </head>
 <body>
@@ -399,6 +400,11 @@ function confetti(){if(RM)return;const box=el('div','confetti'),cols=['#ff7ab3',
   for(let i=0;i<70;i++){const c=el('i');c.style.cssText='left:'+Math.random()*100+'%;--c:'+cols[i%5]+';--d:'+(2.2+Math.random()*2)+'s;--w:'+Math.random()*.6+'s;--x:'+(Math.random()*240-120)+'px;--r:'+(Math.random()*900-450)+'deg';box.append(c)}
   document.body.append(box);setTimeout(()=>box.remove(),5200)}
 const hue=n=>{let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))%360;return h};
+// round avatar: the initial on a colour, or the account's picture once it is fetched (only for logged-in accounts, never for guests)
+const avQ=new Set();let avT=null;
+function mkAv(name,acct){const e=el('span','av',(String(name)[0]||'?').toUpperCase());e.style.setProperty('--h',hue(name));if(acct){e.dataset.n=name;avQ.add(e);clearTimeout(avT);avT=setTimeout(flushAv,30)}return e}
+async function flushAv(){const a=window.SITE_AUTH&&window.SITE_AUTH.configured?window.SITE_AUTH:null,els=[...avQ];avQ.clear();if(!a||!els.length)return;
+  const m=await a.avatars([...new Set(els.map(e=>e.dataset.n))]);els.forEach(e=>{const u=m.get(e.dataset.n);if(u){e.style.backgroundImage='url("'+u+'")';e.classList.add('img');e.textContent=''}})}
 
 /* ---------- autocomplete: start of the text or of any word, never the middle of a word ---------- */
 function attachAc(inp,key){
@@ -477,7 +483,7 @@ async function loadLb(){
   try{const tk=await getTok(),r=await fetch(API+'/daily',tk?{headers:{authorization:'Bearer '+tk}}:undefined);if(!r.ok)throw new Error(r.status);const d=await r.json();lbEnd=Date.now()+d.secondsLeft*1000;NEEDLOGIN=!!d.login;MINE=d.mine&&d.mine.played?d.mine:null;
     const mine=($('nick').value||'').trim();
     $('lbList').replaceChildren(...(d.board.length?d.board.slice(0,20).map((b,i)=>{const row=el('div','pl'+(b.name===mine?' cur':'')+(i<3?' r'+(i+1):''));row.style.setProperty('--i',i);
-      const av=el('span','av',(b.name[0]||'?').toUpperCase());av.style.setProperty('--h',hue(b.name));row.append(el('span','rk',i+1),av,el('span',null,b.name),el('i',null,b.score.toFixed(2)+' pts'));return row}):[el('p','muted','No scores yet today. Be the first!')]));
+      const av=mkAv(b.name,!/\(guest\)\s*$/i.test(b.name));av.style.setProperty('--h',hue(b.name));row.append(el('span','rk',i+1),av,el('span',null,b.name),el('i',null,b.score.toFixed(2)+' pts'));return row}):[el('p','muted','No scores yet today. Be the first!')]));
     tickLb(d.secondsLeft)}
   catch(e){lbEnd=0;$('lbInfo').textContent='';$('dailyLeft').textContent='';$('lbList').replaceChildren(el('p','muted','Couldn’t load the leaderboard.'))}
 }
@@ -490,7 +496,7 @@ fetch(API+'/caps').then(r=>r.json()).then(d=>{CAPS={bg:!!d.bg,why:d.why||''};set
 /* ---------- lobby ---------- */
 function players(box,fn){const list=st.players,sig=JSON.stringify(list.map(p=>[p.id,p.name,fn.info(p),fn.cls?fn.cls(p):'',p.id===st.host,p.id===me])),ids=list.map(p=>p.id).join();
   if(box._sig===sig)return;const still=box._ids===ids;box._sig=sig;box._ids=ids;
-  box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl'+(fn.cls?fn.cls(p):'')+(still?' still':'')),av=el('span','av',(p.name[0]||'?').toUpperCase());d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
+  box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl'+(fn.cls?fn.cls(p):'')+(still?' still':'')),av=mkAv(p.name,p.acct);d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
     d.append(av,el('span',null,(p.id===st.host?'★ ':'')+p.name+(p.id===me?' (you)':'')),el('i',null,fn.info(p)));return d}))}
 const hearts=n=>n>0?'♥'.repeat(n):'out';
 {const box=$('cfgf');for(const k of ALL){const l=el('label'),i=el('input');l.id='lf_'+k;i.type='checkbox';i.id='c_'+k;i.onchange=push;l.append(i,NAME[k]);box.append(l)}}
@@ -552,7 +558,7 @@ function arena(q){const box=$('board');
   box._ffa.lastChild.textContent=alive+' of '+st.players.length+' alive · last one standing wins';
   const seen=new Set();
   st.players.forEach((p,i)=>{seen.add(p.id);let t=box._tiles.get(p.id);
-    if(!t){t=el('div','tile');t.style.setProperty('--i',i);const av=el('span','av',(p.name[0]||'?').toUpperCase());av.style.setProperty('--h',hue(p.name));
+    if(!t){t=el('div','tile');t.style.setProperty('--i',i);const av=mkAv(p.name,p.acct);av.style.setProperty('--h',hue(p.name));
       t._hp=el('div','hp');t.append(el('span','bomb','💣'),av,el('div','nm'),t._hp,el('div','tg'));t._nm=t.children[2];t._tg=t.children[4];t._lives=p.lives;box._grid.append(t);box._tiles.set(p.id,t)}
     t._nm.textContent=p.name+(p.id===me?' (you)':'');
     const cur=p.id===q.cur,out=p.lives<=0;
@@ -594,7 +600,7 @@ function renderGame(){
 function renderEnd(){
   show('end');stopClip();lastScore=null;const bomb=st.cfg.mode==='bomb',list=[...st.players].sort((a,b)=>bomb?b.lives-a.lives:b.score-a.score);
   const box=$('final'),sig=JSON.stringify(list);
-  if(box._sig!==sig){box._sig=sig;box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl r'+(i+1)+(i===0?' cur':'')),av=el('span','av',(p.name[0]||'?').toUpperCase());d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
+  if(box._sig!==sig){box._sig=sig;box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl r'+(i+1)+(i===0?' cur':'')),av=mkAv(p.name,p.acct);d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
       d.append(el('span','rk',i===0?'🏆':i+1),av,el('span',null,p.name+(p.id===me?' (you)':'')),el('i',null,bomb?hearts(p.lives):f2(p.score)+' pts'));return d}));
     if(list[0]&&(list[0].id===me||list.length===1))setTimeout(confetti,350)}
   $('finalNote').textContent=daily()?'Your score is on today’s leaderboard (your best score of the day counts).':'';
