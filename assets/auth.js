@@ -56,7 +56,7 @@ css.textContent=`
 .ac-msg.ok{background:rgba(143,209,158,.12);border-color:rgba(143,209,158,.4);color:#a8e0b4}
 .ac-sec{width:100%;padding:9px;border-radius:10px;border:1px solid var(--border,rgba(255,220,230,.09));background:var(--panel-2,#452c3a);color:var(--text,#f3e6ea);font:600 .82rem 'Inter',sans-serif;cursor:pointer;transition:border-color .15s,transform .14s}.ac-sec:hover{border-color:var(--gold-dim,#8f5c6b)}.ac-sec:active{transform:scale(.97)}
 .ac-go.danger{background:linear-gradient(135deg,#ef7a8c,#c24a63);color:#fff;box-shadow:0 6px 18px rgba(194,74,99,.3)}.ac-sec.danger{color:#f0b3bf}
-.av.img,.ac-av.img{background-size:cover;background-position:center;color:transparent}
+#acBtn .av.img,.ac-av.img{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;color:transparent}
 .ac-pic{display:flex;align-items:center;gap:12px}.ac-pic .ac-av{width:52px;height:52px;font-size:1.3rem}.ac-pic div{display:grid;gap:6px;flex:1}
 #acPicMsg{color:#f0b3bf;min-height:0}
 .ac-x{float:right;border:0;background:none;color:var(--muted,#a58891);font-size:1.4rem;line-height:1;cursor:pointer;padding:0 4px}
