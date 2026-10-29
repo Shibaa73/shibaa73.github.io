@@ -57,6 +57,8 @@ css.textContent=`
 .ac-sec{width:100%;padding:9px;border-radius:10px;border:1px solid var(--border,rgba(255,220,230,.09));background:var(--panel-2,#452c3a);color:var(--text,#f3e6ea);font:600 .82rem 'Inter',sans-serif;cursor:pointer;transition:border-color .15s,transform .14s}.ac-sec:hover{border-color:var(--gold-dim,#8f5c6b)}.ac-sec:active{transform:scale(.97)}
 .ac-go.danger{background:linear-gradient(135deg,#ef7a8c,#c24a63);color:#fff;box-shadow:0 6px 18px rgba(194,74,99,.3)}.ac-sec.danger{color:#f0b3bf}
 #acBtn .av.img,.ac-av.img{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;color:transparent}
+.ac-box input[type=range]{padding:0;border:0;background:none;box-shadow:none;accent-color:#ff7ab3;height:22px}
+.ac-crop{display:grid;place-items:center;margin:0 0 14px}.ac-crop canvas{width:min(280px,100%);height:auto;aspect-ratio:1;border-radius:14px;touch-action:none;cursor:grab;background:#000}.ac-crop canvas:active{cursor:grabbing}
 .ac-pic{display:flex;align-items:center;gap:12px}.ac-pic .ac-av{width:52px;height:52px;font-size:1.3rem}.ac-pic div{display:grid;gap:6px;flex:1}
 #acPicMsg{color:#f0b3bf;min-height:0}
 .ac-x{float:right;border:0;background:none;color:var(--muted,#a58891);font-size:1.4rem;line-height:1;cursor:pointer;padding:0 4px}
@@ -81,15 +83,18 @@ function toggleMenu(){if(menu)return closeMenu();menu=el(`<div id="acMenu"><div 
   menu.querySelector('#acOut').onclick=async()=>{closeMenu();await A.logout()};
   const pm=t=>{const e=menu&&menu.querySelector('#acPicMsg');if(e)e.textContent=t||''};
   menu.querySelector('#acPic').onclick=()=>menu.querySelector('#acFile').click();
-  menu.querySelector('#acFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;pm('Uploading…');try{await uploadAvatar(f);toast('Picture updated.')}catch(x){pm(String(x.message||x))}};
+  menu.querySelector('#acFile').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await openCrop(f)}catch(x){pm(String(x.message||x))}};
   const rm=menu.querySelector('#acPicDel');if(rm)rm.onclick=async()=>{pm('Removing…');try{await removeAvatar();toast('Picture removed.')}catch(x){pm(String(x.message||x))}};
   menu.querySelector('#acPw').onclick=()=>{openModal('newpass')};menu.querySelector('#acDel').onclick=()=>{openModal('delete')};document.body.append(menu)}
 document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!btn.contains(e.target))closeMenu()});
-async function uploadAvatar(file){
+let cr=null;   // the picture being cropped: {src: canvas, z: zoom 0-100, s: px per source px, ox, oy: where it sits in the 280px square}
+async function openCrop(file){
   if(!file||!/^image\//.test(file.type))throw new Error('Pick an image file.');
-  const bmp=await createImageBitmap(file),S=256,c=document.createElement('canvas');c.width=c.height=S;const m=Math.min(bmp.width,bmp.height);
-  c.getContext('2d').drawImage(bmp,(bmp.width-m)/2,(bmp.height-m)/2,m,m,0,0,S,S);   // centred square crop, 256x256
-  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.88));if(!blob)throw new Error('Couldn’t read that image.');
+  if(file.size>25e6)throw new Error('That image is too big (25 MB max).');
+  const bmp=await createImageBitmap(file),src=document.createElement('canvas');src.width=bmp.width;src.height=bmp.height;src.getContext('2d').drawImage(bmp,0,0);
+  cr={src,z:0,s:null};closeMenu();openModal('crop')}
+async function uploadAvatar(blob){
+  if(!blob)throw new Error('Couldn’t read that image.');
   const path=A.user.id+'/avatar.jpg';
   let r=await sb.storage.from('avatars').upload(path,blob,{upsert:true,contentType:'image/jpeg'});if(r.error)throw r.error;
   const url=SUPABASE_URL.replace(/\/+$/,'')+'/storage/v1/object/public/avatars/'+path+'?v='+Date.now();
@@ -133,6 +138,28 @@ const box=()=>modal.firstChild;
 function msg(){return st.msg?`<div class="ac-msg${st.ok?' ok':''}">${esc(st.msg)}</div>`:''}
 function render(){
   const b=box(),v=st.view;
+  if(v==='crop'){
+    b.innerHTML=`<button class="ac-x" type="button" aria-label="Close">×</button><h2>Adjust your picture</h2><p>Drag the picture to move it, use the slider to zoom. The circle is what people will see.</p>${msg()}
+      <div class="ac-crop"><canvas id="acCv" width="280" height="280"></canvas></div>
+      <label>Zoom<input id="acZoom" type="range" min="0" max="100" value="${cr.z}"></label>
+      <div class="ac-row" style="margin:0 0 12px"><button class="ac-sec" id="acRot" type="button" style="width:auto;padding:9px 14px">⟳ Rotate</button></div>
+      <button class="ac-go" id="acSaveP" type="button">Save picture</button>`;
+    const cv=b.querySelector('#acCv'),g=cv.getContext('2d'),C=280;
+    const lim=()=>{const w=cr.src.width*cr.s,h=cr.src.height*cr.s;cr.ox=Math.min(0,Math.max(C-w,cr.ox));cr.oy=Math.min(0,Math.max(C-h,cr.oy))};
+    const setZoom=(z,keep)=>{const cx=keep?(C/2-cr.ox)/cr.s:cr.src.width/2,cy=keep?(C/2-cr.oy)/cr.s:cr.src.height/2;cr.z=z;cr.min=C/Math.min(cr.src.width,cr.src.height);cr.s=cr.min*Math.pow(4,z/100);cr.ox=C/2-cx*cr.s;cr.oy=C/2-cy*cr.s;lim()};
+    const draw=()=>{g.fillStyle='#000';g.fillRect(0,0,C,C);g.drawImage(cr.src,cr.ox,cr.oy,cr.src.width*cr.s,cr.src.height*cr.s);
+      g.fillStyle='rgba(18,9,14,.62)';g.beginPath();g.rect(0,0,C,C);g.arc(C/2,C/2,C/2-6,0,Math.PI*2);g.fill('evenodd');g.strokeStyle='rgba(255,255,255,.8)';g.lineWidth=2;g.beginPath();g.arc(C/2,C/2,C/2-6,0,Math.PI*2);g.stroke()};
+    setZoom(cr.z,cr.s!=null);draw();
+    let drag=null;const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*C/r.width,(e.clientY-r.top)*C/r.height]};
+    cv.onpointerdown=e=>{drag=pt(e);cv.setPointerCapture(e.pointerId)};cv.onpointermove=e=>{if(!drag)return;const p=pt(e);cr.ox+=p[0]-drag[0];cr.oy+=p[1]-drag[1];drag=p;lim();draw()};cv.onpointerup=cv.onpointercancel=()=>{drag=null};
+    cv.onwheel=e=>{e.preventDefault();const z=Math.max(0,Math.min(100,cr.z-Math.sign(e.deltaY)*6));b.querySelector('#acZoom').value=z;setZoom(z,true);draw()};
+    b.querySelector('#acZoom').oninput=e=>{setZoom(+e.target.value,true);draw()};
+    b.querySelector('#acRot').onclick=()=>{const o=cr.src,n=document.createElement('canvas');n.width=o.height;n.height=o.width;const x=n.getContext('2d');x.translate(n.width,0);x.rotate(Math.PI/2);x.drawImage(o,0,0);cr.src=n;cr.s=null;cr.z=0;setZoom(0,false);b.querySelector('#acZoom').value=0;draw()};
+    b.querySelector('#acSaveP').onclick=async()=>{busy(true);try{const S=256,out=document.createElement('canvas');out.width=out.height=S;
+        out.getContext('2d').drawImage(cr.src,-cr.ox/cr.s,-cr.oy/cr.s,C/cr.s,C/cr.s,0,0,S,S);
+        const blob=await new Promise(r=>out.toBlob(r,'image/jpeg',.88));await uploadAvatar(blob);closeModal();toast('Picture updated.')}
+      catch(x){busy(false);st.msg=String(x.message||x);st.ok=false;render()}};
+    b.querySelector('.ac-x').onclick=closeModal;return}
   if(v==='forgot'){
     b.innerHTML=`<button class="ac-x" type="button" aria-label="Close">×</button><h2>Reset your password</h2><p>Enter your email and we’ll send a code. With it you can choose a new password.</p>${msg()}
       <label>Email<input id="acEmail" type="email" autocomplete="email" value="${esc(st.email)}"></label>
