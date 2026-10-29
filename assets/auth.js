@@ -5,6 +5,7 @@
 (()=>{
 const SUPABASE_URL='https://dvgbaacklfddxgnnnjha.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_tGiOvKtS48g4Agv7IoHQxg_YPZ7RZAD';
+const OZU_API='https://ozu-server.shibagd73.workers.dev';   // the Ozu server: it also erases your Daily ozu scores when you delete your account
 
 // inside the home page's frame the shell (index.html) owns the login
 try{if(window.parent!==window&&window.parent.SITE_AUTH){window.SITE_AUTH=window.parent.SITE_AUTH;return}}catch(e){}
@@ -47,6 +48,8 @@ css.textContent=`
 .ac-row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px}
 .ac-msg{margin:0 0 12px;padding:9px 12px;border-radius:10px;font-size:.84rem;background:rgba(229,138,154,.12);border:1px solid rgba(229,138,154,.4);color:#f0b3bf}
 .ac-msg.ok{background:rgba(143,209,158,.12);border-color:rgba(143,209,158,.4);color:#a8e0b4}
+.ac-sec{width:100%;padding:9px;border-radius:10px;border:1px solid var(--border,rgba(255,220,230,.09));background:var(--panel-2,#452c3a);color:var(--text,#f3e6ea);font:600 .82rem 'Inter',sans-serif;cursor:pointer;transition:border-color .15s,transform .14s}.ac-sec:hover{border-color:var(--gold-dim,#8f5c6b)}.ac-sec:active{transform:scale(.97)}
+.ac-go.danger{background:linear-gradient(135deg,#ef7a8c,#c24a63);color:#fff;box-shadow:0 6px 18px rgba(194,74,99,.3)}.ac-sec.danger{color:#f0b3bf}
 .ac-x{float:right;border:0;background:none;color:var(--muted,#a58891);font-size:1.4rem;line-height:1;cursor:pointer;padding:0 4px}
 @keyframes acin{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}@keyframes acfade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
@@ -63,8 +66,10 @@ btn.onclick=()=>{if(A.user)toggleMenu();else openModal('login')};
 document.body.append(btn);
 let menu=null;
 function closeMenu(){if(menu){menu.remove();menu=null}}
-function toggleMenu(){if(menu)return closeMenu();menu=el(`<div id="acMenu"><small>Signed in as</small><b>${esc(A.name||'…')}</b><small>${esc(A.user.email||'')}</small><button class="ac-go" type="button">Log out</button></div>`);
-  if(btn.style.right)menu.style.right=btn.style.right;menu.querySelector('button').onclick=async()=>{closeMenu();await A.logout()};document.body.append(menu)}
+function toggleMenu(){if(menu)return closeMenu();menu=el(`<div id="acMenu"><small>Signed in as</small><b>${esc(A.name||'…')}</b><small>${esc(A.user.email||'')}</small><button class="ac-sec" id="acPw" type="button">Change password</button><button class="ac-sec danger" id="acDel" type="button">Delete account</button><button class="ac-go" id="acOut" type="button">Log out</button></div>`);
+  if(btn.style.right)menu.style.right=btn.style.right;
+  menu.querySelector('#acOut').onclick=async()=>{closeMenu();await A.logout()};
+  menu.querySelector('#acPw').onclick=()=>{openModal('newpass')};menu.querySelector('#acDel').onclick=()=>{openModal('delete')};document.body.append(menu)}
 document.addEventListener('pointerdown',e=>{if(menu&&!menu.contains(e.target)&&!btn.contains(e.target))closeMenu()});
 function paint(){
   if(A.user){const n=A.name||'…';btn.style.setProperty('--h',hue(n));btn.innerHTML=`<span class="av">${esc(n[0].toUpperCase())}</span><span class="n">${esc(n)}</span>`;btn.setAttribute('aria-label','Account: '+n)}
@@ -97,8 +102,35 @@ const box=()=>modal.firstChild;
 function msg(){return st.msg?`<div class="ac-msg${st.ok?' ok':''}">${esc(st.msg)}</div>`:''}
 function render(){
   const b=box(),v=st.view;
+  if(v==='forgot'){
+    b.innerHTML=`<button class="ac-x" type="button" aria-label="Close">×</button><h2>Reset your password</h2><p>Enter your email and we’ll send a code. With it you can choose a new password.</p>${msg()}
+      <label>Email<input id="acEmail" type="email" autocomplete="email" value="${esc(st.email)}"></label>
+      <button class="ac-go" id="acSend" type="button">Send code</button><div class="ac-row"><button class="ac-link" id="acBack" type="button">Back to log in</button></div>`;
+    const go=async()=>{const email=val('acEmail');if(!email)return say('Enter your email.');busy(true);const {error}=await sb.auth.resetPasswordForEmail(email);busy(false);
+      if(error)return say(nice(error));st.email=email;st.kind='recovery';st.view='code';st.msg='';render()};   // the same message whether or not the email has an account
+    b.querySelector('#acSend').onclick=go;b.querySelector('#acEmail').onkeydown=e=>{if(e.key==='Enter')go()};b.querySelector('#acBack').onclick=()=>{st.view='login';st.msg='';render()};
+    b.querySelector('.ac-x').onclick=closeModal;const f=b.querySelector('input');if(!f.value)f.focus();return}
+  if(v==='newpass'){
+    b.innerHTML=`<button class="ac-x" type="button" aria-label="Close">×</button><h2>Choose a new password</h2><p>At least 8 characters.</p>${msg()}
+      <label>New password<input id="acPass" type="password" autocomplete="new-password"></label><label>Repeat it<input id="acPass2" type="password" autocomplete="new-password"></label>
+      <button class="ac-go" id="acSave" type="button">Save password</button>`;
+    const go=async()=>{const p1=b.querySelector('#acPass').value,p2=b.querySelector('#acPass2').value;if(p1.length<8)return say('The password needs at least 8 characters.');if(p1!==p2)return say('The two passwords are different.');
+      busy(true);const {error}=await sb.auth.updateUser({password:p1});busy(false);if(error)return say(nice(error));closeModal();toast('Password changed.')};
+    b.querySelector('#acSave').onclick=go;b.querySelector('#acPass2').onkeydown=e=>{if(e.key==='Enter')go()};b.querySelector('.ac-x').onclick=closeModal;b.querySelector('#acPass').focus();return}
+  if(v==='delete'){
+    const me=A.name||'';
+    b.innerHTML=`<button class="ac-x" type="button" aria-label="Close">×</button><h2>Delete your account</h2><p>This permanently deletes your account, your username and your Daily ozu scores. It can’t be undone.</p>${msg()}
+      <label>Type your username (<b>${esc(me)}</b>) to confirm<input id="acConf" autocomplete="off"></label>
+      <button class="ac-go danger" id="acKill" type="button" disabled>Delete forever</button><div class="ac-row"><button class="ac-link" id="acBack" type="button">Keep my account</button></div>`;
+    const c=b.querySelector('#acConf'),k=b.querySelector('#acKill');c.oninput=()=>{k.disabled=!me||c.value.trim().toLowerCase()!==me.toLowerCase()};
+    k.onclick=async()=>{busy(true);try{const tok=await A.token();
+        const r=await fetch(OZU_API+'/account/erase',{method:'POST',headers:{authorization:'Bearer '+tok}});if(!r.ok&&r.status!==400)throw new Error('Couldn’t remove your scores (server answered '+r.status+'). Nothing was deleted.');
+        const {error}=await sb.rpc('delete_my_account');if(error)throw error;
+        await sb.auth.signOut();closeModal();toast('Your account was deleted.')}
+      catch(e){busy(false);st.msg=String(e.message||e);st.ok=false;render()}};
+    b.querySelector('#acBack').onclick=closeModal;b.querySelector('.ac-x').onclick=closeModal;c.focus();return}
   if(v==='code'){
-    b.innerHTML=`<button class="ac-x" type="button" aria-label="Close">×</button><h2>Check your email</h2><p>We sent a code to <b>${esc(st.email)}</b>. Type it here to ${st.kind==='signup'?'finish creating your account':'log in'}.</p>${msg()}
+    b.innerHTML=`<button class="ac-x" type="button" aria-label="Close">×</button><h2>Check your email</h2><p>We sent a code to <b>${esc(st.email)}</b>. Type it here to ${st.kind==='signup'?'finish creating your account':st.kind==='recovery'?'choose a new password':'log in'}.</p>${msg()}
       <label>Code<input class="code" id="acCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="••••••"></label>
       <button class="ac-go" id="acVerify" type="button">Verify</button>
       <div class="ac-row"><button class="ac-link" id="acResend" type="button">Send a new code</button><button class="ac-link" id="acBack" type="button">Back</button></div>`;
@@ -114,7 +146,8 @@ function render(){
       <label>Email<input id="acEmail" type="email" autocomplete="email" value="${esc(st.email)}"></label>
       <label>Password<input id="acPass" type="password" autocomplete="current-password"></label>
       <button class="ac-go" id="acLogin" type="button">Log in</button>
-      <div class="ac-row"><button class="ac-link" id="acMail" type="button">Email me a code instead</button></div>`;
+      <div class="ac-row"><button class="ac-link" id="acMail" type="button">Email me a code instead</button><button class="ac-link" id="acForgot" type="button">Forgot password?</button></div>`;
+    b.querySelector('#acForgot').onclick=()=>{st.email=(b.querySelector('#acEmail')||{}).value||st.email;st.view='forgot';st.msg='';render()};
     const go=async()=>{const email=val('acEmail'),password=b.querySelector('#acPass').value;if(!email||!password)return say('Enter your email and password.');
       busy(true);const {error}=await sb.auth.signInWithPassword({email,password});busy(false);
       if(!error)return closeModal();
@@ -155,6 +188,8 @@ const say=t=>{st.msg=t;st.ok=false;const keep={};box().querySelectorAll('input')
 const busy=on=>box().querySelectorAll('.ac-go').forEach(x=>{x.disabled=on});
 const nice=e=>{const m=String(e.message||e);return /invalid login/i.test(m)?'Wrong email or password.':/rate limit|too many|seconds/i.test(m)?'Too many tries. Wait a minute and try again.':/expired|invalid/i.test(m)?'That code is wrong or has expired.':m};
 async function verify(){const code=box().querySelector('#acCode').value.trim();if(code.length<6)return;busy(true);
-  const {error}=await sb.auth.verifyOtp({email:st.email,token:code,type:st.kind==='signup'?'signup':'email'});busy(false);
-  if(error){st.msg=nice(error);st.ok=false;return render()}closeModal()}
+  if(st.kind==='recovery')modal.dataset.done='1';   // no "welcome" toast: they are only here to set a new password
+  const {error}=await sb.auth.verifyOtp({email:st.email,token:code,type:st.kind==='signup'?'signup':st.kind==='recovery'?'recovery':'email'});busy(false);
+  if(error){st.msg=nice(error);st.ok=false;return render()}
+  if(st.kind==='recovery'){st.view='newpass';st.msg='';return render()}closeModal()}
 })();
