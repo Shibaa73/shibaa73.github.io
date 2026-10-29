@@ -487,7 +487,7 @@ async function loadLb(){
     tickLb(d.secondsLeft)}
   catch(e){lbEnd=0;$('lbInfo').textContent='';$('dailyLeft').textContent='';$('lbList').replaceChildren(el('p','muted','Couldn’t load the leaderboard.'))}
 }
-const tickLb=s=>{lbSecs=s;$('lbInfo').textContent='new set in '+hms(s);const a=AUTH();$('dailyLeft').textContent=(MINE?'Played today: '+f2(MINE.score)+' pts · ':NEEDLOGIN&&!(a&&a.user)?'Log in to play · ':'')+'New set in '+hms(s)};
+const tickLb=s=>{lbSecs=s;$('lbInfo').textContent='new set in '+hms(s);const a=AUTH();$('dailyLeft').textContent=(MINE?'Played today: '+f2(MINE.score)+' pts · ':NEEDLOGIN&&!(a&&a.user)?'Guest score shows as (guest) · ':'')+'New set in '+hms(s)};
 setInterval(()=>{if(!lbEnd)return;const s=(lbEnd-Date.now())/1000;tickLb(s);if(s<-1){lbEnd=0;loadLb()}},1000);
 function setBgState(){const e=$('bgState'),b=$('bgsolo');
   if(CAPS.bg===false){e.textContent='Unavailable: '+(CAPS.why||'no data');b.disabled=true}else{e.textContent=CAPS.bg?'5 difficulties · play count based':'';b.disabled=false}}
@@ -616,7 +616,6 @@ setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.p
 /* ---------- buttons ---------- */
 async function makeLobby(k){
   if(k==='daily'){const a=AUTH();
-    if(NEEDLOGIN&&!(a&&a.user)){status('Log in to play the Daily ozu.');if(a)a.open('login');return}
     if(MINE)return status('You already played today’s Daily ozu ('+f2(MINE.score)+' pts). A new set comes at midnight Rome time.');
     if(!$('nick').value.trim())return status('Type a name first: it shows on the leaderboard.')}
   try{if(API.includes('YOURNAME'))return connect('XXXXX');
