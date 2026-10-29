@@ -238,6 +238,39 @@ select,.row input[type=number]{background:var(--panel-2);border:1px solid var(--
 #form{position:relative;z-index:5}
 #form .fld:focus-within{z-index:20}
 .ac{box-shadow:0 12px 28px rgba(0,0,0,.5)}
+
+/* ---------- bomb mode: free for all ---------- */
+#game.bomb{--pink:#ff9f43;--pink-2:#ff7a3c;border-color:rgba(255,138,76,.4);background:linear-gradient(180deg,rgba(255,106,60,.12),var(--panel) 260px)}
+#game.bomb .timer .tp{stroke:#ff9f43}
+#game.bomb .timer.urgent .tp{stroke:#ff4d4d}
+.arena{margin-top:18px}
+.ffa{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:.84rem;color:var(--muted)}
+.ffa b{font:600 .85rem 'Fredoka',sans-serif;letter-spacing:.08em;color:#ff9f43;padding:4px 12px;border-radius:999px;background:rgba(255,159,67,.14);border:1px solid rgba(255,159,67,.4)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tile{position:relative;display:grid;justify-items:center;gap:6px;padding:16px 10px 12px;border-radius:16px;background:var(--panel-2);border:1px solid var(--border);text-align:center;animation:rise .45s var(--ease) both;animation-delay:calc(var(--i,0)*70ms);transition:transform .35s var(--ease),border-color .25s,box-shadow .3s,opacity .4s,filter .4s}
+.tile .av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:600 1.2rem 'Fredoka',sans-serif;color:#fff;background:hsl(var(--h,330) 52% 46%);transition:transform .3s var(--ease)}
+.tile .nm{font-weight:600;font-size:.92rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .hp{display:flex;gap:3px;color:var(--coral);font-size:.95rem}
+.tile .hp i{font-style:normal;transition:transform .3s,opacity .3s,filter .3s}
+.tile .hp i.off{opacity:.18;filter:grayscale(1);transform:scale(.8)}
+.tile .tg{min-height:1.2em;font:600 .7rem 'Fredoka',sans-serif;letter-spacing:.1em;color:var(--muted)}
+.tile .bomb{position:absolute;top:-14px;font-size:1.7rem;opacity:0;transform:translateY(10px) scale(.4);transition:opacity .25s,transform .4s var(--ease);filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.tile.cur{border-color:#ff9f43;transform:translateY(-4px) scale(1.04);box-shadow:0 12px 30px rgba(255,122,60,.35);background:linear-gradient(180deg,rgba(255,159,67,.2),var(--panel-2))}
+.tile.cur .bomb{opacity:1;transform:none;animation:fuse .6s ease-in-out infinite alternate}
+.tile.cur .tg{color:#ff9f43}
+.tile.cur::after{content:'';position:absolute;inset:-5px;border-radius:20px;border:2px solid rgba(255,159,67,.55);animation:t-ring 1.3s ease-out infinite;pointer-events:none}
+.tile.cur .av{transform:scale(1.12)}
+.tile.ok{border-color:var(--mint);box-shadow:0 12px 30px rgba(143,209,158,.3);background:linear-gradient(180deg,rgba(143,209,158,.2),var(--panel-2))}
+.tile.ok .tg{color:var(--mint)}.tile.ok::after{border-color:rgba(143,209,158,.6)}
+.tile.bad{border-color:#ff4d4d;box-shadow:0 12px 30px rgba(255,77,77,.35);background:linear-gradient(180deg,rgba(255,77,77,.22),var(--panel-2))}
+.tile.bad .tg{color:#ff6b6b}.tile.bad .bomb{animation:boom .5s ease-out both}.tile.bad::after{border-color:rgba(255,77,77,.6)}
+.tile.hit{animation:shake .5s ease both}
+.tile.out{opacity:.38;filter:grayscale(1);transform:scale(.94)}
+.tile.out .av{transform:scale(.85)}
+.tile.me:not(.cur){border-color:rgba(255,122,179,.35)}
+@keyframes fuse{from{transform:rotate(-12deg) scale(1)}to{transform:rotate(12deg) scale(1.15)}}
+@keyframes boom{0%{transform:scale(1)}40%{transform:scale(2.2);opacity:1}100%{transform:scale(2.8);opacity:0}}
+@keyframes t-ring{0%{transform:scale(1.15);opacity:0}25%{opacity:1}100%{transform:scale(1);opacity:0}}
 </style>
 </head>
 <body>
@@ -348,7 +381,11 @@ const duck=b=>{try{window.SITE&&SITE.duck&&SITE.duck(b)}catch(e){}};
 addEventListener('pagehide',()=>duck(false));
 const status=t=>$('status').textContent=t||'';
 const err=t=>{const e=$('gerr');e.textContent=t||'';e.hidden=!t;if(t){e.style.animation='none';void e.offsetWidth;e.style.animation=''}};
-let draftT=null,draftSent=false;
+let draftT=null,draftSent=false,svErr='',NEEDLOGIN=false,MINE=null,lbSecs=0;
+const AUTH=()=>window.SITE_AUTH&&window.SITE_AUTH.configured?window.SITE_AUTH:null;
+const getTok=async()=>{try{const a=AUTH();return a?await a.token():null}catch(e){return null}};
+function syncNick(){const a=AUTH(),n=$('nick');if(a&&a.user&&a.name){n.value=a.name;n.disabled=true;n.title='You play under your account name'}else{n.disabled=false;n.title=''}}
+addEventListener('load',()=>{const a=AUTH();if(a)a.onChange(()=>{syncNick();loadLb()})});
 
 /* ---------- small effects ---------- */
 function countUp(e,to,dec,ms,delay){to=+to;if(RM||!isFinite(to)){e.textContent=to.toFixed(dec);return}
@@ -415,13 +452,13 @@ function connect(c,create){
   if(API.includes('YOURNAME'))return status('Not connected yet: paste your server URL into API in this page’s script.');
   const name=$('nick').value.trim()||(solo()?'Player':'');if(!name){kind=null;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
-  err('');status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
-  ws.onopen=()=>tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':undefined});
+  err('');svErr='';status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
+  ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':undefined,token})};
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
     else if(m.t==='caps'){CAPS={bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
-    else if(m.t==='err'){status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
-  ws.onclose=()=>{const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(was?'Disconnected from the server.':'Couldn’t connect to the server.')};
+    else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
+  ws.onclose=()=>{const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
   ws.onerror=()=>status('Couldn’t connect to the server.');
 }
 function leave(){const w=ws;ws=null;st=null;me=null;lastKey=null;kind=null;V=null;duck(false);err('');status('');
@@ -437,14 +474,14 @@ function show(id){
 /* ---------- daily leaderboard ---------- */
 const hms=s=>{s=Math.max(0,Math.round(s));return[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')};
 async function loadLb(){
-  try{const r=await fetch(API+'/daily');if(!r.ok)throw new Error(r.status);const d=await r.json();lbEnd=Date.now()+d.secondsLeft*1000;
+  try{const tk=await getTok(),r=await fetch(API+'/daily',tk?{headers:{authorization:'Bearer '+tk}}:undefined);if(!r.ok)throw new Error(r.status);const d=await r.json();lbEnd=Date.now()+d.secondsLeft*1000;NEEDLOGIN=!!d.login;MINE=d.mine&&d.mine.played?d.mine:null;
     const mine=($('nick').value||'').trim();
     $('lbList').replaceChildren(...(d.board.length?d.board.slice(0,20).map((b,i)=>{const row=el('div','pl'+(b.name===mine?' cur':'')+(i<3?' r'+(i+1):''));row.style.setProperty('--i',i);
       const av=el('span','av',(b.name[0]||'?').toUpperCase());av.style.setProperty('--h',hue(b.name));row.append(el('span','rk',i+1),av,el('span',null,b.name),el('i',null,b.score.toFixed(2)+' pts'));return row}):[el('p','muted','No scores yet today. Be the first!')]));
     tickLb(d.secondsLeft)}
   catch(e){lbEnd=0;$('lbInfo').textContent='';$('dailyLeft').textContent='';$('lbList').replaceChildren(el('p','muted','Couldn’t load the leaderboard.'))}
 }
-const tickLb=s=>{$('lbInfo').textContent='new set in '+hms(s);$('dailyLeft').textContent='New set in '+hms(s)};
+const tickLb=s=>{lbSecs=s;$('lbInfo').textContent='new set in '+hms(s);const a=AUTH();$('dailyLeft').textContent=(MINE?'Played today: '+f2(MINE.score)+' pts · ':NEEDLOGIN&&!(a&&a.user)?'Log in to play · ':'')+'New set in '+hms(s)};
 setInterval(()=>{if(!lbEnd)return;const s=(lbEnd-Date.now())/1000;tickLb(s);if(s<-1){lbEnd=0;loadLb()}},1000);
 function setBgState(){const e=$('bgState'),b=$('bgsolo');
   if(CAPS.bg===false){e.textContent='Unavailable: '+(CAPS.why||'no data');b.disabled=true}else{e.textContent=CAPS.bg?'5 difficulties · play count based':'';b.disabled=false}}
@@ -507,6 +544,25 @@ function newQuestion(q){
   tot=Math.max(1,timeLeft(q));
 }
 let lastScore=null;
+/* bomb mode: everybody sits in one arena, the bomb sits on whoever's turn it is, wrong answers cost a heart */
+function arena(q){const box=$('board');
+  if(!box._arena){box.replaceChildren();box._arena=true;box._tiles=new Map();box._sig=null;box.className='arena';
+    const f=el('div','ffa');f.append(el('b',null,'💣 FREE FOR ALL'),el('span',null,''));box.append(f);box._ffa=f;box._grid=el('div','tiles');box.append(box._grid)}
+  const rev=st.phase==='turnReveal',alive=st.players.filter(p=>p.lives>0).length;
+  box._ffa.lastChild.textContent=alive+' of '+st.players.length+' alive · last one standing wins';
+  const seen=new Set();
+  st.players.forEach((p,i)=>{seen.add(p.id);let t=box._tiles.get(p.id);
+    if(!t){t=el('div','tile');t.style.setProperty('--i',i);const av=el('span','av',(p.name[0]||'?').toUpperCase());av.style.setProperty('--h',hue(p.name));
+      t._hp=el('div','hp');t.append(el('span','bomb','💣'),av,el('div','nm'),t._hp,el('div','tg'));t._nm=t.children[2];t._tg=t.children[4];t._lives=p.lives;box._grid.append(t);box._tiles.set(p.id,t)}
+    t._nm.textContent=p.name+(p.id===me?' (you)':'');
+    const cur=p.id===q.cur,out=p.lives<=0;
+    t.classList.toggle('cur',cur);t.classList.toggle('out',out);t.classList.toggle('me',p.id===me);
+    t.classList.toggle('ok',cur&&rev&&!!st.reveal.ok);t.classList.toggle('bad',cur&&rev&&!st.reveal.ok);
+    t._tg.textContent=out?'ELIMINATED':cur?(rev?(st.reveal.ok?'SAFE':'BOOM'):'ON THE BOMB'):'';
+    const max=Math.max(st.cfg.lives||3,p.lives);if(t._hp.children.length!==max)t._hp.replaceChildren(...Array.from({length:max},()=>el('i',null,'♥')));
+    [...t._hp.children].forEach((h,k)=>h.classList.toggle('off',k>=p.lives));
+    if(p.lives<t._lives){t.classList.remove('hit');void t.offsetWidth;t.classList.add('hit')}t._lives=p.lives});
+  for(const [id,t] of box._tiles)if(!seen.has(id)){t.remove();box._tiles.delete(id)}}
 function renderGame(){
   show('game');const q=st.q,bomb=st.cfg.mode==='bomb',reveal=st.phase==='reveal'||st.phase==='turnReveal',myTurn=bomb&&q.cur===me&&st.phase==='turn';
   if(q.key!==lastKey)newQuestion(q);
@@ -514,7 +570,9 @@ function renderGame(){
   const you=st.players.find(p=>p.id===me)||{};
   $('rd').textContent=bomb?'Turn '+q.i+' · '+((st.players.find(p=>p.id===q.cur)||{}).name||'')+(myTurn?' (you!)':''):(daily()?'Daily ozu · ':'')+'Round '+q.i+' / '+st.cfg.rounds;
   const sc=$('sc');if(bomb){sc.textContent=hearts(you.lives)}else if(lastScore!==you.score){const was=lastScore;lastScore=you.score;sc.replaceChildren(el('span'),el('small',null,'pts'));countUp(sc.firstChild,you.score,2,was==null?0:800);if(was!=null){sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump')}}
-  players($('board'),{cls:p=>(bomb&&p.id===q.cur?' cur':'')+(bomb&&p.lives<=0?' out':''),info:p=>bomb?hearts(p.lives):p.score+' pts'+(p.done&&!reveal?' ✓':'')});
+  $('game').classList.toggle('bomb',bomb);
+  if(bomb)arena(q);else{const bd=$('board');if(bd._arena){bd.replaceChildren();bd._arena=false;bd._tiles=null;bd.className=''}
+    players(bd,{cls:p=>'',info:p=>p.score+' pts'+(p.done&&!reveal?' ✓':'')})}
   const locked=reveal||sent||(bomb&&!myTurn);
   $('form').querySelectorAll('input').forEach(i=>i.disabled=locked);$('submit').hidden=locked;
   $('clip').classList.toggle('reveal',reveal&&!bomb);
@@ -551,7 +609,10 @@ setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.p
 
 /* ---------- buttons ---------- */
 async function makeLobby(k){
-  if(k==='daily'&&!$('nick').value.trim())return status('Type a name first: it shows on the leaderboard.');
+  if(k==='daily'){const a=AUTH();
+    if(NEEDLOGIN&&!(a&&a.user)){status('Log in to play the Daily ozu.');if(a)a.open('login');return}
+    if(MINE)return status('You already played today’s Daily ozu ('+f2(MINE.score)+' pts). A new set comes at midnight Rome time.');
+    if(!$('nick').value.trim())return status('Type a name first: it shows on the leaderboard.')}
   try{if(API.includes('YOURNAME'))return connect('XXXXX');
     const r=await fetch(API+'/new');if(!r.ok)throw new Error('server answered '+r.status);
     const d=await r.json();kind=k;connect(d.code,true)}
@@ -666,5 +727,6 @@ function syncCtl(){const c=A.curve[sel],set=(id,v)=>{const e=$(id);if(e&&documen
 </script>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/auth.js"></script>
 </body>
 </html>
