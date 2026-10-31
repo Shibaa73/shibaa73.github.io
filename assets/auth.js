@@ -209,7 +209,7 @@ function render(){
     b.querySelector('#acForgot').onclick=()=>{st.email=(b.querySelector('#acEmail')||{}).value||st.email;st.view='forgot';st.msg='';render()};
     const go=async()=>{const email=val('acEmail'),password=b.querySelector('#acPass').value;if(!email||!password)return say('Enter your email and password.');
       busy(true);const {error}=await sb.auth.signInWithPassword({email,password});busy(false);
-      if(!error)return closeModal();
+      if(!error){try{SFX.play('good')}catch(e){}return closeModal()}try{SFX.play('miss')}catch(e){}
       if(/not confirmed/i.test(error.message)){st.email=email;st.kind='signup';st.view='code';st.msg='Your email isn’t verified yet. Type the code we sent you.';st.ok=false;await sb.auth.resend({type:'signup',email});return render()}
       say(nice(error))};
     b.querySelector('#acLogin').onclick=go;b.querySelector('#acPass').onkeydown=e=>{if(e.key==='Enter')go()};
@@ -250,5 +250,5 @@ async function verify(){const code=box().querySelector('#acCode').value.trim();i
   if(st.kind==='recovery')modal.dataset.done='1';   // no "welcome" toast: they are only here to set a new password
   const {error}=await sb.auth.verifyOtp({email:st.email,token:code,type:st.kind==='signup'?'signup':st.kind==='recovery'?'recovery':'email'});busy(false);
   if(error){st.msg=nice(error);st.ok=false;return render()}
-  if(st.kind==='recovery'){st.view='newpass';st.msg='';return render()}closeModal()}
+  if(st.kind==='recovery'){st.view='newpass';st.msg='';return render()}try{SFX.play('good')}catch(e){}closeModal()}
 })();

@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content">
 <title>Ozu Guessr</title>
 <link rel="preconnect" href="https://ozu-server.shibagd73.workers.dev">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -296,7 +296,7 @@ body.ingame .wrap{max-width:1120px}
 .tile{padding:12px 6px 8px;gap:4px}
 .tile .av{width:34px;height:34px;font-size:1rem}.tile .nm{font-size:.84rem}.tile .hp{font-size:.82rem}.tile .tg{font-size:.62rem}
 .arena{margin-top:10px}.ffa{margin-bottom:8px}
-@media (max-width:900px){.gcols{grid-template-columns:1fr}.gright{max-height:none;overflow:visible}.clip{width:100%}body.ingame header{display:block}}
+@media (max-width:900px){.gcols{grid-template-columns:1fr}.gright{max-height:none;overflow:visible}.clip{width:100%}}
 
 /* live typing of the player on the bomb */
 .live{margin:4px 0 10px;animation:rise .3s var(--ease) both}
@@ -306,6 +306,44 @@ body.ingame .wrap{max-width:1120px}
 .tile .bomb{display:none}
 @keyframes passin{0%{transform:translateY(-4px) scale(.92)}60%{transform:translateY(-8px) scale(1.08)}100%{transform:translateY(-4px) scale(1.04)}}
 .tile.pass{animation:passin .55s var(--ease)}
+
+/* ---------- streak, hints, spectating, rematch ---------- */
+.streak{display:block;font:600 .84rem 'Fredoka',sans-serif;color:#ffb347;margin-top:2px}.streak:empty{display:none}
+.streak.big{font-size:1.05rem;margin:10px 0 0}
+.badge.spec{--c:#7cc7ff}
+.hintrow{display:flex;align-items:center;gap:12px;margin:2px 0 8px;min-height:38px}.hintrow[hidden]{display:none}
+.hintrow .btn{padding:7px 14px;font-size:.84rem}
+#hinttxt{font:500 1.05rem 'IBM Plex Mono',monospace;letter-spacing:.06em;color:var(--gold);word-break:break-word;animation:rise .3s var(--ease) both}
+.subrow{margin:6px 0 0}
+#again.on{box-shadow:0 0 0 3px rgba(255,122,179,.35)}
+/* ---------- phones: small sticky clip on top, answers underneath, Submit pinned to the bottom ---------- */
+@media (max-width:900px){
+  body.ingame{padding:50px 10px 0}
+  body.ingame header{display:none}
+  body.ingame .wrap{max-width:none}
+  #game.sec{padding:0 10px 0;border-radius:14px;margin-bottom:10px}
+  #game .ghead{position:sticky;top:0;z-index:32;background:var(--panel);margin:0;padding:8px 0 6px;gap:10px;border-radius:14px 14px 0 0}
+  #game .ghead h2{font-size:1rem;gap:6px}
+  #game .score{font-size:1.05rem}
+  #game .timer{width:42px;height:42px}#game .timer b{font-size:.9rem}
+  .gcols{gap:8px}
+  .gleft{position:sticky;top:56px;z-index:31;background:var(--panel);padding-bottom:6px;box-shadow:0 8px 14px -10px rgba(0,0,0,.6)}
+  .clip{width:min(100%,calc(26vh*16/9));min-width:0}
+  #vctl{display:none}
+  .ctl{margin:6px 0 0;gap:8px}.ctl .btn{padding:6px 12px;font-size:.8rem}
+  .wait{margin:4px 0 0;font-size:.78rem}
+  #form.f4 .fld{grid-column:span 2}#form.f4 .fld.w2,#form.f4 .fld.w4{grid-column:span 4}
+  #form .fld{margin-bottom:8px}
+  #form .fld label{font-size:.76rem}
+  #form .fld input{font-size:16px;padding:11px 12px}
+  .subrow{position:sticky;bottom:0;z-index:30;background:var(--panel);padding:8px 0 calc(8px + env(safe-area-inset-bottom));margin:0;box-shadow:0 -10px 14px -10px rgba(0,0,0,.6)}
+  .subrow .btn{width:100%;padding:13px;font-size:1rem}
+  .subrow[hidden]{display:none}
+  #gerr{font-size:.85rem}
+  .gright .rr{grid-template-columns:54px minmax(0,1fr) minmax(0,1fr)}.gright .rr .pt{grid-column:1/-1;justify-content:flex-start}
+}
+@media (max-width:900px) and (max-height:520px){.clip{width:min(100%,calc(34vh*16/9))}}
+#form .fld{min-width:0}#form .fld input{width:100%;min-width:0;box-sizing:border-box}
 </style>
 </head>
 <body>
@@ -330,7 +368,7 @@ body.ingame .wrap{max-width:1120px}
       <button class="mode featured" id="daily" type="button">
         <b><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Daily ozu</b>
         <span>5 rounds, the same clips for everyone, a new set every day at midnight (Rome time). Your score goes on the leaderboard.</span>
-        <em id="dailyLeft"></em>
+        <em id="dailyLeft"></em><em class="streak" id="dailyStreak"></em>
       </button>
       <button class="mode" id="solo" type="button">
         <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg>Unlimited mode</b>
@@ -361,8 +399,10 @@ body.ingame .wrap{max-width:1120px}
       <label id="l_time">Time (s) <input id="c_time" type="number" min="10" max="180"></label>
       <label id="l_rounds">Rounds <input id="c_rounds" type="number" min="1" max="20"></label>
       <label id="l_lives">Lives <input id="c_lives" type="number" min="1" max="10"></label>
+      <label id="l_clip">Clip length (s) <input id="c_clip" type="number" min="5" max="30"></label>
     </div>
     <div class="opts" id="l_wait"><label><input id="c_wait" type="checkbox"> Timer starts at the first guess and speeds up with every guess</label></div>
+    <div class="opts" id="l_hints"><label><input id="c_hints" type="checkbox"> Hints: after half of the time, show the song title’s first letters (−40% song points)</label></div>
     <p class="muted" id="bgInfo"></p>
     <p class="note" id="bgNote" hidden></p>
     <p class="muted" id="hint" style="margin-top:10px"></p>
@@ -371,7 +411,7 @@ body.ingame .wrap{max-width:1120px}
 
   <section class="sec" id="game" hidden>
     <div class="ghead">
-      <h2><span id="rd"></span><span class="badge" id="tierBadge" hidden></span></h2>
+      <h2><span id="rd"></span><span class="badge" id="tierBadge" hidden></span><span class="badge spec" id="specTag" hidden>Spectating</span></h2>
       <div class="score" id="sc"></div>
       <div class="timer" id="timer"><svg viewBox="0 0 44 44" aria-hidden="true"><circle class="tr" cx="22" cy="22" r="19"/><circle class="tp" id="ring" cx="22" cy="22" r="19"/></svg><b id="tnum"></b></div>
     </div>
@@ -385,7 +425,8 @@ body.ingame .wrap{max-width:1120px}
       <div class="gright">
         <div id="form"></div>
         <div class="live" id="live" hidden><span class="who" id="liveWho"></span><div class="box"><span id="liveTxt"></span><i class="caret"></i></div></div>
-        <div class="row" style="margin:6px 0 0"><button class="btn go" id="submit" type="button">Submit</button></div>
+        <div class="hintrow" id="hintrow" hidden><button class="btn" id="hintbtn" type="button" data-sfx="off">Hint</button><span id="hinttxt"></span></div>
+        <div class="subrow" id="subrow"><button class="btn go" id="submit" type="button" data-sfx="off">Submit</button></div>
         <div id="res"></div>
         <div id="board" style="margin-top:14px"></div>
       </div>
@@ -395,7 +436,9 @@ body.ingame .wrap{max-width:1120px}
   <section class="sec" id="end" hidden>
     <h2>Final</h2><div id="final"></div>
     <p class="muted" id="finalNote" style="margin-top:8px"></p>
-    <div class="row"><button class="btn go" id="again" type="button">Back to lobby</button><button class="btn" id="leave2" type="button">Leave</button></div>
+    <p class="streak big" id="streakEnd" hidden></p>
+    <p class="muted" id="rmNote" style="margin-top:6px"></p>
+    <div class="row"><button class="btn go" id="again" type="button">Rematch</button><button class="btn" id="leave2" type="button">Leave</button></div>
   </section>
 
   <section class="sec" id="lb">
@@ -421,9 +464,11 @@ const tx=o=>{if(ws&&ws.readyState===1){ws.send(JSON.stringify(o));return true}er
 const sfx=()=>Math.round((window.SITE&&SITE.sfxLevel?SITE.sfxLevel():1)*100);
 const duck=b=>{try{window.SITE&&SITE.duck&&SITE.duck(b)}catch(e){}};
 addEventListener('pagehide',()=>duck(false));
+const sfxp=n=>{try{window.SFX&&SFX.play(n)}catch(e){}};
+const spec=()=>!!(st&&me&&st.phase!=='lobby'&&!st.players.some(p=>p.id===me));   // joined while a game was running: watching
 const status=t=>$('status').textContent=t||'';
 const err=t=>{const e=$('gerr');e.textContent=t||'';e.hidden=!t;if(t){e.style.animation='none';void e.offsetWidth;e.style.animation=''}};
-let draftT=null,draftSent=false,svErr='',NEEDLOGIN=false,MINE=null,lbSecs=0;
+let STREAK=null,draftT=null,draftSent=false,svErr='',NEEDLOGIN=false,MINE=null,lbSecs=0;
 const AUTH=()=>window.SITE_AUTH&&window.SITE_AUTH.configured?window.SITE_AUTH:null;
 const getTok=async()=>{try{const a=AUTH();return a?await a.token():null}catch(e){return null}};
 function syncNick(){const a=AUTH(),n=$('nick');if(a&&a.user&&a.name){n.value=a.name;n.disabled=true;n.title='You play under your account name'}else{n.disabled=false;n.title=''}}
@@ -473,9 +518,9 @@ window.onYouTubeIframeAPIReady=()=>{yt=new YT.Player('yt',{width:'100%',height:'
   playerVars:{controls:0,disablekb:1,fs:0,modestbranding:1,rel:0,iv_load_policy:3,playsinline:1,cc_load_policy:0},
   events:{onReady:()=>{ytReady=true;if(pend)pend()}}})};
 {const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.append(s)}
-function playClip(c){V=c;adSeen=0;adNow=false;loadedAt=Date.now();const go=()=>{loadedAt=Date.now();yt.loadVideoById({videoId:c.id,startSeconds:c.start});yt.setVolume(clipVol())};ytReady?go():pend=go}
+function playClip(c){V=c;$('seek').max=Math.max(1,c.end-c.start);$('seek').value=0;adSeen=0;adNow=false;loadedAt=Date.now();const go=()=>{loadedAt=Date.now();yt.loadVideoById({videoId:c.id,startSeconds:c.start});yt.setVolume(clipVol())};ytReady?go():pend=go}
 function stopClip(){V=null;pend=null;adSeen=0;adNow=false;try{if(ytReady)yt.pauseVideo()}catch(e){}$('pp').textContent='Play'}
-const iMustReport=()=>st&&st.q&&(st.cfg.mode!=='bomb'||st.q.cur===me);
+const iMustReport=()=>st&&st.q&&!spec()&&(st.cfg.mode!=='bomb'||st.q.cur===me);
 function sendReady(key){if(readyFor===key||!st||!st.q||st.q.key!==key)return;readyFor=key;if(iMustReport())tx({t:'ready',key})}
 function sendHold(on){if(st&&st.q&&iMustReport())tx({t:'hold',key:st.q.key,on})}
 // Ad handling. A page can't remove YouTube ads, but it can notice one: while an ad plays, the player reports PLAYING with the ad's
@@ -488,7 +533,7 @@ setInterval(()=>{
   if(ad!==adNow){adNow=ad;sendHold(ad)}
   if(!sus&&(t>=V.end-.15||(ps===1&&t<V.start-1)))yt.seekTo(V.start,true);
   yt.setVolume(clipVol());
-  if(!sus)$('seek').value=Math.max(0,Math.min(20,t-V.start));
+  if(!sus)$('seek').value=Math.max(0,Math.min(V.end-V.start,t-V.start));
   if(!ad&&!sus&&ps===1&&t>=V.start-1&&t<=V.end+1)sendReady(st.q.key);
 },250);
 $('seek').oninput=e=>{if(V)yt.seekTo(V.start+ +e.target.value,true)};
@@ -504,6 +549,7 @@ function connect(c,create){
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
     else if(m.t==='caps'){CAPS={bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
+    else if(m.t==='hint'){if(st&&st.q&&st.q.key===m.key){hintOn=true;$('hinttxt').textContent=m.text;$('hintbtn').hidden=true;sfxp('hint')}}
     else if(m.t==='typing'){if(st&&st.q&&st.q.key===m.key){liveT=m.v;paintLive()}}
     else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
   ws.onclose=()=>{const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
@@ -523,13 +569,15 @@ function show(id){
 /* ---------- daily leaderboard ---------- */
 const hms=s=>{s=Math.max(0,Math.round(s));return[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')};
 async function loadLb(){
-  try{const tk=await getTok(),r=await fetch(API+'/daily',tk?{headers:{authorization:'Bearer '+tk}}:undefined);if(!r.ok)throw new Error(r.status);const d=await r.json();lbEnd=Date.now()+d.secondsLeft*1000;NEEDLOGIN=!!d.login;MINE=d.mine&&d.mine.played?d.mine:null;
+  try{const tk=await getTok(),r=await fetch(API+'/daily',tk?{headers:{authorization:'Bearer '+tk}}:undefined);if(!r.ok)throw new Error(r.status);const d=await r.json();lbEnd=Date.now()+d.secondsLeft*1000;NEEDLOGIN=!!d.login;MINE=d.mine&&d.mine.played?d.mine:null;STREAK=d.mine?{s:d.mine.streak||0,b:d.mine.best||0}:null;
     const mine=($('nick').value||'').trim();
     $('lbList').replaceChildren(...(d.board.length?d.board.slice(0,20).map((b,i)=>{const row=el('div','pl'+(b.name===mine?' cur':'')+(i<3?' r'+(i+1):''));row.style.setProperty('--i',i);
       const av=mkAv(b.name,!/\(guest\)\s*$/i.test(b.name));av.style.setProperty('--h',hue(b.name));row.append(el('span','rk',i+1),av,el('span',null,b.name),el('i',null,b.score.toFixed(2)+' pts'));return row}):[el('p','muted','No scores yet today. Be the first!')]));
-    tickLb(d.secondsLeft)}
+    tickLb(d.secondsLeft);paintStreak()}
   catch(e){lbEnd=0;$('lbInfo').textContent='';$('dailyLeft').textContent='';$('lbList').replaceChildren(el('p','muted','Couldn’t load the leaderboard.'))}
 }
+const paintStreak=()=>{const a=AUTH(),t=STREAK&&STREAK.s>0?'🔥 '+STREAK.s+'-day streak'+(STREAK.b>STREAK.s?' · best '+STREAK.b:''):a&&a.user&&STREAK?'Play today to start a streak':'';
+  $('dailyStreak').textContent=t;const e=$('streakEnd');e.textContent=t;e.hidden=!(daily()&&t)};
 const tickLb=s=>{lbSecs=s;$('lbInfo').textContent='new set in '+hms(s);const a=AUTH();$('dailyLeft').textContent=(MINE?'Played today: '+f2(MINE.score)+' pts · ':NEEDLOGIN&&!(a&&a.user)?'Guest score shows as (guest) · ':'')+'New set in '+hms(s)};
 setInterval(()=>{if(!lbEnd)return;const s=(lbEnd-Date.now())/1000;tickLb(s);if(s<-1){lbEnd=0;loadLb()}},1000);
 function setBgState(){const e=$('bgState'),b=$('bgsolo');
@@ -543,19 +591,21 @@ function players(box,fn){const list=st.players,sig=JSON.stringify(list.map(p=>[p
     d.append(av,el('span',null,(p.id===st.host?'★ ':'')+p.name+(p.id===me?' (you)':'')),el('i',null,fn.info(p)));return d}))}
 const hearts=n=>n>0?'♥'.repeat(n):'out';
 {const box=$('cfgf');for(const k of ALL){const l=el('label'),i=el('input');l.id='lf_'+k;i.type='checkbox';i.id='c_'+k;i.onchange=push;l.append(i,NAME[k]);box.append(l)}}
+let lastN=0;
 function renderLobby(){
+  if(st.players.length>lastN&&lastN>0)sfxp('join');lastN=st.players.length;
   show('lobby');$('lcode').textContent=code;const c=st.cfg,host=st.host===me,s=solo(),bomb=c.mode==='bomb',bgOnly=c.content==='bg';
   $('ltxt').textContent=kind==='bgsolo'?'Background guessr':s?'Unlimited mode':'Lobby';$('lcode').hidden=$('copy').hidden=s;
   $('c_mode').querySelector('option[value=bomb]').disabled=s;
   const noBg=CAPS.bg===false;$('c_content').querySelector('option[value=bg]').disabled=noBg;$('c_content').querySelector('option[value=mixed]').disabled=noBg;
   const vis=(id,b)=>{$(id).style.display=b?'':'none'};
   vis('l_mode',!s);vis('l_content',!s&&!bomb);vis('l_tier',!bomb&&c.content!=='clips'&&!(kind==='solo'));
-  vis('l_time',!s);vis('l_lives',!s&&bomb);vis('l_wait',!s&&!bomb);vis('l_rounds',!bomb);vis('cfgf',!bomb);
+  vis('l_time',!s);vis('l_clip',!bgOnly);vis('l_hints',!bomb);vis('l_lives',!s&&bomb);vis('l_wait',!s&&!bomb);vis('l_rounds',!bomb);vis('cfgf',!bomb);
   for(const k of ALL)vis('lf_'+k,!(bgOnly&&k!=='artist'));
   if(bgOnly)$('lf_artist').lastChild.textContent='Also guess the artist';else $('lf_artist').lastChild.textContent=NAME.artist;
   players($('plist'),{info:p=>''});
   const set=(id,v)=>{const e=$(id);if(document.activeElement!==e)e.value=v;e.disabled=!host};
-  set('c_mode',c.mode);set('c_content',c.content);set('c_tier',c.tier);set('c_time',c.time);set('c_rounds',c.rounds);set('c_lives',c.lives);
+  set('c_mode',c.mode);set('c_content',c.content);set('c_tier',c.tier);set('c_time',c.time);set('c_clip',c.clipLen||20);$('c_hints').checked=!!c.hints;$('c_hints').disabled=!host;set('c_rounds',c.rounds);set('c_lives',c.lives);
   $('c_wait').checked=c.waitFirst;$('c_wait').disabled=!host;for(const k of ALL){$('c_'+k).checked=!!c.fields[k];$('c_'+k).disabled=!host}
   $('bgInfo').textContent=(c.content!=='clips'||bomb)&&st.bgMult?'Background questions multiply the text points: '+st.bgMult.map((m,i)=>TIER[i]+' ×'+f2(m)).join(' · ')+'. In lobbies every player gets the same difficulty on the same question.':'';
   const nb=$('bgNote');nb.hidden=!(noBg&&(c.content!=='clips'||kind==='bgsolo'));nb.textContent='Backgrounds aren’t available on this server: '+(CAPS.why||'');
@@ -564,7 +614,7 @@ function renderLobby(){
   if(s&&host&&c.mode==='bomb'){$('c_mode').value='classic';push()}   // solo is classic only
 }
 function push(){const fields=Object.fromEntries(ALL.map(k=>[k,$('c_'+k).checked]));
-  tx({t:'settings',cfg:{mode:$('c_mode').value,content:kind==='bgsolo'?'bg':kind==='solo'?'clips':$('c_content').value,tier:$('c_tier').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,waitFirst:$('c_wait').checked,fields}})}
+  tx({t:'settings',cfg:{mode:$('c_mode').value,content:kind==='bgsolo'?'bg':kind==='solo'?'clips':$('c_content').value,tier:$('c_tier').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,waitFirst:$('c_wait').checked,clipLen:$('c_clip').value,hints:$('c_hints').checked,fields}})}
 function draftNow(){if(!st||st.cfg.mode!=='classic'||st.phase!=='round'||sent||!ws||ws.readyState!==1)return;
   tx({t:'draft',v:Object.fromEntries(st.q.fields.map(k=>[k,($('g_'+k)||{}).value||'']))})}
 let typT=0;
@@ -572,7 +622,7 @@ $('form').addEventListener('input',()=>{clearTimeout(draftT);draftT=setTimeout(d
   if(st&&st.cfg.mode==='bomb'&&st.phase==='turn'&&st.q.cur===me&&!typT){typT=setTimeout(()=>{typT=0;const i=$('g_a');if(i&&st&&st.phase==='turn')tx({t:'typing',v:i.value})},60)}});   // what you type is shown live to the others
 
 /* ---------- a question ---------- */
-let liveT='';
+let liveT='',hintOn=false;
 function paintLive(){const q=st&&st.q;if(!q)return;const bomb=st.cfg.mode==='bomb',watch=bomb&&st.phase==='turn'&&q.cur!==me;$('live').hidden=!watch;if(!watch)return;
   $('liveWho').textContent=((st.players.find(p=>p.id===q.cur)||{}).name||'Player')+' is typing…';$('liveTxt').textContent=liveT}
 const timeLeft=q=>q.endsAt?(q.endsAt-(Date.now()+off))/1000:q.left-(q.running?(Date.now()+off-q.at)/1000*q.speed:0);
@@ -584,10 +634,10 @@ function showBg(q){const cover=$('cover'),key=q.key,urls=[q.bg,q.bg.replace('raw
   img.onerror=()=>{if(!done())return;if(++n<urls.length)img.src=urls[n];else{cover.append(el('div','why','Couldn’t load this background.'));sendReady(key)}};
   img.src=urls[0]}
 function newQuestion(q){
-  lastKey=q.key;liveT='';sent=false;draftSent=false;readyFor=null;adSeen=0;adNow=false;$('res').replaceChildren();$('res')._k=null;$('pp').textContent='Pause';$('clip').classList.remove('reveal');
+  lastKey=q.key;liveT='';hintOn=false;$('hinttxt').textContent='';$('hintbtn').hidden=false;sfxp(q.i===1?'start':'pop');sent=false;draftSent=false;readyFor=null;adSeen=0;adNow=false;$('res').replaceChildren();$('res')._k=null;$('pp').textContent='Pause';$('clip').classList.remove('reveal');
   const bomb=st.cfg.mode==='bomb',isBg=q.type==='bg'||q.type==='bg_map',keys=bomb?['a']:q.fields;
   const nText=keys.filter(k=>TEXT.includes(k)).length;$('form').className=bomb?'':'f4';
-  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el('input');i.id='g_'+k;i.autocomplete='off';d.style.setProperty('--i',n);
+  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el('input');i.id='g_'+k;i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
     if(bomb?(q.type==='clip_bpm'||q.type==='clip_pp'):NUMS.includes(k)){i.type='text';i.inputMode='decimal'}
     d.append(l,i);if(k==='song'||k==='artist')attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');return d}));
   const cover=$('cover');cover.hidden=!(q.type==='audio_map'||isBg);cover.classList.remove('shown');cover.replaceChildren();cover.style.backgroundImage='';
@@ -599,6 +649,11 @@ function newQuestion(q){
   tot=Math.max(1,timeLeft(q));
 }
 let lastScore=null;
+function paintHint(){const b=$('hintbtn'),q=st&&st.q,ok=!!q&&st.cfg.hints&&st.cfg.mode==='classic'&&st.phase==='round'&&q.fields.includes('song')&&!spec()&&!sent;
+  $('hintrow').hidden=!(ok||(hintOn&&q&&st.phase==='round'&&!spec()));if(!ok||hintOn)return;
+  const half=st.cfg.time/2,t=timeLeft(q),can=!!q.running&&t<=half;b.disabled=!can;
+  b.textContent=can?'Hint (song points −40%)':'Hint unlocks at '+Math.ceil(half)+' s'}
+$('hintbtn').onclick=()=>{if(st&&st.q)tx({t:'hint'})};
 /* bomb mode: everybody sits in one arena, the bomb sits on whoever's turn it is, wrong answers cost a heart */
 function arena(q){const box=$('board');
   if(!box._arena){box.replaceChildren();box._arena=true;box._tiles=new Map();box._sig=null;box.className='arena';
@@ -611,7 +666,7 @@ function arena(q){const box=$('board');
       t._hp=el('div','hp');t.append(av,el('div','nm'),t._hp,el('div','tg'));t._nm=t.children[1];t._tg=t.children[3];t._lives=p.lives;box._grid.append(t);box._tiles.set(p.id,t)}
     t._nm.textContent=p.name+(p.id===me?' (you)':'');
     const cur=p.id===q.cur,out=p.lives<=0;
-    if(cur&&!t.classList.contains('cur')){t.classList.remove('pass');void t.offsetWidth;t.classList.add('pass')}   // the bomb just arrived here
+    if(cur&&!t.classList.contains('cur')){t.classList.remove('pass');void t.offsetWidth;t.classList.add('pass');sfxp('pass')}   // the bomb just arrived here
     t.classList.toggle('cur',cur);t.classList.toggle('out',out);t.classList.toggle('me',p.id===me);
     t.classList.toggle('ok',cur&&rev&&!!st.reveal.ok);t.classList.toggle('bad',cur&&rev&&!st.reveal.ok);
     t._tg.textContent=out?'ELIMINATED':cur?(rev?(st.reveal.ok?'SAFE':'BOOM'):'ON THE BOMB'):'';
@@ -623,28 +678,32 @@ function renderGame(){
   show('game');const q=st.q,bomb=st.cfg.mode==='bomb',reveal=st.phase==='reveal'||st.phase==='turnReveal',myTurn=bomb&&q.cur===me&&st.phase==='turn';
   if(q.key!==lastKey)newQuestion(q);
   if(reveal)stopClip();   // round over: the clip stops
-  const you=st.players.find(p=>p.id===me)||{};
+  const sp=spec(),you=st.players.find(p=>p.id===me)||{};$('specTag').hidden=!sp;
   $('rd').textContent=bomb?'Turn '+q.i+' · '+((st.players.find(p=>p.id===q.cur)||{}).name||'')+(myTurn?' (you!)':''):(daily()?'Daily ozu · ':'')+'Round '+q.i+' / '+st.cfg.rounds;
-  const sc=$('sc');if(bomb){sc.textContent=hearts(you.lives)}else if(lastScore!==you.score){const was=lastScore;lastScore=you.score;sc.replaceChildren(el('span'),el('small',null,'pts'));countUp(sc.firstChild,you.score,2,was==null?0:800);if(was!=null){sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump')}}
+  if(st.spectators)$('rd').textContent+=' · 👁 '+st.spectators;
+  const sc=$('sc');if(sp){sc.textContent=''}else if(bomb){sc.textContent=hearts(you.lives)}else if(lastScore!==you.score){const was=lastScore;lastScore=you.score;sc.replaceChildren(el('span'),el('small',null,'pts'));countUp(sc.firstChild,you.score,2,was==null?0:800);if(was!=null){sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump')}}
   $('game').classList.toggle('bomb',bomb);
   if(bomb)arena(q);else{const bd=$('board');if(bd._arena){bd.replaceChildren();bd._arena=false;bd._tiles=null;bd.className=''}
     players(bd,{cls:p=>'',info:p=>p.score+' pts'+(p.done&&!reveal?' ✓':'')})}
-  const locked=reveal||sent||(bomb&&!myTurn);
-  $('form').hidden=reveal||(bomb&&!myTurn);paintLive();
+  const locked=sp||reveal||sent||(bomb&&!myTurn);
+  $('form').hidden=sp||reveal||(bomb&&!myTurn);paintLive();$('subrow').hidden=locked;paintHint();
   $('form').querySelectorAll('input').forEach(i=>i.disabled=locked);$('submit').hidden=locked;
   $('clip').classList.toggle('reveal',reveal&&!bomb);
   $('wait').textContent=reveal?'':q.held?'Timer paused: an ad seems to be playing for someone. It continues right after.':q.gate?(q.type==='bg'||q.type==='bg_map'?'Waiting for everyone’s background to load…':'Waiting for everyone’s clip to start…'):'';
   const res=$('res'),rk=q.key+'|'+st.phase+'|'+(reveal?JSON.stringify(st.reveal)+(st.host===me):'');if(res._k===rk)return;res._k=rk;res.replaceChildren();
   if(st.phase==='reveal'){const R=st.reveal,mine=R.res.find(r=>r.id===me)||{guess:{},pts:{},total:0},rt=el('div','rt');
+    if(!sp)sfxp(mine.total>=R.max*.95?'good':mine.total>0?'ok':'miss');
     {const hr=el('div','rr h');['','Your guess','Answer','Points'].forEach(h=>hr.append(el('div',null,h)));hr.lastChild.style.textAlign='right';rt.append(hr)}
     q.fields.forEach((k,i)=>{const p=mine.pts[k]||0,m=R.fmax[k]||1,j=p>=m-.005?['300','j300']:p>=m*.5?['100','j100']:p>0?['50','j50']:['miss','jm'];
       const row=el('div','rr');row.style.setProperty('--i',i);const pt=el('div','pt'),b=el('b');pt.append(b,el('span',null,'/ '+f2(m)),el('span','jd '+j[1],j[0]));
       pt.lastChild.style.setProperty('--i',i);row.append(el('div',null,NAME[k]),el('div',null,mine.guess[k]?String(mine.guess[k]):'—'),el('div',null,String(R.answer[k])),pt);rt.append(row);countUp(b,p,2,650,i*90+200)});
-    const tl=el('p','tot'),tb=el('b');tl.append('You scored +',tb,' of '+f2(R.max)+'. ',R.res.filter(r=>r.id!==me).map(r=>r.name+' +'+f2(r.total)).join(' · '));countUp(tb,mine.total,2,800,300);
+    const tl=el('p','tot'),tb=el('b');if(sp)tl.append('Round result: ',R.res.map(r=>r.name+' +'+f2(r.total)).join(' · '));else{tl.append('You scored +',tb,' of '+f2(R.max)+(mine.hint?' (hint used: song points ×0.6)':'')+'. ',R.res.filter(r=>r.id!==me).map(r=>r.name+' +'+f2(r.total)).join(' · '));countUp(tb,mine.total,2,800,300)}
+    if(sp)rt.replaceChildren(...R.res.map(r=>{const d=el('div','rr'),h=el('div',null,r.name);d.append(h,el('div',null,Object.values(r.guess).filter(Boolean).join(' / ')||'—'),el('div',null,'+'+f2(r.total)));return d}));
     res.append(rt,tl);
     if(st.host===me){const nb=el('button','btn go pulse',q.i>=st.cfg.rounds?'Show final results':'Next round');nb.type='button';nb.id='next';nb.style.marginTop='14px';nb.onclick=()=>{nb.disabled=true;tx({t:'next'})};res.append(nb)}
     else res.append(el('p','muted','Waiting for the host to continue…'))}
-  if(st.phase==='turnReveal'){const R=st.reveal,who=(st.players.find(p=>p.id===R.cur)||{}).name||'Player';
+
+  if(st.phase==='turnReveal'){const R=st.reveal;sfxp(R.ok?'good':'boom');const who=(st.players.find(p=>p.id===R.cur)||{}).name||'Player';
     res.append(el('p','big',R.ok?'✔ '+who+' got it':'✖ '+who+(R.guess==null?' ran out of time':' missed')+' and loses a life'),
       el('p','muted','Answer: '+R.answer.artist+' – '+R.answer.song+(R.answer.bpm!=null?' · '+R.answer.bpm+' BPM':'')+(R.answer.pp?' · '+R.answer.pp+'pp':'')))}
 }
@@ -653,17 +712,21 @@ function renderEnd(){
   const box=$('final'),sig=JSON.stringify(list);
   if(box._sig!==sig){box._sig=sig;box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl r'+(i+1)+(i===0?' cur':'')),av=mkAv(p.name,p.acct);d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
       d.append(el('span','rk',i===0?'🏆':i+1),av,el('span',null,p.name+(p.id===me?' (you)':'')),el('i',null,bomb?hearts(p.lives):f2(p.score)+' pts'));return d}));
-    if(list[0]&&(list[0].id===me||list.length===1))setTimeout(confetti,350)}
+    if(list[0]&&(list[0].id===me||list.length===1)){setTimeout(confetti,350);sfxp('win')}else if(!spec())sfxp('ok')}
   $('finalNote').textContent=daily()?'Your score is on today’s leaderboard (your best score of the day counts).':'';
-  $('again').hidden=st.host!==me||daily();$('again').textContent=solo()?'Play again':'Back to lobby';
+  const votes=st.rematch||[],mineV=votes.includes(me),sp=spec();paintStreak();
+  $('again').hidden=daily()||sp;$('again').textContent=solo()?'Play again':(mineV?'Rematch · you voted':'Rematch')+' ('+votes.length+'/'+st.players.length+')';$('again').classList.toggle('on',mineV);
+  $('rmNote').textContent=daily()?'':sp?'You joined during the game: you will play in the next one.':solo()?'':'Rematch needs more than half of the players. '+(votes.length?'Voted: '+votes.map(id=>(st.players.find(p=>p.id===id)||{}).name).filter(Boolean).join(', ')+'.':'')
 }
-function render(){const ph=st.phase;if(ph==='lobby'||ph==='end'){lastKey=null;$('res')._k=null;liveT=''}   // a new game must never be mistaken for the old one (question keys can repeat)
+function render(){const ph=st.phase;if(ph!=='lobby')lastN=0;if(ph==='lobby'||ph==='end'){lastKey=null;$('res')._k=null;liveT=''}   // a new game must never be mistaken for the old one (question keys can repeat)
   ph==='lobby'?renderLobby():ph==='end'?renderEnd():renderGame()}
+let tickS=-1;
 setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.phase==='reveal'||st.phase==='turnReveal',t=reveal?0:Math.max(0,timeLeft(q));
   if(!reveal&&!sent&&!draftSent&&st.cfg.mode==='classic'&&st.phase==='round'&&t<=.8){draftSent=true;draftNow()}   // timer about to run out: hand in what is typed
   const tm=$('timer'),run=!reveal&&(q.endsAt?!!q.endsAt:q.running);
   $('ring').style.strokeDashoffset=(119.38*(1-Math.max(0,Math.min(1,t/tot)))).toFixed(2);
-  $('tnum').textContent=reveal?'':Math.ceil(t);tm.classList.toggle('paused',!reveal&&!run);tm.classList.toggle('urgent',run&&t<=5&&t>0);tm.style.opacity=reveal?.35:''},100);
+  $('tnum').textContent=reveal?'':Math.ceil(t);tm.classList.toggle('paused',!reveal&&!run);tm.classList.toggle('urgent',run&&t<=5&&t>0);tm.style.opacity=reveal?.35:'';
+  if(!reveal)paintHint();const sec=Math.ceil(t);if(run&&t>0&&sec<=5&&sec!==tickS){tickS=sec;sfxp('tick')}if(sec>5||reveal)tickS=-1},100);
 
 /* ---------- buttons ---------- */
 async function makeLobby(k){
@@ -678,11 +741,11 @@ async function makeLobby(k){
 $('create').onclick=()=>makeLobby('lobby');$('solo').onclick=()=>makeLobby('solo');$('bgsolo').onclick=()=>makeLobby('bgsolo');$('daily').onclick=()=>makeLobby('daily');
 $('join').onclick=()=>{kind='lobby';const c=$('code').value.trim().toUpperCase();c.length===5?connect(c,false):(kind=null,status('Enter the 5-letter lobby code.'))};
 $('leave').onclick=$('leave2').onclick=leave;
-$('start').onclick=()=>{err('');tx({t:'start'})};$('again').onclick=()=>{err('');tx({t:'again'})};
-['c_mode','c_content','c_tier','c_time','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
+$('start').onclick=()=>{sfxp('start');err('');tx({t:'start'})};$('again').onclick=()=>{err('');tx({t:'again'})};
+['c_mode','c_content','c_tier','c_time','c_clip','c_hints','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
 $('copy').onclick=async()=>{const url=location.href.replace(/Apps\/OzuGuessr\.html.*$/,'index.html#Apps/OzuGuessr.html?lobby='+code);
   try{await navigator.clipboard.writeText(url);$('copy').textContent='Copied!'}catch(e){prompt('Invite link',url)}setTimeout(()=>$('copy').textContent='Copy invite link',1500)};
-$('submit').onclick=e=>{if(sent||!st)return;const bomb=st.cfg.mode==='bomb';sent=true;if(e&&e.clientX)burst(e.clientX,e.clientY);
+$('submit').onclick=e=>{if(sent||!st||spec())return;sfxp('submit');const bomb=st.cfg.mode==='bomb';sent=true;if(e&&e.clientX)burst(e.clientX,e.clientY);
   const v=bomb?$('g_a').value.trim():Object.fromEntries(st.q.fields.map(k=>[k,$('g_'+k).value.trim()]));
   tx(bomb?{t:'answer',v}:{t:'guess',v});$('submit').hidden=true;$('form').querySelectorAll('input').forEach(i=>i.disabled=true)};
 addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.closest('#form')&&!document.querySelector('.ac:not([hidden]) li.on')){const b=$('submit');b.onclick({clientX:b.getBoundingClientRect().left+20,clientY:b.getBoundingClientRect().top+10})}});
@@ -784,6 +847,7 @@ function syncCtl(){const c=A.curve[sel],set=(id,v)=>{const e=$(id);if(e&&documen
 </script>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/sfx.js"></script>
 <script src="../assets/auth.js"></script>
 </body>
 </html>
