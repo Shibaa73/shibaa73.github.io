@@ -235,7 +235,7 @@ select,.row input[type=number]{background:var(--panel-2);border:1px solid var(--
 .admst{font-size:.84rem;color:var(--muted)}.admst.ok{color:var(--mint)}.admst.bad{color:var(--coral)}
 
 /* fixes: backgrounds shown whole (16:9 box, letterboxed if the image differs), suggestions above the Submit button */
-.cover{background-size:contain}
+.cover{background-size:cover;background-position:center}   /* backgrounds fill the 16:9 box (cropped, no black bars) */
 #form{position:relative;z-index:5}
 #form .fld:focus-within{z-index:20}
 .ac{box-shadow:0 12px 28px rgba(0,0,0,.5)}
@@ -453,6 +453,8 @@ body.pshake{animation:ozshake .5s linear}
 .pstat b{font:600 1.05rem 'Fredoka',sans-serif}.pstat b.warn{color:var(--amber)}.pstat b.bad{color:var(--coral)}
 @media (max-width:720px){.modes.three{grid-template-columns:1fr}}
 .modes.three+.join{margin-top:18px}
+
+.secret{-webkit-text-security:disc;text-security:disc}
 </style>
 </head>
 <body>
@@ -785,12 +787,13 @@ function showBg(q){const cover=$('cover'),key=q.key,urls=[q.bg,q.bg.replace('raw
   img.src=urls[0]}
 function newQuestion(q){
   lastKey=q.key;liveT='';hintOn=false;$('hinttxt').textContent='';$('hintbtn').hidden=false;sfxp(q.i===1?'start':'pop');sent=false;draftSent=false;readyFor=null;adSeen=0;adNow=false;$('res').replaceChildren();$('res')._k=null;$('pp').textContent='Pause';$('clip').classList.remove('reveal');
-  fxClear();const bomb=st.cfg.mode==='bomb',isBg=q.type==='bg'||q.type==='bg_map',isOzq=q.type==='oz',keys=bomb||isOzq?['a']:q.fields;
+  fxClear();const bomb=st.cfg.mode==='bomb',isBg=q.type==='bg'||q.type==='bg_map',isOzq=q.type==='oz',keys=isOzq?(bomb?(q.diff?['a','d']:['a']):q.fields):bomb?['a']:q.fields;
   $('ozq').hidden=!isOzq;if(isOzq)$('ozqt').textContent=q.text;try{if(!q.clip)pa.pause()}catch(e){}
   const nText=keys.filter(k=>TEXT.includes(k)).length;$('form').className=bomb?'':'f4';
-  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(isOzq?' w4':bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,isOzq?(q.live?'Name a map · the less played, the more points (10 to 100)':bomb?'Your answer':'Your answer · the rarer, the more points (10 to 100)'):bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el('input');i.id='g_'+k;i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
+  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(isOzq?' w4':bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,isOzq?(k==='d'?'Difficulty':q.live?(q.diff?'Map · the less played, the more points (10 to 100)':'Name a map · the less played, the more points (10 to 100)'):bomb?'Your answer':'Your answer · the rarer, the more points (10 to 100)'):bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el(isOzq&&k==='d'?'select':'input');i.id='g_'+k;i.name='ozu-'+k+'-'+Math.random().toString(36).slice(2,7);i.setAttribute('data-lpignore','true');i.setAttribute('data-1p-ignore','true');i.setAttribute('data-form-type','other');i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
     if(bomb?(q.type==='clip_bpm'||q.type==='clip_pp'):NUMS.includes(k)){i.type='text';i.inputMode='decimal'}
-    d.append(l,i);if(!isOzq&&(k==='song'||k==='artist'))attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');if(isOzq&&q.live)attachLiveAc(i);return d}));
+    d.append(l,i);if(!isOzq&&(k==='song'||k==='artist'))attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');return d}));
+  if(isOzq&&q.live)attachLiveAc($('g_a'),q.diff?$('g_d'):null);
   const cover=$('cover');cover.hidden=!(q.type==='audio_map'||isBg||q.audio);cover.classList.remove('shown');cover.replaceChildren();cover.style.backgroundImage='';
   if(q.type==='audio_map'||q.audio){cover.append(el('div','eq')),cover.firstChild.append(...[1,2,3,4,5].map(()=>el('i')))}
   $('ctl').hidden=bomb||isBg||isOzq;$('vctl').hidden=isBg||isOzq;$('clip').hidden=isOzq;
@@ -902,8 +905,8 @@ $('start').onclick=()=>{sfxp('start');err('');tx({t:'start'})};$('again').onclic
 $('copy').onclick=async()=>{const url=location.href.replace(/Apps\/OzuGuessr\.html.*$/,'index.html#Apps/OzuGuessr.html?lobby='+code);
   try{await navigator.clipboard.writeText(url);$('copy').textContent='Copied!'}catch(e){prompt('Invite link',url)}setTimeout(()=>$('copy').textContent='Copy invite link',1500)};
 $('submit').onclick=e=>{if(sent||!st||spec())return;sfxp('submit');const bomb=st.cfg.mode==='bomb';sent=true;if(e&&e.clientX)burst(e.clientX,e.clientY);
-  const v=bomb?$('g_a').value.trim():Object.fromEntries(st.q.fields.map(k=>[k,$('g_'+k).value.trim()]));
-  tx(bomb?{t:'answer',v}:{t:'guess',v});$('submit').hidden=true;$('form').querySelectorAll('input').forEach(i=>i.disabled=true)};
+  const v=bomb?$('g_a').value.trim()+(st.q.diff?'\u0001'+$('g_d').value:''):Object.fromEntries(st.q.fields.map(k=>[k,$('g_'+k).value.trim()]));
+  tx(bomb?{t:'answer',v}:{t:'guess',v});$('submit').hidden=true;$('form').querySelectorAll('input').forEach(i=>i.readOnly=true);$('form').querySelectorAll('select').forEach(i=>i.disabled=true)};
 addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.closest('#form')&&!document.querySelector('.ac:not([hidden]) li.on')){const b=$('submit');b.onclick({clientX:b.getBoundingClientRect().left+20,clientY:b.getBoundingClientRect().top+10})}});
 {try{$('nick').value=localStorage.getItem('ozu:nick')||''}catch(e){}const l=new URLSearchParams(location.search).get('lobby');if(l)$('code').value=l.toUpperCase().slice(0,5)}
 show('menu');
@@ -926,7 +929,7 @@ async function openAdmin(){
     try{aKey=sessionStorage.getItem('ozu:ak')||''}catch(e){}
     m.innerHTML=`<div class="admbox" role="dialog" aria-label="Scoring settings">
       <div class="admhead"><h2>Admin</h2><button class="btn" id="admClose" type="button">Close</button></div>
-      <div class="admkey"><input id="admkey" type="password" placeholder="Admin key" autocomplete="off" value=""><button class="btn" id="admUnlock" type="button">Check key</button><span class="admst" id="admSt"></span></div>
+      <div class="admkey"><input id="admkey" type="text" name="ozu-adm-key" class="secret" placeholder="Admin key" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" value=""><button class="btn" id="admUnlock" type="button">Check key</button><span class="admst" id="admSt"></span></div>
       <div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button></div>
       <div id="tab_sc"><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><div class="admgrid"><div>
         <div class="legend" id="legend"></div>
@@ -1062,7 +1065,7 @@ function reportBtn(i){
 function ozRows(R,i,key){   // everybody's answers for a finished question
   const rt=el('div','rt');
   R.res.forEach((r,k)=>{const row=el('div','orr'+(r.id===me?' me':''));row.style.setProperty('--i',k);const nm=(st.players.find(p=>p.id===r.id)||{}).name||r.name;
-    const pt=el('div','pt',(r.hit?'+':'')+r.total);row.append(el('div',null,nm+(r.id===me?' (you)':'')),el('div',null,r.guess&&r.guess.a?r.guess.a:'—'),el('div'),pt);
+    const pt=el('div','pt',(r.hit?'+':'')+r.total);row.append(el('div',null,nm+(r.id===me?' (you)':'')),el('div',null,r.guess&&r.guess.a?r.guess.a+(r.guess.d?' ['+r.guess.d+']':''):'—'),el('div'),pt);
     const mid=row.children[2];if(r.hit){mid.append(chip(r.tier),' '+r.match)}else mid.append(el('span','muted',r.guess&&r.guess.a?(R.live?'doesn’t fit':'not on the list'):'no answer'));
     if(r.id===me&&!r.hit&&r.guess&&r.guess.a&&!spec()&&!R.live)mid.append(' ',reportBtn(i));rt.append(row)});
   return rt}
@@ -1108,17 +1111,24 @@ function showResume(kind){
   box.append(list);$('rs').hidden=false;$('rs').classList.remove('enter');void $('rs').offsetWidth;$('rs').classList.add('enter');$('rs').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
 $('rsX').onclick=()=>{$('rs').hidden=true};
 
-/* ---------- live questions: autocomplete from osu! (a plain search by name, so the list never reveals what fits the question) ---------- */
-function attachLiveAc(inp){
-  const ul=el('ul','ac');ul.hidden=true;inp.parentNode.append(ul);let idx=-1,tm=0,seq=0;
-  const pick=t=>{inp.value=t;ul.hidden=true;inp.dispatchEvent(new Event('input',{bubbles:true}));idx=-1};
-  inp.addEventListener('input',()=>{clearTimeout(tm);const v=inp.value.trim();if(v.length<2){ul.hidden=true;return}
-    tm=setTimeout(async()=>{const my=++seq;try{const r=await fetch(API+'/oz/suggest?q='+encodeURIComponent(v)).then(x=>x.json());if(my!==seq||document.activeElement!==inp)return;
-      ul.replaceChildren(...(r.items||[]).map(m=>{const li=el('li',null,m.a+' - '+m.t);li.dataset.sfx='off';li.onpointerdown=e=>{e.preventDefault();pick(m.a+' - '+m.t)};return li}));ul.hidden=!ul.children.length;idx=-1}catch(e){}},260)});
+/* ---------- live questions: autocomplete from osu! (a plain search by name, so the list never reveals what fits the question) ----------
+   With a difficulty field (dsel) the list also knows the difficulties of every map: picking a map fills the difficulty menu. */
+function attachLiveAc(inp,dsel){
+  const ul=el('ul','ac');ul.hidden=true;inp.parentNode.append(ul);let idx=-1,tm=0,seq=0,picked='';
+  const noDiff=t=>{if(!dsel)return;dsel.replaceChildren(el('option',null,t));dsel.value='';dsel.disabled=true};
+  noDiff('Pick a map from the list first');
+  const pick=m=>{const t=m.a+' - '+m.t;inp.value=t;picked=t;ul.hidden=true;idx=-1;
+    if(dsel){dsel.disabled=false;dsel.replaceChildren(...(m.v||[]).map(v=>{const o=el('option',null,v.n+' · '+v.s.toFixed(2)+'★');o.value=v.n;return o}));if(!m.v||!m.v.length)noDiff('No difficulties found');else dsel.selectedIndex=-1;
+      if(dsel.options.length&&!dsel.disabled){const ph=el('option',null,'Choose the difficulty…');ph.value='';dsel.prepend(ph);dsel.value=''}}};
+  let last=[];
+  inp.addEventListener('input',()=>{if(dsel&&inp.value!==picked){picked='';noDiff('Pick a map from the list first')}
+    clearTimeout(tm);const v=inp.value.trim();if(v.length<2){ul.hidden=true;return}
+    tm=setTimeout(async()=>{const my=++seq;try{const r=await fetch(API+'/oz/suggest?q='+encodeURIComponent(v)).then(x=>x.json());if(my!==seq||document.activeElement!==inp)return;last=r.items||[];
+      ul.replaceChildren(...last.map(m=>{const li=el('li',null,m.a+' - '+m.t);li.dataset.sfx='off';li.onpointerdown=e=>{e.preventDefault();pick(m)};return li}));ul.hidden=!ul.children.length;idx=-1}catch(e){}},260)});
   inp.addEventListener('blur',()=>{seq++;ul.hidden=true});
   inp.addEventListener('keydown',e=>{const it=[...ul.children];if(ul.hidden||!it.length)return;
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();idx=(idx+(e.key==='ArrowDown'?1:-1)+it.length)%it.length;it.forEach((li,i)=>li.classList.toggle('on',i===idx))}
-    else if(e.key==='Enter'&&idx>=0){e.preventDefault();e.stopPropagation();pick(it[idx].textContent)}
+    else if(e.key==='Enter'&&idx>=0){e.preventDefault();e.stopPropagation();pick(last[idx])}
     else if(e.key==='Escape')ul.hidden=true},true)}
 
 /* ---------- admin: map pool + Ozillion tabs (the Scoring tab is above) ---------- */
@@ -1148,7 +1158,7 @@ function initPool(W){
   const P=POOLS[W],i=P.id,box=$('tab_'+W),q=n=>$(i+n);
   box.innerHTML=`<p class="stat">${P.about}</p>
     <div class="pcard"><div class="pstat"><b id="${i}Stat">Loading…</b></div>
-    <div class="row">${W==='maps'?`<button class="btn go" id="${i}Fill" type="button">Fill from osu!</button><label>Most played <input id="${i}N" type="number" min="50" max="3000" step="50" value="1000"></label><label>Status <select id="${i}S"><option value="ranked">Ranked</option><option value="loved">Loved</option><option value="any">Any</option></select></label>`:`<button class="btn go" id="${i}Fill" type="button">Fill from YouTube</button><label>Shortest video (s) <input id="${i}Min" type="number" min="30" max="600" step="5" value="30"></label>`}</div>
+    <div class="row">${W==='maps'?`<button class="btn go" id="${i}Fill" type="button">Fill from osu!</button><label>Most played <input id="${i}N" type="number" min="50" max="10000" step="50" value="3000"></label><label>Status <select id="${i}S"><option value="ranked">Ranked</option><option value="loved">Loved</option><option value="any">Any</option></select></label>`:`<button class="btn go" id="${i}Fill" type="button">Fill from YouTube</button><label>Shortest video (s) <input id="${i}Min" type="number" min="30" max="600" step="5" value="30"></label>`}</div>
     <p class="stat" id="${i}Prog"></p></div>
     <details class="pcard"><summary>${W==='maps'?'Add a map':'Add a video'}</summary>
       <div class="row"><input id="${i}Q" type="search" placeholder="${W==='maps'?'Search osu! (title / artist) or paste a beatmapset link or id':'Paste a YouTube link or video id'}" style="flex:1;min-width:200px">${W==='maps'?`<select id="${i}Qs"><option value="any">Any status</option><option value="ranked">Ranked</option><option value="loved">Loved</option></select>`:''}<button class="btn" id="${i}Go" type="button">${W==='maps'?'Search':'Add'}</button></div><div id="${i}Res" class="admp"></div></details>
@@ -1170,8 +1180,9 @@ function initPool(W){
   q('F').oninput=()=>{off=0;clearTimeout(load.t);load.t=setTimeout(load,250)};q('Fs').onchange=()=>{off=0;load()};q('Prev').onclick=()=>{off=Math.max(0,off-L);load()};q('Next').onclick=()=>{off+=L;load()};
   q('Fill').onclick=async()=>{const b=q('Fill');b.disabled=true;
     try{if(W==='clips'){let tok='',up='',n=0,added=0,skipped=0,r;do{prog('Reading the channel… '+n+' videos so far');r=await adm(base+'import',{token:tok,up,minLen:Math.max(30,+q('Min').value||30)});tok=r.token;up=r.up;n+=r.videos;added+=r.added;skipped+=r.skipped;load()}while(!r.done&&n<20000);prog('Done: '+n+' videos read, '+added+' new clips, '+skipped+' skipped (no “Beatmap info”, or shorter than the minimum) · '+r.total+' clips.','ok')}
-      else{const target=Math.max(50,Math.min(3000,+q('N').value||1000));let cur='',n=0,pages=0;
-        while(n<target){const p=Math.min(20,Math.ceil((target-n)/50));prog('Most played maps ('+n+' / '+target+')…');const r=await adm(base+'import',{cursor:cur,pages:p,status:q('S').value});n+=p*50;pages++;cur=r.cursor;prog(Math.min(n,target)+' / '+target+' · '+r.total+' maps');load();if(r.done||pages>80)break}
+      else{const target=Math.max(50,Math.min(10000,+q('N').value||1000));let cur='',n=0,calls=0,waits=0;
+        while(n<target&&calls++<600){const p=Math.min(5,Math.ceil((target-n)/50));prog('Most played maps ('+n+' / '+target+')…');const r=await adm(base+'import',{cursor:cur,pages:p,status:q('S').value});n+=r.fetched||0;cur=r.cursor;load();
+          if(r.rateLimited){if(++waits>12)throw new Error('osu! keeps saying “too many requests”. '+n+' maps are saved: press Fill again in a few minutes to continue.');prog(n+' / '+target+' · osu! asked to slow down, continuing in 15 s…','warn');await new Promise(z=>setTimeout(z,15000));continue}waits=0;prog(Math.min(n,target)+' / '+target+' · '+r.total+' maps');if(r.done)break}
         prog('Done. The game picks it up within a few minutes.','ok')}}
     catch(e){prog(e.message,'bad')}b.disabled=false;load()};
   q('Go').onclick=async()=>{const v=q('Q').value.trim(),res=q('Res');if(!v)return;
@@ -1190,7 +1201,7 @@ function initPool(W){
 /* ----- Ozillion: questions, answers (+ aliases, counts), reports ----- */
 function initOz(){
   const box=$('tab_oz');box.innerHTML=`<p class="stat">A question needs at least 3 answers to be asked. <b>Count</b> = how often the answer is given for that question; the rarity follows from it (the most given answers that cover the first 50 % of all counts are Doo Doo, then 30 % Those Who Know..., 13 % Ball Knowledge, 5.5 % WYSI, the rest Ozillion!). You can also pin a tier on an answer.</p>
-    <div class="ozadm"><div><div class="row"><input id="oqNew" type="text" maxlength="200" placeholder="New question…" style="flex:1;min-width:0"><button class="btn go" id="oqAdd" type="button">Add</button></div><div class="row" style="flex-wrap:wrap"><select id="oqKind" title="Question type"><option value="list">Typed answers</option><option value="scrape">Scraped from osu!</option><option value="live">Live osu! search</option></select><input id="oqF" type="text" maxlength="300" placeholder="osu! filter, e.g. bpm>{bpm 150,200} stars>6" style="flex:1 1 100%;min-width:0" hidden></div><div class="qlist" id="oqList"></div></div>
+    <div class="ozadm"><div><div class="row"><input id="oqNew" type="text" maxlength="200" placeholder="New question…" style="flex:1;min-width:0"><button class="btn go" id="oqAdd" type="button">Add</button></div><div class="row" style="flex-wrap:wrap"><select id="oqKind" title="Question type"><option value="list">Typed answers</option><option value="scrape">Scraped from osu!</option><option value="live">Live osu! search</option></select><label id="oqDl" hidden><input type="checkbox" id="oqD"> needs the difficulty</label><input id="oqF" type="text" maxlength="300" placeholder="osu! filter, e.g. bpm>{bpm 150,200} stars>6" style="flex:1 1 100%;min-width:0" hidden></div><div class="qlist" id="oqList"></div></div>
     <div id="oqEd"><p class="stat">Pick a question on the left, or create one.</p></div></div>
     <h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>
     <h3>Backup</h3><div class="row"><button class="btn" id="oExp" type="button">Download all questions (JSON)</button><input type="file" id="oFile" accept=".json"><button class="btn" id="oRes" type="button">Restore from file</button></div><p class="stat" id="oMsg"></p>`;
@@ -1201,15 +1212,16 @@ function initOz(){
       $('oRepN').textContent='('+d.reports+')';return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
     try{const {q}=await adm('/admin/oz/q?id='+sel);ed.replaceChildren();
-      const kindOf=q.kind||'list',fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
+      const kindOf=q.kind||'list',dc=kindOf==='live'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
       const sv=el('button','btn','Save text'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
-      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:q.kind,f:fi?fi.value:''});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
+      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:q.kind,f:fi?fi.value:'',diff:dc?dc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
       dq.onclick=async()=>{if(!confirm('Delete this question and all its answers?'))return;try{await adm('/admin/oz/q/del',{id:q.id});sel=null;ed.replaceChildren(el('p','stat','Deleted.'));list();reps()}catch(e){msg(e.message,'bad')}};
       top.append(tx,sv,dq);ed.append(top);
       if(fi){fi.type='text';fi.value=q.f||'';fi.maxLength=300;fi.placeholder='osu! filter, e.g. bpm{dir: >|<}{bpm 150,200} stars>5';fi.style.cssText='flex:1;min-width:200px';
         const tr=el('button','btn','Test'),fr=el('div','row'),out=el('div','stat'),help=el('details','pcard');tr.type='button';fr.append(el('label',null,'osu! filter'),fi,tr);
         help.innerHTML='<summary>Filters and {keywords}</summary><p class="stat">Same filters as the osu! website search: <code>bpm&gt;180</code> <code>ar&lt;8</code> <code>stars&gt;6</code> <code>length&gt;300</code> <code>artist=xi</code> <code>mapper=name</code> <code>tag=…</code> <code>status=loved</code>. Keywords: <code>{bpm 150,200}</code> is a random number from 150 to 200 (both included), <code>{dir: higher|lower}</code> picks one option. The same name always rolls the same value, so write <code>{bpm}</code> again in the question text; <code>{dir: &gt;|&lt;}</code> in the filter follows the same pick by position. '+(kindOf==='live'?'Live: the player names a map and the osu! site decides whether it fits. The rarer (less played) the map, the more points.':'Scraped: the filter is fixed (no keywords); the maps it finds become the answers and the play counts become the counts.</p>');
         tr.onclick=async()=>{out.className='stat';out.textContent='Asking osu!…';try{const r=await adm('/admin/oz/q/preview',{text:tx.value,f:fi.value});out.className='stat ok';out.textContent='Rolled: “'+r.text+'” → '+r.f+' · '+r.total.toLocaleString()+' maps found. Most played: '+(r.items.join(' | ')||'none')}catch(e){out.className='stat bad';out.textContent=e.message}};
+        if(dc){dc.type='checkbox';dc.checked=!!q.diff;const dl2=el('label');dl2.append(dc,' The player also picks the difficulty (the numbers in the filter, like bpm or stars, then have to hold for that difficulty). Save the text to apply.');ed.append(dl2)}
         ed.append(fr,help,out);
         if(kindOf==='scrape'){const sr=el('div','row'),n=el('input'),go=el('button','btn go','Scrape now'),rp=el('input'),pg=el('span','stat');n.type='number';n.min=50;n.max=5000;n.step=50;n.value=300;rp.type='checkbox';rp.checked=true;go.type='button';
           const lb=el('label',null,'Number of maps ');lb.append(n);const lb2=el('label');lb2.append(rp,' replace the scraped answers (your own answers stay)');sr.append(lb,go,lb2);
@@ -1245,8 +1257,8 @@ function initOz(){
             const hit=q.ans.find(a=>r.target&&a.name.toLowerCase()===r.target.toLowerCase());if(hit)sl.value=hit.id}).catch(()=>{});
           ok.onclick=async()=>{try{await adm('/admin/oz/report/resolve',{id:r.id,action:'alias',target:sl.value});reps();list()}catch(e){msg(e.message,'bad')}};ctl.append(sl,ok,dis)}
         return c}))}catch(e){msg(e.message,'bad')}}
-  $('oqKind').onchange=()=>{$('oqF').hidden=$('oqKind').value==='list'};
-  $('oqAdd').onclick=async()=>{const t=$('oqNew').value.trim();if(!t)return;try{const r=await adm('/admin/oz/q/save',{text:t,kind:$('oqKind').value,f:$('oqF').value});$('oqF').value='';$('oqNew').value='';sel=r.id;await list();edit()}catch(e){msg(e.message,'bad')}};
+  $('oqKind').onchange=()=>{$('oqF').hidden=$('oqKind').value==='list';$('oqDl').hidden=$('oqKind').value!=='live'};
+  $('oqAdd').onclick=async()=>{const t=$('oqNew').value.trim();if(!t)return;try{const r=await adm('/admin/oz/q/save',{text:t,kind:$('oqKind').value,f:$('oqF').value,diff:$('oqD').checked});$('oqF').value='';$('oqNew').value='';sel=r.id;await list();edit()}catch(e){msg(e.message,'bad')}};
   $('oqNew').addEventListener('keydown',e=>{if(e.key==='Enter')$('oqAdd').click()});
   $('oExp').onclick=async()=>{try{dl('ozillion-questions.json',await adm('/admin/oz/export'))}catch(e){msg(e.message,'bad')}};
   $('oRes').onclick=async()=>{try{const d=await readJson($('oFile'));await adm('/admin/oz/restore',{qs:d.qs||d});msg('Restored.','ok');list()}catch(e){msg(e.message,'bad')}};
