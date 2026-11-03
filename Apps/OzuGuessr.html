@@ -788,9 +788,9 @@ function newQuestion(q){
   fxClear();const bomb=st.cfg.mode==='bomb',isBg=q.type==='bg'||q.type==='bg_map',isOzq=q.type==='oz',keys=bomb||isOzq?['a']:q.fields;
   $('ozq').hidden=!isOzq;if(isOzq)$('ozqt').textContent=q.text;try{if(!q.clip)pa.pause()}catch(e){}
   const nText=keys.filter(k=>TEXT.includes(k)).length;$('form').className=bomb?'':'f4';
-  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(isOzq?' w4':bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,isOzq?(bomb?'Your answer':'Your answer · the rarer, the more points (10 to 100)'):bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el('input');i.id='g_'+k;i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
+  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(isOzq?' w4':bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,isOzq?(q.live?'Name a map · the less played, the more points (10 to 100)':bomb?'Your answer':'Your answer · the rarer, the more points (10 to 100)'):bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el('input');i.id='g_'+k;i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
     if(bomb?(q.type==='clip_bpm'||q.type==='clip_pp'):NUMS.includes(k)){i.type='text';i.inputMode='decimal'}
-    d.append(l,i);if(!isOzq&&(k==='song'||k==='artist'))attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');return d}));
+    d.append(l,i);if(!isOzq&&(k==='song'||k==='artist'))attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');if(isOzq&&q.live)attachLiveAc(i);return d}));
   const cover=$('cover');cover.hidden=!(q.type==='audio_map'||isBg||q.audio);cover.classList.remove('shown');cover.replaceChildren();cover.style.backgroundImage='';
   if(q.type==='audio_map'||q.audio){cover.append(el('div','eq')),cover.firstChild.append(...[1,2,3,4,5].map(()=>el('i')))}
   $('ctl').hidden=bomb||isBg||isOzq;$('vctl').hidden=isBg||isOzq;$('clip').hidden=isOzq;
@@ -1063,20 +1063,20 @@ function ozRows(R,i,key){   // everybody's answers for a finished question
   const rt=el('div','rt');
   R.res.forEach((r,k)=>{const row=el('div','orr'+(r.id===me?' me':''));row.style.setProperty('--i',k);const nm=(st.players.find(p=>p.id===r.id)||{}).name||r.name;
     const pt=el('div','pt',(r.hit?'+':'')+r.total);row.append(el('div',null,nm+(r.id===me?' (you)':'')),el('div',null,r.guess&&r.guess.a?r.guess.a:'—'),el('div'),pt);
-    const mid=row.children[2];if(r.hit){mid.append(chip(r.tier),' '+r.match)}else mid.append(el('span','muted',r.guess&&r.guess.a?'not on the list':'no answer'));
-    if(r.id===me&&!r.hit&&r.guess&&r.guess.a&&!spec())mid.append(' ',reportBtn(i));rt.append(row)});
+    const mid=row.children[2];if(r.hit){mid.append(chip(r.tier),' '+r.match)}else mid.append(el('span','muted',r.guess&&r.guess.a?(R.live?'doesn’t fit':'not on the list'):'no answer'));
+    if(r.id===me&&!r.hit&&r.guess&&r.guess.a&&!spec()&&!R.live)mid.append(' ',reportBtn(i));rt.append(row)});
   return rt}
 function ozReveal(res,R,sp){   // classic round: my dive, then the table of answers
   const i=st.q.i-1,mine=R.res.find(r=>r.id===me);
   if(mine&&!sp)ozDive({hit:mine.hit,tier:mine.tier,name:mine.match,guess:mine.guess.a,pts:mine.total,who:'Your answer'});
-  res.append(ozRows(R,i),el('p','topline','Most given answers: '+(R.top&&R.top.length?R.top.join(' · '):'—')));
+  res.append(ozRows(R,i),el('p','topline',(R.live?'Most played maps that fit: ':'Most given answers: ')+(R.top&&R.top.length?R.top.join(' · '):'—')));
   const sc=el('p','tot');sc.append(sp?'Round result':'You scored +'+(mine?mine.total:0)+' of 100.');res.append(sc);
   if(st.host===me){const nb=el('button','btn go pulse',st.q.i>=st.cfg.rounds?'Show final results':'Next round');nb.type='button';nb.id='next';nb.style.marginTop='14px';nb.onclick=()=>{nb.disabled=true;fxClear();tx({t:'next'})};res.append(nb)}
   else res.append(el('p','muted','Waiting for the host to continue…'))}
 function ozTurnReveal(res,R){   // bomb: the dive of the player on the bomb, everybody watches
   const who=(st.players.find(p=>p.id===R.cur)||{}).name||'Player';
   ozDive({hit:R.ok,tier:R.tier,name:R.match,guess:R.guess,heal:R.ok&&R.tier>=3,who:who+(R.cur===me?' (you)':'')+' answered',fast:true});
-  res.append(el('p','big',R.ok?'✔ '+who+': '+R.match:R.dup?'✖ '+who+' used an answer that was already given and loses a life':'✖ '+who+(R.guess?' — “'+R.guess+'” isn’t on the list':' ran out of time')+' and loses a life'));
+  res.append(el('p','big',R.ok?'✔ '+who+': '+R.match:R.dup?'✖ '+who+' used an answer that was already given and loses a life':'✖ '+who+(R.guess?' — “'+R.guess+(R.live?'” doesn’t fit':'” isn’t on the list'):' ran out of time')+' and loses a life'));
   if(R.ok){const p=el('p','muted');p.append(chip(R.tier),R.tier>=3?' A rare answer: +1 life':'');res.append(p)}}
 
 /* ---------- final screen: rank + recap of my answers ---------- */
@@ -1086,8 +1086,8 @@ function ozFinal(){
   const me0=st.players.find(p=>p.id===me);if(!me0)return;const max=(st.hist||[]).length*100||st.cfg.rounds*100,g=gradeOf(me0.score,max),G=GRADES[g];
   rk.hidden=false;rk.style.setProperty('--gc',G[1]);rk.replaceChildren(el('div','gr',G[0]),(()=>{const d=el('div');d.append(el('b',null,G[2]),el('span',null,f2(me0.score)+' of '+max+' points'));return d})());
   rk.firstChild.dataset.sfx='off';if(rk._g!==g+'|'+me0.score){rk._g=g+'|'+me0.score;sfxp(g>=4?'ozillion':g>=2?'win':'ok')}
-  const rows=(st.hist||[]).map((h,i)=>({i,text:h.text,r:h.res.find(x=>x.id===me)})).filter(x=>x.r);
-  box.className='recap';box.append(el('h3',null,'Your answers'),...rows.map(({i,text,r})=>recapCard(text,r,reportBtn,i)))}
+  const rows=(st.hist||[]).map((h,i)=>({i,text:h.text,live:h.live,r:h.res.find(x=>x.id===me)})).filter(x=>x.r);
+  box.className='recap';box.append(el('h3',null,'Your answers'),...rows.map(({i,text,r,live})=>recapCard(text,r,live?null:reportBtn,i)))}
 function recapCard(text,r,rep,i){const c=el('div','rcard'),l=el('div','line');c.append(el('div','q',text),l);
   l.append(el('span',null,'You: '),el('b',null,r.guess&&(r.guess.a||r.guess)?(r.guess.a||r.guess):'—'));
   if(r.hit||r.match){l.append('→',el('b',null,r.match),chip(r.tier),el('span',null,'+'+(r.total!=null?r.total:OZP[r.tier])+' pts'))}
@@ -1107,6 +1107,19 @@ function showResume(kind){
     const ln=el('div','line');ln.append('Total: ',el('b',null,f2(r.total)+' / '+f2(r.max)));c.append(rt,ln);list.append(c)}
   box.append(list);$('rs').hidden=false;$('rs').classList.remove('enter');void $('rs').offsetWidth;$('rs').classList.add('enter');$('rs').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
 $('rsX').onclick=()=>{$('rs').hidden=true};
+
+/* ---------- live questions: autocomplete from osu! (a plain search by name, so the list never reveals what fits the question) ---------- */
+function attachLiveAc(inp){
+  const ul=el('ul','ac');ul.hidden=true;inp.parentNode.append(ul);let idx=-1,tm=0,seq=0;
+  const pick=t=>{inp.value=t;ul.hidden=true;inp.dispatchEvent(new Event('input',{bubbles:true}));idx=-1};
+  inp.addEventListener('input',()=>{clearTimeout(tm);const v=inp.value.trim();if(v.length<2){ul.hidden=true;return}
+    tm=setTimeout(async()=>{const my=++seq;try{const r=await fetch(API+'/oz/suggest?q='+encodeURIComponent(v)).then(x=>x.json());if(my!==seq||document.activeElement!==inp)return;
+      ul.replaceChildren(...(r.items||[]).map(m=>{const li=el('li',null,m.a+' - '+m.t);li.dataset.sfx='off';li.onpointerdown=e=>{e.preventDefault();pick(m.a+' - '+m.t)};return li}));ul.hidden=!ul.children.length;idx=-1}catch(e){}},260)});
+  inp.addEventListener('blur',()=>{seq++;ul.hidden=true});
+  inp.addEventListener('keydown',e=>{const it=[...ul.children];if(ul.hidden||!it.length)return;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();idx=(idx+(e.key==='ArrowDown'?1:-1)+it.length)%it.length;it.forEach((li,i)=>li.classList.toggle('on',i===idx))}
+    else if(e.key==='Enter'&&idx>=0){e.preventDefault();e.stopPropagation();pick(it[idx].textContent)}
+    else if(e.key==='Escape')ul.hidden=true},true)}
 
 /* ---------- admin: map pool + Ozillion tabs (the Scoring tab is above) ---------- */
 async function adm(path,body){aKey=($('admkey')&&$('admkey').value)||aKey;
@@ -1177,22 +1190,35 @@ function initPool(W){
 /* ----- Ozillion: questions, answers (+ aliases, counts), reports ----- */
 function initOz(){
   const box=$('tab_oz');box.innerHTML=`<p class="stat">A question needs at least 3 answers to be asked. <b>Count</b> = how often the answer is given for that question; the rarity follows from it (the most given answers that cover the first 50 % of all counts are Doo Doo, then 30 % Those Who Know..., 13 % Ball Knowledge, 5.5 % WYSI, the rest Ozillion!). You can also pin a tier on an answer.</p>
-    <div class="ozadm"><div><div class="row"><input id="oqNew" type="text" maxlength="200" placeholder="New question…" style="flex:1;min-width:0"><button class="btn go" id="oqAdd" type="button">Add</button></div><div class="qlist" id="oqList"></div></div>
+    <div class="ozadm"><div><div class="row"><input id="oqNew" type="text" maxlength="200" placeholder="New question…" style="flex:1;min-width:0"><button class="btn go" id="oqAdd" type="button">Add</button></div><div class="row" style="flex-wrap:wrap"><select id="oqKind" title="Question type"><option value="list">Typed answers</option><option value="scrape">Scraped from osu!</option><option value="live">Live osu! search</option></select><input id="oqF" type="text" maxlength="300" placeholder="osu! filter, e.g. bpm>{bpm 150,200} stars>6" style="flex:1 1 100%;min-width:0" hidden></div><div class="qlist" id="oqList"></div></div>
     <div id="oqEd"><p class="stat">Pick a question on the left, or create one.</p></div></div>
     <h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>
     <h3>Backup</h3><div class="row"><button class="btn" id="oExp" type="button">Download all questions (JSON)</button><input type="file" id="oFile" accept=".json"><button class="btn" id="oRes" type="button">Restore from file</button></div><p class="stat" id="oMsg"></p>`;
   let sel=null;const msg=(t,k)=>say($('oMsg'),t,k);
   const OZA=['#9aa0a6','#4f9cff','#ff4d62','#17131d','#ff66aa'];
   async function list(){try{const d=await adm('/admin/oz/overview');
-      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,q.answers+' answers'+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;list();edit()};return b}));
+      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='live'?'Live osu! search':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;list();edit()};return b}));
       $('oRepN').textContent='('+d.reports+')';return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
     try{const {q}=await adm('/admin/oz/q?id='+sel);ed.replaceChildren();
-      const top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
+      const kindOf=q.kind||'list',fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
       const sv=el('button','btn','Save text'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
-      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
+      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:q.kind,f:fi?fi.value:''});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
       dq.onclick=async()=>{if(!confirm('Delete this question and all its answers?'))return;try{await adm('/admin/oz/q/del',{id:q.id});sel=null;ed.replaceChildren(el('p','stat','Deleted.'));list();reps()}catch(e){msg(e.message,'bad')}};
-      top.append(tx,sv,dq);ed.append(top,el('p','stat',q.ans.length+' answers · total count '+q.total.toLocaleString()));
+      top.append(tx,sv,dq);ed.append(top);
+      if(fi){fi.type='text';fi.value=q.f||'';fi.maxLength=300;fi.placeholder='osu! filter, e.g. bpm{dir: >|<}{bpm 150,200} stars>5';fi.style.cssText='flex:1;min-width:200px';
+        const tr=el('button','btn','Test'),fr=el('div','row'),out=el('div','stat'),help=el('details','pcard');tr.type='button';fr.append(el('label',null,'osu! filter'),fi,tr);
+        help.innerHTML='<summary>Filters and {keywords}</summary><p class="stat">Same filters as the osu! website search: <code>bpm&gt;180</code> <code>ar&lt;8</code> <code>stars&gt;6</code> <code>length&gt;300</code> <code>artist=xi</code> <code>mapper=name</code> <code>tag=…</code> <code>status=loved</code>. Keywords: <code>{bpm 150,200}</code> is a random number from 150 to 200 (both included), <code>{dir: higher|lower}</code> picks one option. The same name always rolls the same value, so write <code>{bpm}</code> again in the question text; <code>{dir: &gt;|&lt;}</code> in the filter follows the same pick by position. '+(kindOf==='live'?'Live: the player names a map and the osu! site decides whether it fits. The rarer (less played) the map, the more points.':'Scraped: the filter is fixed (no keywords); the maps it finds become the answers and the play counts become the counts.</p>');
+        tr.onclick=async()=>{out.className='stat';out.textContent='Asking osu!…';try{const r=await adm('/admin/oz/q/preview',{text:tx.value,f:fi.value});out.className='stat ok';out.textContent='Rolled: “'+r.text+'” → '+r.f+' · '+r.total.toLocaleString()+' maps found. Most played: '+(r.items.join(' | ')||'none')}catch(e){out.className='stat bad';out.textContent=e.message}};
+        ed.append(fr,help,out);
+        if(kindOf==='scrape'){const sr=el('div','row'),n=el('input'),go=el('button','btn go','Scrape now'),rp=el('input'),pg=el('span','stat');n.type='number';n.min=50;n.max=5000;n.step=50;n.value=300;rp.type='checkbox';rp.checked=true;go.type='button';
+          const lb=el('label',null,'Number of maps ');lb.append(n);const lb2=el('label');lb2.append(rp,' replace the scraped answers (your own answers stay)');sr.append(lb,go,lb2);
+          go.onclick=async()=>{go.disabled=true;try{let cur='',got=0,r,pagesLeft=Math.max(1,Math.ceil((+n.value||300)/50)),first=true;
+              while(pagesLeft>0){const p=Math.min(8,pagesLeft);pg.textContent='Scraping… '+got+' maps';r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:p,replace:rp.checked&&first});first=false;pagesLeft-=p;got+=r.added+r.updated;cur=r.cursor;if(r.done)break}
+              msg('Scraped: '+r.total+' answers now.','ok');edit();list()}catch(e){msg(e.message,'bad')}go.disabled=false};
+          ed.append(sr,pg,el('p','stat','Scraping takes the most played maps first. Press it again any time to refresh the play counts.'))}}
+      if(kindOf==='live'){ed.append(el('p','stat','Nothing to fill in: there are no answers to manage and nothing to report.'));return}
+      ed.append(el('p','stat',q.ans.length+' answers · total count '+q.total.toLocaleString()));
       const head=el('div','arow h');['Answer','Aliases (comma separated)','Count','Tier',''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
       const row=(a)=>{const r=el('div','arow'),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
         nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
@@ -1219,7 +1245,8 @@ function initOz(){
             const hit=q.ans.find(a=>r.target&&a.name.toLowerCase()===r.target.toLowerCase());if(hit)sl.value=hit.id}).catch(()=>{});
           ok.onclick=async()=>{try{await adm('/admin/oz/report/resolve',{id:r.id,action:'alias',target:sl.value});reps();list()}catch(e){msg(e.message,'bad')}};ctl.append(sl,ok,dis)}
         return c}))}catch(e){msg(e.message,'bad')}}
-  $('oqAdd').onclick=async()=>{const t=$('oqNew').value.trim();if(!t)return;try{const r=await adm('/admin/oz/q/save',{text:t});$('oqNew').value='';sel=r.id;await list();edit()}catch(e){msg(e.message,'bad')}};
+  $('oqKind').onchange=()=>{$('oqF').hidden=$('oqKind').value==='list'};
+  $('oqAdd').onclick=async()=>{const t=$('oqNew').value.trim();if(!t)return;try{const r=await adm('/admin/oz/q/save',{text:t,kind:$('oqKind').value,f:$('oqF').value});$('oqF').value='';$('oqNew').value='';sel=r.id;await list();edit()}catch(e){msg(e.message,'bad')}};
   $('oqNew').addEventListener('keydown',e=>{if(e.key==='Enter')$('oqAdd').click()});
   $('oExp').onclick=async()=>{try{dl('ozillion-questions.json',await adm('/admin/oz/export'))}catch(e){msg(e.message,'bad')}};
   $('oRes').onclick=async()=>{try{const d=await readJson($('oFile'));await adm('/admin/oz/restore',{qs:d.qs||d});msg('Restored.','ok');list()}catch(e){msg(e.message,'bad')}};
