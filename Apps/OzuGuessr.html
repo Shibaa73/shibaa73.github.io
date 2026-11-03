@@ -71,17 +71,17 @@ header p{color:var(--muted);font-size:.98rem;margin:0;animation:rise .5s ease .2
 .fld input,.codein{padding:12px 14px;background:var(--panel-2);border:1px solid var(--border);border-radius:12px;color:var(--text);font:inherit;font-size:1rem;transition:border-color .15s,box-shadow .2s}
 .fld input:focus,.codein:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,122,179,.14);outline:none}
 .modes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:18px}
-.mode{position:relative;overflow:hidden;display:grid;gap:6px;text-align:left;padding:18px 18px 16px;border-radius:16px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:transform .2s var(--ease),border-color .2s,box-shadow .25s,background .2s}
+.mode{--ac:var(--pink);--acr:255,122,179;position:relative;overflow:hidden;display:grid;gap:6px;text-align:left;padding:18px 18px 16px;border-radius:16px;background:var(--panel-2);border:1px solid var(--border);color:var(--text);cursor:pointer;transition:transform .2s var(--ease),border-color .2s,box-shadow .25s,background .2s}
 .mode b{font:600 1.15rem 'Fredoka',sans-serif;display:flex;align-items:center;gap:10px}
 .mode span{color:var(--muted);font-size:.86rem;line-height:1.5}
-.mode em{font-style:normal;font:500 .82rem 'IBM Plex Mono',monospace;color:var(--pink)}
-.mode svg{width:22px;height:22px;stroke:var(--pink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;transition:transform .35s var(--ease)}
-.mode::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;border:2px solid rgba(255,122,179,.28);scale:.6;opacity:0;transition:scale .5s var(--ease),opacity .3s}
-.mode:hover{transform:translateY(-4px);border-color:rgba(255,122,179,.55);box-shadow:0 14px 30px rgba(224,103,154,.16);background:var(--panel-3)}
+.mode em{font-style:normal;font:500 .82rem 'IBM Plex Mono',monospace;color:var(--ac)}
+.mode svg{width:22px;height:22px;stroke:var(--ac);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;transition:transform .35s var(--ease)}
+.mode::after{content:'';position:absolute;right:-30px;top:-30px;width:110px;height:110px;border-radius:50%;border:2px solid rgba(var(--acr),.28);scale:.6;opacity:0;transition:scale .5s var(--ease),opacity .3s}
+.mode:hover{transform:translateY(-4px);border-color:rgba(var(--acr),.55);box-shadow:0 14px 30px rgba(var(--acr),.14);background:var(--panel-3)}
 .mode:hover::after{scale:1.15;opacity:1}
 .mode:hover svg{transform:rotate(-12deg) scale(1.15)}
 .mode:active{transform:translateY(-1px) scale(.985)}
-.mode.featured{grid-column:1/-1;background:linear-gradient(120deg,rgba(255,122,179,.2),var(--panel-2) 62%);border-color:rgba(255,122,179,.3)}
+
 .mode:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
 .join{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .codein{width:120px;text-transform:uppercase;letter-spacing:.22em;text-align:center;font-family:'IBM Plex Mono',monospace}
@@ -348,8 +348,8 @@ body.ingame .wrap{max-width:1120px}
 /* ---------- Ozillion ---------- */
 :root{--t0:#9aa0a6;--t1:#4f9cff;--t2:#ff4d62;--t3:#17131d;--t4:#ff66aa}
 .mode.half{grid-column:auto}.mode.wide{grid-column:1/-1}
-.mode.oz{background:linear-gradient(120deg,rgba(124,199,255,.14),var(--panel-2) 62%);border-color:rgba(124,199,255,.3)}
-.mode.oz svg{stroke:var(--cyan)}.mode.oz em{color:var(--cyan)}
+.mode.oz{--ac:var(--cyan);--acr:124,199,255}
+.mode.half{background:linear-gradient(120deg,rgba(var(--acr),.14),var(--panel-2) 62%);border-color:rgba(var(--acr),.28)}
 .ozq{padding:16px 18px 18px;border-radius:16px;background:linear-gradient(135deg,rgba(255,122,179,.18),var(--panel-2));border:1px solid rgba(255,122,179,.32);animation:rise .4s var(--ease) both}
 .ozq small{display:block;font:600 .7rem 'Fredoka',sans-serif;letter-spacing:.2em;color:var(--pink);margin-bottom:8px}
 .ozq h3{margin:0;font:600 clamp(1.2rem,3.4vw,1.7rem)/1.25 'Fredoka',sans-serif}
@@ -437,6 +437,22 @@ body.pshake{animation:ozshake .5s linear}
 .arow.h{color:var(--muted);font-size:.72rem;margin:0}
 .rep{display:grid;gap:6px;padding:10px;border-radius:12px;background:var(--panel-2);border:1px solid var(--border)}
 @media (max-width:760px){.ozadm{grid-template-columns:1fr}.arow{grid-template-columns:1fr 1fr}.arow.h{display:none}}
+
+/* ---------- tidy-up: menu groups, accents, admin pool cards ---------- */
+.modes.three{grid-template-columns:repeat(3,1fr)}
+.grp{display:flex;align-items:baseline;gap:10px;margin:18px 0 10px;font:600 .8rem 'Fredoka',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.grp small{font:400 .78rem 'Inter',sans-serif;letter-spacing:0;text-transform:none;opacity:.8}
+.modes{gap:12px;margin-bottom:6px}
+.mode{padding:16px 16px 14px}
+.mode span{font-size:.84rem}
+.mode.oz:focus-visible{outline-color:var(--cyan)}
+.tipline{margin:14px 0 0;color:var(--muted);font-size:.8rem}.tipline summary{cursor:pointer;width:max-content}.tipline p{margin:8px 0 0;line-height:1.55}
+.pcard{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin:12px 0}
+.pcard>summary{cursor:pointer;font:600 .92rem 'Fredoka',sans-serif}
+.pcard .row{margin:8px 0}
+.pstat b{font:600 1.05rem 'Fredoka',sans-serif}.pstat b.warn{color:var(--amber)}.pstat b.bad{color:var(--coral)}
+@media (max-width:720px){.modes.three{grid-template-columns:1fr}}
+.modes.three+.join{margin-top:18px}
 </style>
 </head>
 <body>
@@ -457,36 +473,40 @@ body.pshake{animation:ozshake .5s linear}
   <section class="sec" id="menu">
     <h2>Play</h2>
     <div class="fld"><label for="nick">Your name</label><input id="nick" maxlength="20" autocomplete="off"></div>
+    <h3 class="grp">Daily <small>same for everyone, once a day</small></h3>
     <div class="modes">
-      <button class="mode featured half" id="daily" type="button">
+      <button class="mode half" id="daily" type="button">
         <b><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Daily ozu</b>
-        <span>5 rounds, the same clips for everyone, a new set every day at midnight (Rome time). Your score goes on the leaderboard.</span>
+        <span>5 clips and backgrounds. New set at midnight.</span>
         <em id="dailyLeft"></em><em class="streak" id="dailyStreak"></em>
       </button>
-      <button class="mode featured half oz" id="ozdaily" type="button">
+      <button class="mode half oz" id="ozdaily" type="button">
         <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3"/></svg>Daily Ozillion</b>
-        <span>5 questions, 25 seconds each. The rarer your answer, the more points: Doo Doo to Ozillion! Same questions for everyone, new set at midnight.</span>
+        <span>5 questions. The rarer your answer, the more points.</span>
         <em id="ozLeft"></em><em class="streak" id="ozStreak"></em>
       </button>
+    </div>
+    <h3 class="grp">Unlimited <small>play as long as you like</small></h3>
+    <div class="modes three">
       <button class="mode" id="solo" type="button">
-        <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg>Unlimited mode</b>
-        <span>Play on your own with your own rounds and fields.</span>
+        <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg>Clips</b>
+        <span>Guess the song and the numbers from a play.</span>
       </button>
       <button class="mode" id="bgsolo" type="button">
-        <b><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg>Background guessr</b>
-        <span>Name the map from its background. Five difficulties, from Autoplay to DT.</span>
+        <b><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg>Backgrounds</b>
+        <span>Name the map from its background.</span>
         <em id="bgState"></em>
       </button>
-      <button class="mode oz wide" id="ozsolo" type="button">
-        <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3"/></svg>Ozillion (unlimited)</b>
-        <span>Name something that fits the question. Pick how many questions and how much time you get. In lobbies, Ozillion is a question type of the Bomb mode.</span>
+      <button class="mode oz" id="ozsolo" type="button">
+        <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3"/></svg>Ozillion</b>
+        <span>Name something that fits the question.</span>
         <em id="ozState"></em>
       </button>
     </div>
     <div class="join"><button class="btn go" id="create" type="button">Create lobby</button>
       <input class="codein" id="code" maxlength="5" placeholder="CODE" aria-label="Lobby code" autocomplete="off"><button class="btn" id="join" type="button">Join</button></div>
     <p class="muted" id="status" style="margin-top:14px"></p>
-    <p class="tipline">YouTube ads can’t be turned off from a web page. The clips play in the normal YouTube player, so a browser ad blocker (for example uBlock Origin) works here too. If an ad does start, the round timer waits for it.</p>
+    <details class="tipline"><summary>About YouTube ads</summary><p>YouTube ads can’t be turned off from a web page. The clips play in the normal YouTube player, so a browser ad blocker (for example uBlock Origin) works here too. If an ad does start, the round timer waits for it.</p></details>
   </section>
 
   <section class="sec" id="rs" hidden>
@@ -907,13 +927,13 @@ async function openAdmin(){
     m.innerHTML=`<div class="admbox" role="dialog" aria-label="Scoring settings">
       <div class="admhead"><h2>Admin</h2><button class="btn" id="admClose" type="button">Close</button></div>
       <div class="admkey"><input id="admkey" type="password" placeholder="Admin key" autocomplete="off" value=""><button class="btn" id="admUnlock" type="button">Check key</button><span class="admst" id="admSt"></span></div>
-      <div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="pool" aria-pressed="false">Map pool</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button></div>
+      <div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button></div>
       <div id="tab_sc"><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><div class="admgrid"><div>
         <div class="legend" id="legend"></div>
         <div class="chartwrap" id="cw"><svg id="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points by relative error for AR, BPM, SR and PP"></svg><div class="tip" id="tip" hidden></div></div>
         <div id="admTable" hidden></div>
         <div class="row"><button class="btn" id="admTbl" type="button">Table view</button></div>
-      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_pool" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div></div>`;
+      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div></div>`;
     $('admkey').value=aKey;
     $('admClose').onclick=closeAdmin;m.addEventListener('pointerdown',e=>{if(e.target===m)closeAdmin()});
     $('admTbl').onclick=()=>{tableOn=!tableOn;$('admTbl').textContent=tableOn?'Graph view':'Table view';$('cw').hidden=tableOn;$('legend').hidden=tableOn;$('admTable').hidden=!tableOn;drawTable()};
@@ -1097,57 +1117,60 @@ const dl=(name,obj)=>{const a=document.createElement('a');a.href=URL.createObjec
 const readJson=inp=>new Promise((res,rej)=>{const f=inp.files[0];if(!f)return rej(new Error('Choose a file first'));const r=new FileReader();r.onload=()=>{try{res(JSON.parse(r.result))}catch(e){rej(new Error('Not a valid JSON file'))}};r.readAsText(f)});
 const inited={};
 function admTabs(){
-  const bar=$('admtabs'),T={sc:$('tab_sc'),pool:$('tab_pool'),oz:$('tab_oz')};
+  const bar=$('admtabs'),T={sc:$('tab_sc'),maps:$('tab_maps'),clips:$('tab_clips'),oz:$('tab_oz')};
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
-    for(const k in T)T[k].hidden=k!==b.dataset.t;if(b.dataset.t==='pool'&&!inited.pool){inited.pool=1;initPool()}if(b.dataset.t==='oz'&&!inited.oz){inited.oz=1;initOz()}})}
+    for(const k in T)T[k].hidden=k!==b.dataset.t;if((b.dataset.t==='maps'||b.dataset.t==='clips')&&!inited[b.dataset.t]){inited[b.dataset.t]=1;initPool(b.dataset.t)}if(b.dataset.t==='oz'&&!inited.oz){inited.oz=1;initOz()}})}
 
-/* ----- map pool ----- */
-function initPool(){
-  const box=$('tab_pool');box.innerHTML=`<p class="stat" id="pStat">Loading…</p>
-    <h3>Fill the pool</h3>
-    <p class="stat">The pool is the list of maps the game draws from. Maps with a gameplay video play that clip, the others play the osu! preview audio. Backgrounds are only links to the images, nothing is stored. Maps with a play count are used for backgrounds (the play count sets the difficulty).</p>
-    <div class="row"><button class="btn go" id="pFill" type="button">Fill the pool (recommended)</button><button class="btn" id="pYt" type="button">Import channel clips only</button>
-      <label>Most played maps <input id="pN" type="number" min="50" max="3000" step="50" value="1000"></label><label>Status <select id="pS"><option value="ranked">Ranked</option><option value="loved">Loved</option><option value="any">Any</option></select></label></div>
-    <p class="stat" id="pProg"></p>
-    <h3>Add maps</h3>
-    <div class="row"><input id="pQ" type="search" placeholder="Search osu! maps (title / artist) or paste a beatmapset link or id" style="flex:1;min-width:220px"><select id="pQs"><option value="any">Any status</option><option value="ranked">Ranked</option><option value="loved">Loved</option></select><button class="btn" id="pGo" type="button">Search</button></div>
-    <div id="pRes" class="admp"></div>
-    <h3>The pool</h3>
-    <div class="row"><input id="pF" type="search" placeholder="Filter by title or artist" style="flex:1;min-width:200px"><select id="pFs"><option value="all">All</option><option value="video">With video</option><option value="preview">Preview audio only</option><option value="off">Disabled</option></select></div>
-    <div id="pList" class="admp"></div>
-    <div class="row"><button class="btn" id="pPrev" type="button">Previous</button><span class="stat" id="pPage"></span><button class="btn" id="pNext" type="button">Next</button></div>
-    <h3>Backup</h3><div class="row"><button class="btn" id="pExp" type="button">Download the pool (JSON)</button><input type="file" id="pFile" accept=".json"><button class="btn" id="pRes2" type="button">Restore from file</button></div>`;
-  let off=0,total=0;const L=30,prog=(t,k)=>say($('pProg'),t,k);
-  const thumb=m=>{const i=document.createElement('img');i.loading='lazy';i.alt='';if(m.s)i.src='https://assets.ppy.sh/beatmaps/'+m.s+'/covers/list.jpg';return i};
-  const meta=m=>(m.v?'▶ video':'♪ preview')+(m.c!=null?' · '+Number(m.c).toLocaleString()+' plays':' · no play count')+(m.b?' · '+m.b+' BPM':'')+(m.a!=null?' · AR '+m.a:'')+(m.p?' · '+m.p+'pp':'');
-  async function load(){try{const d=await adm('/admin/pool/list?q='+encodeURIComponent($('pF').value)+'&f='+$('pFs').value+'&off='+off+'&lim='+L);total=d.total;const s=d.stats;
-      say($('pStat'),s.all?s.all+' maps in the pool · '+s.on+' enabled · '+s.video+' with a gameplay video · '+s.preview+' preview audio only · '+s.bg+' usable for backgrounds':'The pool is empty: games still use the old YouTube channel list. Press “Fill the pool” to build it.',s.all?'':'warn');
-      $('pList').replaceChildren(...d.items.map(m=>{const r=el('div','mrow'+(m.on?'':' off')),mid=el('div'),act=el('div','act'),tg=el('button','btn',m.on?'Disable':'Enable'),rm=el('button','btn','Remove');
-        mid.append(el('b',null,m.so+' — '+m.ar),el('small',null,meta(m)));tg.type=rm.type='button';
-        tg.onclick=async()=>{try{await adm('/admin/pool/toggle',{k:m.k,on:!m.on});load()}catch(e){prog(e.message,'bad')}};
-        rm.onclick=async()=>{if(!confirm('Remove “'+m.so+'” from the pool? Imports will not add it back.'))return;try{await adm('/admin/pool/remove',{k:m.k});load()}catch(e){prog(e.message,'bad')}};
-        act.append(tg,rm);r.append(thumb(m),mid,act);return r}));
-      $('pPage').textContent=total?(off+1)+'–'+Math.min(total,off+L)+' of '+total:'nothing here';$('pPrev').disabled=off<=0;$('pNext').disabled=off+L>=total}
-    catch(e){say($('pStat'),e.message,'bad')}}
-  $('pF').oninput=()=>{off=0;clearTimeout(load.t);load.t=setTimeout(load,250)};$('pFs').onchange=()=>{off=0;load()};$('pPrev').onclick=()=>{off=Math.max(0,off-L);load()};$('pNext').onclick=()=>{off+=L;load()};
-  const run=async(label,body)=>{prog(label+'…');return adm('/admin/pool/import',body)};
-  $('pYt').onclick=async()=>{try{const r=await run('Reading the channel’s videos and play counts',{mode:'yt'});prog('Channel clips: '+r.added+' new, '+r.updated+' updated. '+r.total+' maps in the pool.','ok');load()}catch(e){prog(e.message,'bad')}};
-  $('pFill').onclick=async()=>{const b=$('pFill');b.disabled=true;
-    try{try{const r=await run('1/2 Channel clips',{mode:'yt'});prog('Channel clips: '+r.added+' new, '+r.updated+' updated.')}catch(e){prog('Channel import failed ('+e.message+'). Continuing with the most played maps…','warn')}
-      const target=Math.max(50,Math.min(3000,+$('pN').value||1000));let cur='',n=0,pages=0;
-      while(n<target){const p=Math.min(20,Math.ceil((target-n)/50));const r=await run('2/2 Most played maps ('+n+' / '+target+')',{mode:'top',cursor:cur,pages:p,status:$('pS').value});n+=p*50;pages++;cur=r.cursor;prog('Most played maps: '+Math.min(n,target)+' / '+target+' · '+r.total+' in the pool');load();if(r.done||pages>80)break}
-      prog('Done. The game picks it up within a few minutes.','ok')}
+/* ----- pools: "maps" (osu!, backgrounds) and "clips" (YouTube channel, gameplay) share one editor ----- */
+const POOLS={
+  maps:{id:'pm',title:'Background maps',about:'Maps from osu! used for the background questions. Only a link to the image is kept, nothing is stored. The play count decides how hard a map is: the most played are the easy tier.',
+    thumb:m=>'https://assets.ppy.sh/beatmaps/'+m.s+'/covers/list.jpg',
+    meta:m=>(m.c!=null?Number(m.c).toLocaleString()+' plays':'no play count')+(m.b?' · '+m.b+' BPM':''),
+    stat:s=>s.all?s.all+' maps · '+s.on+' enabled':'No maps yet: backgrounds are derived from the clips until you fill this.'},
+  clips:{id:'pc',title:'Clips',about:'Gameplay videos from the YouTube channel (@cpol_v1). Each needs a “Beatmap info” section in its description: that gives the song, artist, AR, BPM, SR and pp.',
+    thumb:m=>'https://i.ytimg.com/vi/'+m.v+'/mqdefault.jpg',
+    meta:m=>[m.a!=null?'AR '+m.a:'',m.b?m.b+' BPM':'',m.r!=null?m.r+'★':'',m.p?m.p+'pp':''].filter(Boolean).join(' · '),
+    stat:s=>s.all?s.all+' clips · '+s.on+' enabled':'No clips yet: games read the channel directly until you fill this.'}};
+function initPool(W){
+  const P=POOLS[W],i=P.id,box=$('tab_'+W),q=n=>$(i+n);
+  box.innerHTML=`<p class="stat">${P.about}</p>
+    <div class="pcard"><div class="pstat"><b id="${i}Stat">Loading…</b></div>
+    <div class="row">${W==='maps'?`<button class="btn go" id="${i}Fill" type="button">Fill from osu!</button><label>Most played <input id="${i}N" type="number" min="50" max="3000" step="50" value="1000"></label><label>Status <select id="${i}S"><option value="ranked">Ranked</option><option value="loved">Loved</option><option value="any">Any</option></select></label>`:`<button class="btn go" id="${i}Fill" type="button">Fill from YouTube</button>`}</div>
+    <p class="stat" id="${i}Prog"></p></div>
+    <details class="pcard"><summary>${W==='maps'?'Add a map':'Add a video'}</summary>
+      <div class="row"><input id="${i}Q" type="search" placeholder="${W==='maps'?'Search osu! (title / artist) or paste a beatmapset link or id':'Paste a YouTube link or video id'}" style="flex:1;min-width:200px">${W==='maps'?`<select id="${i}Qs"><option value="any">Any status</option><option value="ranked">Ranked</option><option value="loved">Loved</option></select>`:''}<button class="btn" id="${i}Go" type="button">${W==='maps'?'Search':'Add'}</button></div><div id="${i}Res" class="admp"></div></details>
+    <div class="pcard"><div class="row"><input id="${i}F" type="search" placeholder="Filter by title or artist" style="flex:1;min-width:180px"><select id="${i}Fs"><option value="all">All</option><option value="off">Disabled</option></select></div>
+    <div id="${i}List" class="admp"></div>
+    <div class="row"><button class="btn" id="${i}Prev" type="button">Previous</button><span class="stat" id="${i}Page"></span><button class="btn" id="${i}Next" type="button">Next</button></div></div>
+    <details class="pcard"><summary>Backup</summary><div class="row"><button class="btn" id="${i}Exp" type="button">Download (JSON)</button><input type="file" id="${i}File" accept=".json"><button class="btn" id="${i}Rest" type="button">Restore from file</button></div></details>`;
+  let off=0,total=0;const L=30,prog=(t,k)=>say(q('Prog'),t,k),base='/admin/pool/'+W+'/';
+  const row=(m,act)=>{const r=el('div','mrow'+(m.on===0?' off':'')),mid=el('div'),im=document.createElement('img');im.loading='lazy';im.alt='';im.src=P.thumb(m);
+    mid.append(el('b',null,m.so+' — '+m.ar),el('small',null,P.meta(m)));r.append(im,mid,act);return r};
+  async function load(){try{const d=await adm(base+'list?q='+encodeURIComponent(q('F').value)+'&f='+q('Fs').value+'&off='+off+'&lim='+L);total=d.total;
+      say(q('Stat'),P.stat(d.stats),d.stats.all?'':'warn');q('Stat').className=d.stats.all?'':'warn';
+      q('List').replaceChildren(...d.items.map(m=>{const act=el('div','act'),tg=el('button','btn',m.on?'Disable':'Enable'),rm=el('button','btn','Remove');tg.type=rm.type='button';
+        tg.onclick=async()=>{try{await adm(base+'toggle',{k:m.k,on:!m.on});load()}catch(e){prog(e.message,'bad')}};
+        rm.onclick=async()=>{if(!confirm('Remove “'+m.so+'”? Fills will not add it back.'))return;try{await adm(base+'remove',{k:m.k});load()}catch(e){prog(e.message,'bad')}};
+        act.append(tg,rm);return row(m,act)}));
+      q('Page').textContent=total?(off+1)+'–'+Math.min(total,off+L)+' of '+total:'nothing here';q('Prev').disabled=off<=0;q('Next').disabled=off+L>=total}
+    catch(e){q('Stat').textContent=e.message;q('Stat').className='bad'}}
+  q('F').oninput=()=>{off=0;clearTimeout(load.t);load.t=setTimeout(load,250)};q('Fs').onchange=()=>{off=0;load()};q('Prev').onclick=()=>{off=Math.max(0,off-L);load()};q('Next').onclick=()=>{off+=L;load()};
+  q('Fill').onclick=async()=>{const b=q('Fill');b.disabled=true;
+    try{if(W==='clips'){prog('Reading the channel’s videos…');const r=await adm(base+'import',{});prog('Done: '+r.added+' new, '+r.updated+' updated · '+r.total+' clips.','ok')}
+      else{const target=Math.max(50,Math.min(3000,+q('N').value||1000));let cur='',n=0,pages=0;
+        while(n<target){const p=Math.min(20,Math.ceil((target-n)/50));prog('Most played maps ('+n+' / '+target+')…');const r=await adm(base+'import',{cursor:cur,pages:p,status:q('S').value});n+=p*50;pages++;cur=r.cursor;prog(Math.min(n,target)+' / '+target+' · '+r.total+' maps');load();if(r.done||pages>80)break}
+        prog('Done. The game picks it up within a few minutes.','ok')}}
     catch(e){prog(e.message,'bad')}b.disabled=false;load()};
-  $('pGo').onclick=async()=>{const q=$('pQ').value.trim(),res=$('pRes');if(!q)return;
-    try{if(/^\d+$/.test(q)||/beatmapsets\/\d+/.test(q)){const r=await adm('/admin/pool/add',{set:q});res.replaceChildren(el('p','stat ok',r.added?'Added.':'That map was already in the pool (updated).'));load();return}
-      res.replaceChildren(el('p','stat','Searching…'));const d=await adm('/admin/osu/search?q='+encodeURIComponent(q)+'&s='+$('pQs').value);
-      res.replaceChildren(...(d.items.length?d.items.map(m=>{const r=el('div','mrow'),mid=el('div'),act=el('div','act'),b=el('button','btn',m.inPool?'In pool':'Add');b.type='button';b.disabled=m.inPool;
-        mid.append(el('b',null,m.so+' — '+m.ar),el('small',null,meta(m)));b.onclick=async()=>{b.disabled=true;try{await adm('/admin/pool/add',{set:m.s});b.textContent='Added';load()}catch(e){b.textContent='Error';prog(e.message,'bad')}};
-        act.append(b);r.append(thumb(m),mid,act);return r}):[el('p','stat','No maps found.')]))}
+  q('Go').onclick=async()=>{const v=q('Q').value.trim(),res=q('Res');if(!v)return;
+    try{if(W==='clips'){const r=await adm(base+'add',{video:v});res.replaceChildren(el('p','stat ok',r.added?'Added.':'Already there (updated).'));load();return}
+      if(/^\d+$/.test(v)||/beatmapsets\/\d+/.test(v)){const r=await adm(base+'add',{set:v});res.replaceChildren(el('p','stat ok',r.added?'Added.':'Already there (updated).'));load();return}
+      res.replaceChildren(el('p','stat','Searching…'));const d=await adm('/admin/osu/search?q='+encodeURIComponent(v)+'&s='+q('Qs').value);
+      res.replaceChildren(...(d.items.length?d.items.map(m=>{const act=el('div','act'),b=el('button','btn',m.inPool?'In pool':'Add');b.type='button';b.disabled=m.inPool;
+        b.onclick=async()=>{b.disabled=true;try{await adm(base+'add',{set:m.s});b.textContent='Added';load()}catch(e){b.textContent='Error';prog(e.message,'bad')}};act.append(b);return row(m,act)}):[el('p','stat','Nothing found.')]))}
     catch(e){res.replaceChildren(el('p','stat bad',e.message))}};
-  $('pQ').addEventListener('keydown',e=>{if(e.key==='Enter')$('pGo').click()});
-  $('pExp').onclick=async()=>{try{dl('ozu-pool.json',await adm('/admin/pool/export'))}catch(e){prog(e.message,'bad')}};
-  $('pRes2').onclick=async()=>{try{const d=await readJson($('pFile')),r=await adm('/admin/pool/restore',{maps:d.maps||d});prog('Restored: '+r.added+' added, '+r.updated+' replaced.','ok');load()}catch(e){prog(e.message,'bad')}};
+  q('Q').addEventListener('keydown',e=>{if(e.key==='Enter')q('Go').click()});
+  q('Exp').onclick=async()=>{try{dl('ozu-'+W+'.json',await adm(base+'export'))}catch(e){prog(e.message,'bad')}};
+  q('Rest').onclick=async()=>{try{const d=await readJson(q('File')),r=await adm(base+'restore',{items:d.items||d});prog('Restored: '+r.added+' added, '+r.updated+' replaced.','ok');load()}catch(e){prog(e.message,'bad')}};
   load();
 }
 
