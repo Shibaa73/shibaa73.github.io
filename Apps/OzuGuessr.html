@@ -930,18 +930,18 @@ async function openAdmin(){
     m.innerHTML=`<div class="admbox" role="dialog" aria-label="Scoring settings">
       <div class="admhead"><h2>Admin</h2><button class="btn" id="admClose" type="button">Close</button></div>
       <div class="admkey"><input id="admkey" type="text" name="ozu-adm-key" class="secret" placeholder="Admin key" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" value=""><button class="btn" id="admUnlock" type="button">Check key</button><span class="admst" id="admSt"></span></div>
-      <div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button></div>
+      <div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button><button type="button" data-t="rep" aria-pressed="false" id="repTab">Reports</button></div>
       <div id="tab_sc"><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><div class="admgrid"><div>
         <div class="legend" id="legend"></div>
         <div class="chartwrap" id="cw"><svg id="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points by relative error for AR, BPM, SR and PP"></svg><div class="tip" id="tip" hidden></div></div>
         <div id="admTable" hidden></div>
         <div class="row"><button class="btn" id="admTbl" type="button">Table view</button></div>
-      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div></div>`;
+      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div><div id="tab_rep" class="admp" hidden></div></div>`;
     $('admkey').value=aKey;
     $('admClose').onclick=closeAdmin;m.addEventListener('pointerdown',e=>{if(e.target===m)closeAdmin()});
     $('admTbl').onclick=()=>{tableOn=!tableOn;$('admTbl').textContent=tableOn?'Graph view':'Table view';$('cw').hidden=tableOn;$('legend').hidden=tableOn;$('admTable').hidden=!tableOn;drawTable()};
     $('admUnlock').onclick=async()=>{aKey=$('admkey').value;try{sessionStorage.setItem('ozu:ak',aKey)}catch(e){}
-      try{const r=await fetch(API+'/admin/check',{headers:{'x-admin-key':aKey}}),d=await r.json();admSt(r.ok?'Key accepted.':d.error||'Not accepted.',r.ok)}catch(e){admSt('Couldn’t reach the server.',false)}};
+      try{const r=await fetch(API+'/admin/check',{headers:{'x-admin-key':aKey}}),d=await r.json();admSt(r.ok?'Key accepted.':d.error||'Not accepted.',r.ok);if(r.ok)repBadge()}catch(e){admSt('Couldn’t reach the server.',false)}};
     bindChart();admTabs();
   }
   try{const r=await fetch(API+'/scoring'),d=await r.json();A=cl(d.cfg);D=cl(d.defaults)}catch(e){admSt('Couldn’t load the current scoring from the server.',false);if(!A){D=cl({w:{song:3,artist:2,ar:1,bpm:1,sr:1,pp:1},curve:Object.fromEntries(['ar','bpm','sr','pp'].map(k=>[k,{full:.02,zero:.2,k:2.5}])),bgMult:[1,1.5,2,2.5,3]});A=cl(D)}}
@@ -1139,10 +1139,11 @@ const say=(e,t,k)=>{e.textContent=t||'';e.className='stat '+(k||'')};
 const dl=(name,obj)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 const readJson=inp=>new Promise((res,rej)=>{const f=inp.files[0];if(!f)return rej(new Error('Choose a file first'));const r=new FileReader();r.onload=()=>{try{res(JSON.parse(r.result))}catch(e){rej(new Error('Not a valid JSON file'))}};r.readAsText(f)});
 const inited={};
+async function repBadge(){try{const d=await adm('/admin/oz/overview'),b=$('repTab');if(b)b.textContent='Reports'+(d.reports?' ('+d.reports+')':'')}catch(e){}}
 function admTabs(){
-  const bar=$('admtabs'),T={sc:$('tab_sc'),maps:$('tab_maps'),clips:$('tab_clips'),oz:$('tab_oz')};
+  const bar=$('admtabs'),T={sc:$('tab_sc'),maps:$('tab_maps'),clips:$('tab_clips'),oz:$('tab_oz'),rep:$('tab_rep')};
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
-    for(const k in T)T[k].hidden=k!==b.dataset.t;if((b.dataset.t==='maps'||b.dataset.t==='clips')&&!inited[b.dataset.t]){inited[b.dataset.t]=1;initPool(b.dataset.t)}if(b.dataset.t==='oz'&&!inited.oz){inited.oz=1;initOz()}})}
+    for(const k in T)T[k].hidden=k!==b.dataset.t;if((b.dataset.t==='maps'||b.dataset.t==='clips')&&!inited[b.dataset.t]){inited[b.dataset.t]=1;initPool(b.dataset.t)}if((b.dataset.t==='oz'||b.dataset.t==='rep')&&!inited.oz){inited.oz=1;initOz()}})}
 
 /* ----- pools: "maps" (osu!, backgrounds) and "clips" (YouTube channel, gameplay) share one editor ----- */
 const POOLS={
@@ -1200,16 +1201,16 @@ function initPool(W){
 
 /* ----- Ozillion: questions, answers (+ aliases, counts), reports ----- */
 function initOz(){
-  const box=$('tab_oz');box.innerHTML=`<p class="stat">A question needs at least 3 answers to be asked. <b>Count</b> = how often the answer is given for that question; the rarity follows from it (the most given answers that cover the first 50 % of all counts are Doo Doo, then 30 % Those Who Know..., 13 % Ball Knowledge, 5.5 % WYSI, the rest Ozillion!). You can also pin a tier on an answer.</p>
+  const box=$('tab_oz');box.innerHTML=`<p class="stat">A question needs at least 3 answers to be asked. <b>Count</b> = how often the answer is used for that question. It is the starting value, and every time a player gives the answer it goes up by 1 (the “given” number in the list). The fewer, the rarer: (the most given answers that cover the first 50 % of all counts are Doo Doo, then 30 % Those Who Know..., 13 % Ball Knowledge, 5.5 % WYSI, the rest Ozillion!). You can also pin a tier on an answer.</p>
     <div class="ozadm"><div><div class="row"><input id="oqNew" type="text" maxlength="200" placeholder="New question…" style="flex:1;min-width:0"><button class="btn go" id="oqAdd" type="button">Add</button></div><div class="row" style="flex-wrap:wrap"><select id="oqKind" title="Question type"><option value="list">Typed answers</option><option value="scrape">Scraped from osu!</option><option value="live">Live osu! search</option></select><label id="oqDl" hidden><input type="checkbox" id="oqD"> needs the difficulty</label><input id="oqF" type="text" maxlength="300" placeholder="osu! filter, e.g. bpm>{bpm 150,200} stars>6" style="flex:1 1 100%;min-width:0" hidden></div><div class="qlist" id="oqList"></div></div>
     <div id="oqEd"><p class="stat">Pick a question on the left, or create one.</p></div></div>
-    <h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>
     <h3>Backup</h3><div class="row"><button class="btn" id="oExp" type="button">Download all questions (JSON)</button><input type="file" id="oFile" accept=".json"><button class="btn" id="oRes" type="button">Restore from file</button></div><p class="stat" id="oMsg"></p>`;
+  $('tab_rep').innerHTML='<p class="stat">Players can report an answer they gave that was not accepted: a missing answer (add it to the question) or a missing alias (another name for an answer).</p><h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>';
   let sel=null;const msg=(t,k)=>say($('oMsg'),t,k);
   const OZA=['#9aa0a6','#4f9cff','#ff4d62','#17131d','#ff66aa'];
   async function list(){try{const d=await adm('/admin/oz/overview');
       $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='live'?'Live osu! search':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;list();edit()};return b}));
-      $('oRepN').textContent='('+d.reports+')';return d}catch(e){msg(e.message,'bad')}}
+      $('oRepN').textContent='('+d.reports+')';const rb=$('repTab');if(rb)rb.textContent='Reports'+(d.reports?' ('+d.reports+')':'');return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
     try{const {q}=await adm('/admin/oz/q?id='+sel);ed.replaceChildren();
       const kindOf=q.kind||'list',dc=kindOf==='live'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
@@ -1245,7 +1246,7 @@ function initOz(){
       const bb=el('button','btn','Add the lines');bb.type='button';bb.onclick=async()=>{try{const r=await adm('/admin/oz/a/bulk',{qid:q.id,text:bulk.value});msg(r.added+' added, '+r.merged+' increased.','ok');edit();list()}catch(e){msg(e.message,'bad')}};
       ed.append(el('h3',null,'Add many'),bulk,bb)}
     catch(e){msg(e.message,'bad')}}
-  async function reps(){try{const {reports}=await adm('/admin/oz/reports'),box=$('oRep');$('oRepN').textContent='('+reports.length+')';
+  async function reps(){try{const {reports}=await adm('/admin/oz/reports'),box=$('oRep');$('oRepN').textContent='('+reports.length+')';const rb=$('repTab');if(rb)rb.textContent='Reports'+(reports.length?' ('+reports.length+')':'');
       if(!reports.length){box.replaceChildren(el('p','stat','No reports.'));return}
       box.replaceChildren(...reports.map(r=>{const c=el('div','rep'),head=el('div'),ctl=el('div','row');head.append(chip(r.kind==='alias'?1:3),' ');head.lastChild.textContent=r.kind==='alias'?'Missing alias':'Missing answer';
         head.append(' · ',el('b',null,r.qtext),' · typed “'+r.text+'” ×'+r.n+(r.target?' · player says it is: “'+r.target+'”':''));c.append(head,ctl);
