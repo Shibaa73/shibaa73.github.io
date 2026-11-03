@@ -344,6 +344,99 @@ body.ingame .wrap{max-width:1120px}
 }
 @media (max-width:900px) and (max-height:520px){.clip{width:min(100%,calc(34vh*16/9))}}
 #form .fld{min-width:0}#form .fld input{width:100%;min-width:0;box-sizing:border-box}
+
+/* ---------- Ozillion ---------- */
+:root{--t0:#9aa0a6;--t1:#4f9cff;--t2:#ff4d62;--t3:#17131d;--t4:#ff66aa}
+.mode.half{grid-column:auto}.mode.wide{grid-column:1/-1}
+.mode.oz{background:linear-gradient(120deg,rgba(124,199,255,.14),var(--panel-2) 62%);border-color:rgba(124,199,255,.3)}
+.mode.oz svg{stroke:var(--cyan)}.mode.oz em{color:var(--cyan)}
+.ozq{padding:16px 18px 18px;border-radius:16px;background:linear-gradient(135deg,rgba(255,122,179,.18),var(--panel-2));border:1px solid rgba(255,122,179,.32);animation:rise .4s var(--ease) both}
+.ozq small{display:block;font:600 .7rem 'Fredoka',sans-serif;letter-spacing:.2em;color:var(--pink);margin-bottom:8px}
+.ozq h3{margin:0;font:600 clamp(1.2rem,3.4vw,1.7rem)/1.25 'Fredoka',sans-serif}
+.tchip{display:inline-block;font:600 .74rem 'Fredoka',sans-serif;padding:3px 10px;border-radius:999px;color:#fff;background:var(--tc);border:1px solid rgba(255,255,255,.28);white-space:nowrap}
+.tchip.t3{box-shadow:0 0 0 1px #000 inset}
+.orr{display:grid;grid-template-columns:minmax(70px,.7fr) 1.1fr 1.3fr auto;gap:4px 10px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--panel-2);border:1px solid var(--border);font-size:.86rem;animation:slide-in .45s var(--ease) both;animation-delay:calc(var(--i,0)*70ms)}
+.orr>div{min-width:0;overflow:hidden;text-overflow:ellipsis}.orr.me{border-color:rgba(255,122,179,.5)}
+.orr .pt{font-family:'IBM Plex Mono',monospace;text-align:right}
+.topline{color:var(--muted);font-size:.82rem;margin:8px 0 0}
+.repbtn{font:600 .72rem 'Inter',sans-serif;background:none;border:1px dashed var(--border);border-radius:8px;color:var(--muted);padding:3px 8px;cursor:pointer}.repbtn:hover{color:var(--pink);border-color:var(--pink)}
+.repform{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-top:6px}
+.repform select,.repform input{background:var(--panel-3);border:1px solid var(--border);border-radius:8px;color:var(--text);font:inherit;font-size:.82rem;padding:6px 8px}.repform input{flex:1;min-width:140px}
+.lbtabs{display:flex;gap:8px;margin:-6px 0 12px}.lbtabs .btn.sm{margin:0}.lbtabs .btn[aria-pressed=true]{border-color:var(--pink);color:var(--pink)}
+/* rank card + recap */
+#rank{display:flex;align-items:center;gap:18px;padding:16px 20px;margin-bottom:14px;border-radius:16px;background:linear-gradient(120deg,color-mix(in srgb,var(--gc) 22%,transparent),var(--panel-2) 70%);border:1px solid color-mix(in srgb,var(--gc) 55%,transparent);animation:pop .6s var(--ease) both}
+#rank[hidden]{display:none}
+#rank .gr{font:700 3.4rem/1 'Fredoka',sans-serif;color:var(--gc);text-shadow:0 0 28px color-mix(in srgb,var(--gc) 70%,transparent)}
+#rank b{display:block;font:600 1.1rem 'Fredoka',sans-serif}#rank span{color:var(--muted);font-size:.86rem}
+.recap{display:grid;gap:8px;margin-top:14px}.recap h3{margin:12px 0 0;font:600 1rem 'Fredoka',sans-serif}
+.rcard{padding:12px 14px;border-radius:14px;background:var(--panel-2);border:1px solid var(--border);display:grid;gap:6px}
+.rcard .q{font-weight:600;font-size:.94rem}.rcard .line{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:.88rem;color:var(--muted)}
+.rcard .line b{color:var(--text);font-weight:600}.rcard .rr{font-size:.8rem;padding:6px 8px;grid-template-columns:70px 1fr 1fr auto}
+/* the dive */
+#ozfx{position:fixed;inset:0;z-index:90;overflow:hidden;cursor:pointer;background:#000;animation:fade .25s ease both}
+#ozfx .scroll{position:absolute;left:0;right:0;top:0;height:500%;transition:transform 1s cubic-bezier(.65,0,.2,1)}
+#ozfx .band{height:20%;position:relative;overflow:hidden;display:grid;place-items:start center}
+#ozfx .lname{margin-top:9vh;font:600 clamp(1rem,3.4vw,1.8rem) 'Fredoka',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#fff;opacity:.6;text-align:center;padding:0 12px}
+.band.b0{background:radial-gradient(circle at 50% 45%,#6d747c,#2b2f34 75%)}
+.band.b1{background:radial-gradient(circle at 50% 45%,#2f7cf0,#0b2658 78%)}
+.band.b2{background:radial-gradient(circle at 50% 45%,#ff4a5f,#4a0712 78%)}
+.band.b3{background:radial-gradient(circle at 50% 45%,#221b2c,#000 80%)}
+.band.b4{background:radial-gradient(circle at 50% 45%,#ffa3d0,#e0498f 40%,#3b0a28 100%)}
+.band::before,.band::after{content:'';position:absolute;inset:0;pointer-events:none}
+.band.b0::before{background:radial-gradient(40% 30% at 20% 60%,rgba(255,255,255,.14),transparent),radial-gradient(40% 30% at 80% 35%,rgba(255,255,255,.1),transparent);animation:ozfog 7s ease-in-out infinite alternate}
+.band.b1::before{background:repeating-radial-gradient(circle at 50% 50%,transparent 0 38px,rgba(255,255,255,.12) 40px 42px,transparent 44px 90px);animation:ozripple 3s linear infinite}
+.band.b2::before{background:radial-gradient(circle,rgba(255,200,120,.9) 0 2px,transparent 3px) 0 0/46px 70px,radial-gradient(circle,rgba(255,120,90,.8) 0 2px,transparent 3px) 20px 30px/62px 90px;animation:ozembers 2.4s linear infinite}
+.band.b3::before{background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,transparent 2px 5px);animation:ozflick .18s steps(2) infinite}
+.band.b3::after{content:'727';position:absolute;inset:auto;left:50%;top:52%;translate:-50% -50%;font:700 clamp(7rem,30vw,20rem) 'Fredoka',sans-serif;color:rgba(255,255,255,.05);animation:ozghost 2.2s steps(1) infinite}
+.band.b4::before{background:conic-gradient(from 0deg at 50% 45%,rgba(255,255,255,.28),transparent 8%,rgba(255,255,255,.2) 16%,transparent 25%,rgba(255,255,255,.28) 33%,transparent 41%,rgba(255,255,255,.2) 50%,transparent 58%,rgba(255,255,255,.28) 66%,transparent 75%,rgba(255,255,255,.2) 83%,transparent 91%);animation:ozspin 9s linear infinite}
+.fxorb{position:absolute;left:50%;top:45%;width:128px;height:128px;margin:-64px 0 0 -64px;pointer-events:none;transition:opacity .4s}
+.fxorb .hc{position:absolute;inset:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--oc,#ff7ab3) 62%);box-shadow:0 0 0 5px rgba(255,255,255,.9),0 0 38px var(--oc,#ff7ab3);animation:ozbeat 1s ease-in-out infinite}
+.fxorb .ap{position:absolute;inset:-8px;border-radius:50%;border:4px solid rgba(255,255,255,.85);animation:ozapp 1.1s ease-out infinite}.fxorb .ap+.ap{animation-delay:.55s}
+.fxmain{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:10px;padding:0 14px;pointer-events:none}
+.fxwho{font:600 .9rem 'Fredoka',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:0}.fxwho.in{opacity:.8;transition:opacity .4s}
+.fxans{font:700 clamp(2rem,8vw,4.6rem)/1.05 'Fredoka',sans-serif;color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.5);opacity:0;scale:.5;max-width:92vw;word-break:break-word}
+.fxans.in{opacity:1;scale:1;transition:scale .5s cubic-bezier(.2,1.6,.4,1),opacity .2s}
+.fxtier{font:700 clamp(1.1rem,4vw,2rem) 'Fredoka',sans-serif;letter-spacing:.08em;color:#fff;opacity:0;translate:0 14px}.fxtier.in{opacity:1;translate:0;transition:all .5s .25s ease}
+.fxpts{font:600 clamp(1rem,3vw,1.5rem) 'IBM Plex Mono',monospace;color:#fff;opacity:0}.fxpts.in{opacity:.95;transition:opacity .4s .5s}
+.fxdig{position:absolute;left:0;right:0;bottom:11vh;text-align:center;font:600 clamp(.9rem,2.6vw,1.2rem) 'Fredoka',sans-serif;letter-spacing:.18em;color:#fff;opacity:.75;text-transform:uppercase;pointer-events:none;transition:opacity .3s}.fxdig i{font-style:normal;animation:ozdots 1.2s steps(4) infinite}
+.fxskip{position:absolute;right:16px;top:14px;font:600 .75rem 'Inter',sans-serif;color:#fff;opacity:.5;letter-spacing:.06em}
+.fxflash{position:absolute;inset:0;background:#fff;pointer-events:none;animation:ozflash .7s ease-out both}
+.fxpt{position:absolute;left:50%;top:45%;width:var(--s,18px);height:var(--s,18px);margin:calc(var(--s,18px)/-2) 0 0 calc(var(--s,18px)/-2);border-radius:50%;background:var(--c,#fff);border:3px solid #fff;pointer-events:none;animation:ozfly var(--d,1.4s) cubic-bezier(.1,.8,.3,1) both}
+.fxring{position:absolute;left:50%;top:45%;width:20px;height:20px;margin:-10px;border-radius:50%;border:5px solid var(--c,#fff);pointer-events:none;animation:ozring 1.2s ease-out both;animation-delay:var(--w,0s)}
+#ozfx.shake{animation:ozshake .5s linear both}#ozfx.shake2{animation:ozshake .8s linear 2 both}
+#ozfx.t3 .fxans{text-shadow:3px 0 #ff2e6e,-3px 0 #26e6ff;animation:ozglitch .35s steps(2) infinite}
+#ozfx.t4 .fxans{background:linear-gradient(90deg,#fff,#ffd1e8,#ff7ab3,#fff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:ozshine 1.2s linear infinite;filter:drop-shadow(0 0 22px #ff66aa)}
+#ozfx.x .fxans{color:#cfd3dc;font-size:clamp(1.6rem,6vw,3rem)}
+body.pshake{animation:ozshake .5s linear}
+@keyframes ozfog{to{transform:translateX(6%) scale(1.15)}}@keyframes ozripple{to{background-position:0 0;transform:scale(1.18)}}
+@keyframes ozembers{to{background-position:0 -70px,20px -60px}}@keyframes ozflick{50%{opacity:.5}}
+@keyframes ozghost{0%{opacity:1}8%{opacity:0}9%{opacity:1}46%{opacity:.2}47%{opacity:1}}@keyframes ozspin{to{transform:rotate(360deg) scale(1.6)}}
+@keyframes ozbeat{50%{scale:1.1}}@keyframes ozapp{0%{scale:2.6;opacity:0}20%{opacity:1}100%{scale:1;opacity:.2}}
+@keyframes ozflash{0%{opacity:1}100%{opacity:0}}@keyframes ozfly{0%{transform:translate(0,0) scale(.2);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(1);opacity:0}}
+@keyframes ozring{0%{transform:scale(.2);opacity:1}100%{transform:scale(34);opacity:0}}
+@keyframes ozshake{0%,100%{translate:0}10%{translate:-9px 4px}20%{translate:8px -6px}30%{translate:-7px -3px}40%{translate:9px 5px}50%{translate:-6px 6px}60%{translate:7px -4px}70%{translate:-8px 2px}80%{translate:6px -5px}90%{translate:-4px 3px}}
+@keyframes ozglitch{0%{translate:-3px 0}50%{translate:3px 1px}100%{translate:0 -1px}}@keyframes ozshine{to{background-position:-200% 0}}@keyframes ozdots{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
+@media (prefers-reduced-motion:reduce){#ozfx{display:none!important}}
+@media (max-width:900px){.orr{grid-template-columns:1fr 1fr auto}.orr>div:nth-child(3){grid-column:1/-1;order:5}.ozq{padding:10px 14px}.ozq h3{font-size:1.1rem}.ozq small{margin-bottom:4px}
+  .fxorb{scale:.8}}
+/* admin tabs */
+.admtabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}.admtabs button{padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);color:var(--muted);font:600 .88rem 'Inter',sans-serif;cursor:pointer}
+.admtabs button[aria-pressed=true]{color:var(--pink);border-color:var(--pink);background:var(--panel-3)}
+.admp{display:grid;gap:14px}.admp h3{margin:6px 0 0;font:600 1.05rem 'Fredoka',sans-serif}.admp .row{margin:0}
+.admp input[type=text],.admp input[type=search],.admp input[type=number],.admp select,.admp textarea{background:var(--panel-2);border:1px solid var(--border);border-radius:8px;color:var(--text);font:inherit;font-size:.9rem;padding:8px 10px;min-width:0}
+.admp textarea{width:100%;min-height:90px;font-family:'IBM Plex Mono',monospace;font-size:.82rem;box-sizing:border-box}
+.admp .stat{color:var(--muted);font-size:.86rem;line-height:1.6}.admp .warn{color:var(--amber);font-size:.88rem}.admp .ok{color:var(--mint)}.admp .bad{color:var(--coral)}
+.mrow{display:grid;grid-template-columns:76px 1fr auto;gap:10px;align-items:center;padding:6px;border-radius:12px;background:var(--panel-2);border:1px solid var(--border)}
+.mrow img{width:76px;height:42px;object-fit:cover;border-radius:8px;background:#000}.mrow b{display:block;font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mrow small{color:var(--muted);font-size:.76rem}
+.mrow.off{opacity:.45}.mrow .act{display:flex;gap:6px;align-items:center}.mrow .btn{padding:6px 10px;font-size:.78rem}
+.ozadm{display:grid;grid-template-columns:240px 1fr;gap:16px;align-items:start}
+.qlist{display:grid;gap:6px;max-height:420px;overflow:auto}.qlist button{text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--panel-2);color:var(--text);font:inherit;font-size:.84rem;cursor:pointer}
+.qlist button[aria-pressed=true]{border-color:var(--pink)}.qlist small{display:block;color:var(--muted);font-size:.72rem}
+.arow{display:grid;grid-template-columns:1.2fr 1.3fr 80px 150px auto;gap:6px;align-items:center;margin-bottom:6px}
+.arow input,.arow select{width:100%;box-sizing:border-box}
+.arow.h{color:var(--muted);font-size:.72rem;margin:0}
+.rep{display:grid;gap:6px;padding:10px;border-radius:12px;background:var(--panel-2);border:1px solid var(--border)}
+@media (max-width:760px){.ozadm{grid-template-columns:1fr}.arow{grid-template-columns:1fr 1fr}.arow.h{display:none}}
 </style>
 </head>
 <body>
@@ -365,10 +458,15 @@ body.ingame .wrap{max-width:1120px}
     <h2>Play</h2>
     <div class="fld"><label for="nick">Your name</label><input id="nick" maxlength="20" autocomplete="off"></div>
     <div class="modes">
-      <button class="mode featured" id="daily" type="button">
+      <button class="mode featured half" id="daily" type="button">
         <b><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Daily ozu</b>
         <span>5 rounds, the same clips for everyone, a new set every day at midnight (Rome time). Your score goes on the leaderboard.</span>
         <em id="dailyLeft"></em><em class="streak" id="dailyStreak"></em>
+      </button>
+      <button class="mode featured half oz" id="ozdaily" type="button">
+        <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3"/></svg>Daily Ozillion</b>
+        <span>5 questions, 25 seconds each. The rarer your answer, the more points: Doo Doo to Ozillion! Same questions for everyone, new set at midnight.</span>
+        <em id="ozLeft"></em><em class="streak" id="ozStreak"></em>
       </button>
       <button class="mode" id="solo" type="button">
         <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5l5 3.5-5 3.5z"/></svg>Unlimited mode</b>
@@ -379,6 +477,11 @@ body.ingame .wrap{max-width:1120px}
         <span>Name the map from its background. Five difficulties, from Autoplay to DT.</span>
         <em id="bgState"></em>
       </button>
+      <button class="mode oz wide" id="ozsolo" type="button">
+        <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3"/></svg>Ozillion (unlimited)</b>
+        <span>Name something that fits the question. Pick how many questions and how much time you get. In lobbies, Ozillion is a question type of the Bomb mode.</span>
+        <em id="ozState"></em>
+      </button>
     </div>
     <div class="join"><button class="btn go" id="create" type="button">Create lobby</button>
       <input class="codein" id="code" maxlength="5" placeholder="CODE" aria-label="Lobby code" autocomplete="off"><button class="btn" id="join" type="button">Join</button></div>
@@ -386,12 +489,16 @@ body.ingame .wrap{max-width:1120px}
     <p class="tipline">YouTube ads can’t be turned off from a web page. The clips play in the normal YouTube player, so a browser ad blocker (for example uBlock Origin) works here too. If an ad does start, the round timer waits for it.</p>
   </section>
 
+  <section class="sec" id="rs" hidden>
+    <h2><span id="rsT">Your answers</span><button class="btn sm" id="rsX" type="button">Close</button></h2><div id="rsB"></div>
+  </section>
+
   <section class="sec" id="lobby" hidden>
     <h2><span id="ltxt">Lobby</span> <span class="pill" id="lcode"></span><button class="btn sm" id="copy" type="button">Copy invite link</button></h2>
     <div id="plist"></div>
     <div class="row">
       <label id="l_mode">Mode <select id="c_mode"><option value="classic">Classic (guess everything)</option><option value="bomb">Bomb (free for all)</option></select></label>
-      <label id="l_content">Questions <select id="c_content"><option value="clips">Clips</option><option value="bg">Backgrounds</option><option value="mixed">Mixed</option></select></label>
+      <label id="l_content">Questions <select id="c_content"><option value="clips">Clips</option><option value="bg">Backgrounds</option><option value="mixed">Mixed</option><option value="oz">Ozillion questions</option></select></label>
       <label id="l_tier">Difficulty <select id="c_tier"><option value="random">Random</option><option value="0">Autoplay (very easy)</option><option value="1">Relax (easy)</option><option value="2">NM (normal)</option><option value="3">HR (hard)</option><option value="4">DT (very hard)</option></select></label>
     </div>
     <div class="opts" id="cfgf"></div>
@@ -417,6 +524,7 @@ body.ingame .wrap{max-width:1120px}
     </div>
     <div class="gcols">
       <div class="gleft">
+        <div class="ozq" id="ozq" hidden><small>QUESTION</small><h3 id="ozqt"></h3></div>
         <div class="clip" id="clip"><div class="zoom"><div id="yt"></div></div><div class="cover" id="cover"></div><div class="shield"></div></div>
         <p class="wait" id="wait"></p>
         <div class="ctl" id="ctl"><button class="btn" id="pp" type="button">Pause</button><input id="seek" type="range" min="0" max="20" step="0.1" value="0" aria-label="Position in clip"></div>
@@ -434,7 +542,7 @@ body.ingame .wrap{max-width:1120px}
   </section>
 
   <section class="sec" id="end" hidden>
-    <h2>Final</h2><div id="final"></div>
+    <h2>Final</h2><div id="rank" hidden></div><div id="final"></div><div id="recap"></div>
     <p class="muted" id="finalNote" style="margin-top:8px"></p>
     <p class="streak big" id="streakEnd" hidden></p>
     <p class="muted" id="rmNote" style="margin-top:6px"></p>
@@ -442,9 +550,12 @@ body.ingame .wrap{max-width:1120px}
   </section>
 
   <section class="sec" id="lb">
-    <h2>Daily leaderboard <small id="lbInfo"></small></h2><div id="lbList"></div>
+    <h2><span id="lbTitle">Daily leaderboard</span> <small id="lbInfo"></small></h2>
+    <div class="lbtabs"><button class="btn sm" id="lbT1" type="button" aria-pressed="true">Daily ozu</button><button class="btn sm" id="lbT2" type="button" aria-pressed="false">Daily Ozillion</button></div><div id="lbList"></div>
   </section>
 </div>
+<div id="ozfx" hidden></div>
+<audio id="pa" preload="auto"></audio>
 <div id="adm" hidden></div>
 
 <script>
@@ -454,12 +565,12 @@ const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=nu
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NAME={song:'Song name',artist:'Artist',ar:'AR',bpm:'BPM',sr:'SR',pp:'PP'};
 const TEXT=['song','artist'],NUMS=['ar','bpm','sr','pp'],ALL=[...TEXT,...NUMS];
-const TYPES={clip_map:'Guess the map (song name)',audio_map:'Guess the map from the sound only',clip_bpm:'Guess the BPM',clip_pp:'Guess the PP',bg_map:'Guess the map from its background'};
+const TYPES={oz:'Your answer',clip_map:'Guess the map (song name)',audio_map:'Guess the map from the sound only',clip_bpm:'Guess the BPM',clip_pp:'Guess the PP',bg_map:'Guess the map from its background'};
 const TIER=['Autoplay','Relax','NM','HR','DT'],TIERC=['#8fd19e','#7cc7ff','#f0b94a','#ff9a5c','#ff6b8b'];
 const norm=s=>String(s||'').normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9぀-ヿ一-鿿]+/g,' ').trim();
 const f2=n=>String(+(+n).toFixed(2));
-let kind=null,lbEnd=0,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null,CAPS={bg:null,why:''};
-const solo=()=>kind==='solo'||kind==='bgsolo',daily=()=>kind==='daily';
+let kind=null,lbEnd=0,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null,CAPS={bg:null,why:'',oz:null};
+const solo=()=>kind==='solo'||kind==='bgsolo'||kind==='ozsolo',daily=()=>kind==='daily'||kind==='ozdaily';
 const tx=o=>{if(ws&&ws.readyState===1){ws.send(JSON.stringify(o));return true}err('Lost the connection to the server. Press Leave and join again.');return false};
 const sfx=()=>Math.round((window.SITE&&SITE.sfxLevel?SITE.sfxLevel():1)*100);
 const duck=b=>{try{window.SITE&&SITE.duck&&SITE.duck(b)}catch(e){}};
@@ -509,6 +620,7 @@ function attachAc(inp,key){
 }
 
 /* ---------- clip player: zoomed in (outer part cut), covered by a shield, looped inside its 20 s window ---------- */
+const pa=$('pa');pa.onloadedmetadata=()=>{if(V&&V.preview)$('seek').max=Math.max(1,pa.duration||30)};
 let yt=null,ytReady=false,pend=null,loadedAt=0,adSeen=0,adNow=false,readyFor=null;
 let cvol=30;try{const v=localStorage.getItem('ozu:cvol');if(v!==null)cvol=Math.max(0,Math.min(100,+v||0))}catch(e){}
 const clipVol=()=>Math.round(sfx()*cvol/100);
@@ -518,14 +630,18 @@ window.onYouTubeIframeAPIReady=()=>{yt=new YT.Player('yt',{width:'100%',height:'
   playerVars:{controls:0,disablekb:1,fs:0,modestbranding:1,rel:0,iv_load_policy:3,playsinline:1,cc_load_policy:0},
   events:{onReady:()=>{ytReady=true;if(pend)pend()}}})};
 {const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.append(s)}
-function playClip(c){V=c;$('seek').max=Math.max(1,c.end-c.start);$('seek').value=0;adSeen=0;adNow=false;loadedAt=Date.now();const go=()=>{loadedAt=Date.now();yt.loadVideoById({videoId:c.id,startSeconds:c.start});yt.setVolume(clipVol())};ytReady?go():pend=go}
-function stopClip(){V=null;pend=null;adSeen=0;adNow=false;try{if(ytReady)yt.pauseVideo()}catch(e){}$('pp').textContent='Play'}
+function playClip(c){V=c;$('seek').max=Math.max(1,c.end-c.start);$('seek').value=0;adSeen=0;adNow=false;loadedAt=Date.now();
+  if(c.preview){try{if(ytReady)yt.pauseVideo()}catch(e){}pa.src='https://b.ppy.sh/preview/'+c.preview+'.mp3';pa.loop=true;pa.volume=clipVol()/100;pa.currentTime=0;pa.play().catch(()=>{});$('seek').max=30;$('pp').textContent='Pause';return}   // no video for this map: the osu! preview audio
+  try{pa.pause()}catch(e){}
+  const go=()=>{loadedAt=Date.now();yt.loadVideoById({videoId:c.id,startSeconds:c.start});yt.setVolume(clipVol())};ytReady?go():pend=go}
+function stopClip(){try{pa.pause()}catch(e){}V=null;pend=null;adSeen=0;adNow=false;try{if(ytReady)yt.pauseVideo()}catch(e){}$('pp').textContent='Play'}
 const iMustReport=()=>st&&st.q&&!spec()&&(st.cfg.mode!=='bomb'||st.q.cur===me);
 function sendReady(key){if(readyFor===key||!st||!st.q||st.q.key!==key)return;readyFor=key;if(iMustReport())tx({t:'ready',key})}
 function sendHold(on){if(st&&st.q&&iMustReport())tx({t:'hold',key:st.q.key,on})}
 // Ad handling. A page can't remove YouTube ads, but it can notice one: while an ad plays, the player reports PLAYING with the ad's
 // length and a position before the clip window. Two polls in a row = "ad": the server pauses the round clock until it's over.
 setInterval(()=>{
+  if(V&&V.preview&&st&&st.q){pa.volume=clipVol()/100;if(!pa.paused&&pa.currentTime>0){$('seek').value=pa.currentTime;sendReady(st.q.key)}$('pp').textContent=pa.paused?'Play':'Pause';return}
   if(!ytReady||!V||!st||!st.q||Date.now()-loadedAt<700)return;
   let t,ps,d;try{t=yt.getCurrentTime();ps=yt.getPlayerState();d=yt.getDuration()}catch(e){return}
   const sus=ps===1&&((V.dur&&d>0&&Math.abs(d-V.dur)>2)||t<V.start-1.5);
@@ -536,8 +652,8 @@ setInterval(()=>{
   if(!sus)$('seek').value=Math.max(0,Math.min(V.end-V.start,t-V.start));
   if(!ad&&!sus&&ps===1&&t>=V.start-1&&t<=V.end+1)sendReady(st.q.key);
 },250);
-$('seek').oninput=e=>{if(V)yt.seekTo(V.start+ +e.target.value,true)};
-$('pp').onclick=()=>{if(!ytReady)return;const on=yt.getPlayerState()===1;on?yt.pauseVideo():yt.playVideo();$('pp').textContent=on?'Play':'Pause'};
+$('seek').oninput=e=>{if(V&&V.preview){pa.currentTime=+e.target.value;return}if(V)yt.seekTo(V.start+ +e.target.value,true)};
+$('pp').onclick=()=>{if(V&&V.preview){pa.paused?pa.play().catch(()=>{}):pa.pause();return}if(!ytReady)return;const on=yt.getPlayerState()===1;on?yt.pauseVideo():yt.playVideo();$('pp').textContent=on?'Play':'Pause'};
 
 /* ---------- connection ---------- */
 function connect(c,create){
@@ -545,44 +661,54 @@ function connect(c,create){
   const name=$('nick').value.trim()||(solo()?'Player':'');if(!name){kind=null;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
   err('');svErr='';status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
-  ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':undefined,token})};
+  ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':kind==='ozsolo'||kind==='ozdaily'?'oz':undefined,token})};
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
-    else if(m.t==='caps'){CAPS={bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
+    else if(m.t==='caps'){CAPS={...CAPS,bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
     else if(m.t==='hint'){if(st&&st.q&&st.q.key===m.key){hintOn=true;$('hinttxt').textContent=m.text;$('hintbtn').hidden=true;sfxp('hint')}}
     else if(m.t==='typing'){if(st&&st.q&&st.q.key===m.key){liveT=m.v;paintLive()}}
     else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
-  ws.onclose=()=>{const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
+  ws.onclose=()=>{fxClear();const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
   ws.onerror=()=>status('Couldn’t connect to the server.');
 }
-function leave(){const w=ws;ws=null;st=null;me=null;lastKey=null;kind=null;V=null;duck(false);err('');status('');
+function leave(){fxClear();const w=ws;ws=null;st=null;me=null;lastKey=null;kind=null;V=null;duck(false);err('');status('');
   if(w){w.onclose=w.onerror=w.onmessage=null;try{w.close()}catch(e){}}
   try{if(ytReady)yt.pauseVideo()}catch(e){}show('menu')}
 let scr=null;
 function show(id){
   document.body.classList.toggle('ingame',id==='game');
-  ['menu','lobby','game','end'].forEach(s=>$(s).hidden=s!==id);duck(id==='game'&&!(st&&st.q&&(st.q.type==='bg'||st.q.type==='bg_map')));   // the site music keeps playing during background questions (no clip audio)
+  ['menu','lobby','game','end'].forEach(s=>$(s).hidden=s!==id);duck(id==='game'&&!(st&&st.q&&(st.q.type==='bg'||st.q.type==='bg_map'||st.q.type==='oz')));   // the site music keeps playing during background questions (no clip audio)
   const lb=id==='menu'||id==='end';$('lb').hidden=!lb;
   if(scr!==id){scr=id;for(const s of [$(id),lb?$('lb'):null]){if(!s)continue;s.classList.remove('enter');void s.offsetWidth;[...s.children].forEach((c,i)=>c.style.setProperty('--i',i));s.classList.add('enter');setTimeout(()=>s.classList.remove('enter'),1000)}
     if(lb)loadLb();if(id==='menu')setBgState()}
 }
 /* ---------- daily leaderboard ---------- */
 const hms=s=>{s=Math.max(0,Math.round(s));return[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')};
+let lbTab='ozu',LBD={ozu:null,oz:null},OZMINE=null,OZSTREAK=null;
+function paintBoard(){const d=LBD[lbTab];$('lbT1').setAttribute('aria-pressed',lbTab==='ozu');$('lbT2').setAttribute('aria-pressed',lbTab==='oz');
+  if(!d){$('lbList').replaceChildren(el('p','muted','Couldn’t load the leaderboard.'));return}
+  const mine=($('nick').value||'').trim();
+  $('lbList').replaceChildren(...(d.board.length?d.board.slice(0,20).map((b,i)=>{const row=el('div','pl'+(b.name===mine?' cur':'')+(i<3?' r'+(i+1):''));row.style.setProperty('--i',i);
+    const av=mkAv(b.name,!/\(guest\)\s*$/i.test(b.name));av.style.setProperty('--h',hue(b.name));row.append(el('span','rk',i+1),av,el('span',null,b.name),el('i',null,b.score.toFixed(2)+' pts'));return row}):[el('p','muted','No scores yet today. Be the first!')]))}
+$('lbT1').onclick=()=>{lbTab='ozu';paintBoard()};$('lbT2').onclick=()=>{lbTab='oz';paintBoard()};
 async function loadLb(){
-  try{const tk=await getTok(),r=await fetch(API+'/daily',tk?{headers:{authorization:'Bearer '+tk}}:undefined);if(!r.ok)throw new Error(r.status);const d=await r.json();lbEnd=Date.now()+d.secondsLeft*1000;NEEDLOGIN=!!d.login;MINE=d.mine&&d.mine.played?d.mine:null;STREAK=d.mine?{s:d.mine.streak||0,b:d.mine.best||0}:null;
-    const mine=($('nick').value||'').trim();
-    $('lbList').replaceChildren(...(d.board.length?d.board.slice(0,20).map((b,i)=>{const row=el('div','pl'+(b.name===mine?' cur':'')+(i<3?' r'+(i+1):''));row.style.setProperty('--i',i);
-      const av=mkAv(b.name,!/\(guest\)\s*$/i.test(b.name));av.style.setProperty('--h',hue(b.name));row.append(el('span','rk',i+1),av,el('span',null,b.name),el('i',null,b.score.toFixed(2)+' pts'));return row}):[el('p','muted','No scores yet today. Be the first!')]));
-    tickLb(d.secondsLeft);paintStreak()}
-  catch(e){lbEnd=0;$('lbInfo').textContent='';$('dailyLeft').textContent='';$('lbList').replaceChildren(el('p','muted','Couldn’t load the leaderboard.'))}
+  try{const tk=await getTok(),h=tk?{headers:{authorization:'Bearer '+tk}}:undefined,[r,r2]=await Promise.all([fetch(API+'/daily',h),fetch(API+'/ozdaily',h).catch(()=>null)]);if(!r.ok)throw new Error(r.status);
+    const d=await r.json();let d2=null;try{d2=r2&&r2.ok?await r2.json():null}catch(e){}
+    lbEnd=Date.now()+d.secondsLeft*1000;NEEDLOGIN=!!d.login;MINE=d.mine&&d.mine.played?d.mine:null;STREAK=d.mine?{s:d.mine.streak||0,b:d.mine.best||0}:null;
+    OZMINE=d2&&d2.mine&&d2.mine.played?d2.mine:null;OZSTREAK=d2&&d2.mine?{s:d2.mine.streak||0,b:d2.mine.best||0}:null;LBD={ozu:d,oz:d2};
+    paintBoard();tickLb(d.secondsLeft);paintStreak()}
+  catch(e){lbEnd=0;$('lbInfo').textContent='';$('dailyLeft').textContent='';LBD={ozu:null,oz:null};paintBoard()}
 }
-const paintStreak=()=>{const a=AUTH(),t=STREAK&&STREAK.s>0?'🔥 '+STREAK.s+'-day streak'+(STREAK.b>STREAK.s?' · best '+STREAK.b:''):a&&a.user&&STREAK?'Play today to start a streak':'';
-  $('dailyStreak').textContent=t;const e=$('streakEnd');e.textContent=t;e.hidden=!(daily()&&t)};
-const tickLb=s=>{lbSecs=s;$('lbInfo').textContent='new set in '+hms(s);const a=AUTH();$('dailyLeft').textContent=(MINE?'Played today: '+f2(MINE.score)+' pts · ':NEEDLOGIN&&!(a&&a.user)?'Guest score shows as (guest) · ':'')+'New set in '+hms(s)};
+const paintStreak=()=>{const a=AUTH(),fmt=S=>S&&S.s>0?'🔥 '+S.s+'-day streak'+(S.b>S.s?' · best '+S.b:''):a&&a.user&&S?'Play today to start a streak':'';
+  $('dailyStreak').textContent=fmt(STREAK);$('ozStreak').textContent=fmt(OZSTREAK);const e=$('streakEnd'),t=kind==='ozdaily'?fmt(OZSTREAK):fmt(STREAK);e.textContent=t;e.hidden=!(daily()&&t)};
+const tickLb=s=>{lbSecs=s;$('lbInfo').textContent='new set in '+hms(s);const a=AUTH(),guest=NEEDLOGIN&&!(a&&a.user);
+  $('dailyLeft').textContent=(MINE?'Played today: '+f2(MINE.score)+' pts · tap to see your answers · ':guest?'Guest score shows as (guest) · ':'')+'New set in '+hms(s);
+  $('ozLeft').textContent=(OZMINE?'Played today: '+f2(OZMINE.score)+' pts · tap to see your answers · ':guest?'Guest score shows as (guest) · ':'')+'New set in '+hms(s)};
 setInterval(()=>{if(!lbEnd)return;const s=(lbEnd-Date.now())/1000;tickLb(s);if(s<-1){lbEnd=0;loadLb()}},1000);
-function setBgState(){const e=$('bgState'),b=$('bgsolo');
+function setBgState(){const oe=$('ozState');if(CAPS.oz===0){oe.textContent='No questions yet: add some in the admin panel';$('ozsolo').disabled=true;$('ozdaily').disabled=true}else{oe.textContent=CAPS.oz?CAPS.oz+' questions':'';$('ozsolo').disabled=false;$('ozdaily').disabled=false}
+  const e=$('bgState'),b=$('bgsolo');
   if(CAPS.bg===false){e.textContent='Unavailable: '+(CAPS.why||'no data');b.disabled=true}else{e.textContent=CAPS.bg?'5 difficulties · play count based':'';b.disabled=false}}
-fetch(API+'/caps').then(r=>r.json()).then(d=>{CAPS={bg:!!d.bg,why:d.why||''};setBgState()}).catch(()=>{});
+fetch(API+'/caps').then(r=>r.json()).then(d=>{CAPS={bg:!!d.bg,why:d.why||'',oz:d.oz};setBgState()}).catch(()=>{});
 
 /* ---------- lobby ---------- */
 function players(box,fn){const list=st.players,sig=JSON.stringify(list.map(p=>[p.id,p.name,fn.info(p),fn.cls?fn.cls(p):'',p.id===st.host,p.id===me])),ids=list.map(p=>p.id).join();
@@ -595,26 +721,30 @@ let lastN=0;
 function renderLobby(){
   if(st.players.length>lastN&&lastN>0)sfxp('join');lastN=st.players.length;
   show('lobby');$('lcode').textContent=code;const c=st.cfg,host=st.host===me,s=solo(),bomb=c.mode==='bomb',bgOnly=c.content==='bg';
-  $('ltxt').textContent=kind==='bgsolo'?'Background guessr':s?'Unlimited mode':'Lobby';$('lcode').hidden=$('copy').hidden=s;
+  $('ltxt').textContent=kind==='bgsolo'?'Background guessr':kind==='ozsolo'?'Ozillion':s?'Unlimited mode':'Lobby';$('lcode').hidden=$('copy').hidden=s;
   $('c_mode').querySelector('option[value=bomb]').disabled=s;
   const noBg=CAPS.bg===false;$('c_content').querySelector('option[value=bg]').disabled=noBg;$('c_content').querySelector('option[value=mixed]').disabled=noBg;
   const vis=(id,b)=>{$(id).style.display=b?'':'none'};
-  vis('l_mode',!s);vis('l_content',!s&&!bomb);vis('l_tier',!bomb&&c.content!=='clips'&&!(kind==='solo'));
-  vis('l_time',!s);vis('l_clip',!bgOnly);vis('l_hints',!bomb);vis('l_lives',!s&&bomb);vis('l_wait',!s&&!bomb);vis('l_rounds',!bomb);vis('cfgf',!bomb);
+  const oz=c.content==='oz';
+  for(const o of $('c_content').options)o.hidden=o.disabled=bomb?o.value!=='clips'&&o.value!=='oz':o.value==='oz';
+  if(bomb&&!oz&&c.content!=='clips')$('c_content').value='clips';
+  $('l_content').querySelector('select').options[0].textContent=bomb?'Clips and backgrounds':'Clips';
+  vis('l_mode',!s);vis('l_content',!s);vis('l_tier',!bomb&&!oz&&c.content!=='clips'&&!(kind==='solo'));
+  vis('l_time',!s||oz);vis('l_clip',!bgOnly&&!oz);vis('l_hints',!bomb&&!oz);vis('l_lives',!s&&bomb);vis('l_wait',!s&&!bomb&&!oz);vis('l_rounds',!bomb);vis('cfgf',!bomb&&!oz);
   for(const k of ALL)vis('lf_'+k,!(bgOnly&&k!=='artist'));
   if(bgOnly)$('lf_artist').lastChild.textContent='Also guess the artist';else $('lf_artist').lastChild.textContent=NAME.artist;
   players($('plist'),{info:p=>''});
   const set=(id,v)=>{const e=$(id);if(document.activeElement!==e)e.value=v;e.disabled=!host};
-  set('c_mode',c.mode);set('c_content',c.content);set('c_tier',c.tier);set('c_time',c.time);set('c_clip',c.clipLen||20);$('c_hints').checked=!!c.hints;$('c_hints').disabled=!host;set('c_rounds',c.rounds);set('c_lives',c.lives);
+  set('c_mode',c.mode);if(!(bomb&&c.content!=='oz'&&c.content!=='clips'))set('c_content',c.content);set('c_tier',c.tier);set('c_time',c.time);set('c_clip',c.clipLen||20);$('c_hints').checked=!!c.hints;$('c_hints').disabled=!host;set('c_rounds',c.rounds);set('c_lives',c.lives);
   $('c_wait').checked=c.waitFirst;$('c_wait').disabled=!host;for(const k of ALL){$('c_'+k).checked=!!c.fields[k];$('c_'+k).disabled=!host}
-  $('bgInfo').textContent=(c.content!=='clips'||bomb)&&st.bgMult?'Background questions multiply the text points: '+st.bgMult.map((m,i)=>TIER[i]+' ×'+f2(m)).join(' · ')+'. In lobbies every player gets the same difficulty on the same question.':'';
+  $('bgInfo').textContent=oz?'Ozillion: name something that fits the question. '+(bomb?'On the bomb, any valid answer is safe, but an answer can only be given once per round, and a rare one (WYSI or Ozillion!) gives a life back.':'Points by rarity: Doo Doo 10 · Those Who Know... 30 · Ball Knowledge 50 · WYSI 80 · Ozillion! 100.'):(c.content!=='clips'||bomb)&&st.bgMult?'Background questions multiply the text points: '+st.bgMult.map((m,i)=>TIER[i]+' ×'+f2(m)).join(' · ')+'. In lobbies every player gets the same difficulty on the same question.':'';
   const nb=$('bgNote');nb.hidden=!(noBg&&(c.content!=='clips'||kind==='bgsolo'));nb.textContent='Backgrounds aren’t available on this server: '+(CAPS.why||'');
   $('start').hidden=!host;const need=!s&&bomb&&st.players.length<2;$('start').disabled=need||(noBg&&c.content==='bg');
   $('hint').textContent=host?(need?'Bomb mode needs at least 2 players.':(s?'Pick your settings, then start.':'Share the code or invite link, then start.')):'Waiting for the host to start…';
   if(s&&host&&c.mode==='bomb'){$('c_mode').value='classic';push()}   // solo is classic only
 }
 function push(){const fields=Object.fromEntries(ALL.map(k=>[k,$('c_'+k).checked]));
-  tx({t:'settings',cfg:{mode:$('c_mode').value,content:kind==='bgsolo'?'bg':kind==='solo'?'clips':$('c_content').value,tier:$('c_tier').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,waitFirst:$('c_wait').checked,clipLen:$('c_clip').value,hints:$('c_hints').checked,fields}})}
+  tx({t:'settings',cfg:{mode:$('c_mode').value,content:kind==='bgsolo'?'bg':kind==='ozsolo'?'oz':kind==='solo'?'clips':$('c_content').value,tier:$('c_tier').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,waitFirst:$('c_wait').checked,clipLen:$('c_clip').value,hints:$('c_hints').checked,fields}})}
 function draftNow(){if(!st||st.cfg.mode!=='classic'||st.phase!=='round'||sent||!ws||ws.readyState!==1)return;
   tx({t:'draft',v:Object.fromEntries(st.q.fields.map(k=>[k,($('g_'+k)||{}).value||'']))})}
 let typT=0;
@@ -635,14 +765,15 @@ function showBg(q){const cover=$('cover'),key=q.key,urls=[q.bg,q.bg.replace('raw
   img.src=urls[0]}
 function newQuestion(q){
   lastKey=q.key;liveT='';hintOn=false;$('hinttxt').textContent='';$('hintbtn').hidden=false;sfxp(q.i===1?'start':'pop');sent=false;draftSent=false;readyFor=null;adSeen=0;adNow=false;$('res').replaceChildren();$('res')._k=null;$('pp').textContent='Pause';$('clip').classList.remove('reveal');
-  const bomb=st.cfg.mode==='bomb',isBg=q.type==='bg'||q.type==='bg_map',keys=bomb?['a']:q.fields;
+  fxClear();const bomb=st.cfg.mode==='bomb',isBg=q.type==='bg'||q.type==='bg_map',isOzq=q.type==='oz',keys=bomb||isOzq?['a']:q.fields;
+  $('ozq').hidden=!isOzq;if(isOzq)$('ozqt').textContent=q.text;try{if(!q.clip)pa.pause()}catch(e){}
   const nText=keys.filter(k=>TEXT.includes(k)).length;$('form').className=bomb?'':'f4';
-  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el('input');i.id='g_'+k;i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
+  $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(isOzq?' w4':bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,isOzq?(bomb?'Your answer':'Your answer · the rarer, the more points (10 to 100)'):bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el('input');i.id='g_'+k;i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
     if(bomb?(q.type==='clip_bpm'||q.type==='clip_pp'):NUMS.includes(k)){i.type='text';i.inputMode='decimal'}
-    d.append(l,i);if(k==='song'||k==='artist')attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');return d}));
-  const cover=$('cover');cover.hidden=!(q.type==='audio_map'||isBg);cover.classList.remove('shown');cover.replaceChildren();cover.style.backgroundImage='';
-  if(q.type==='audio_map'){cover.append(el('div','eq')),cover.firstChild.append(...[1,2,3,4,5].map(()=>el('i')))}
-  $('ctl').hidden=bomb||isBg;$('vctl').hidden=isBg;$('clip').hidden=false;
+    d.append(l,i);if(!isOzq&&(k==='song'||k==='artist'))attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');return d}));
+  const cover=$('cover');cover.hidden=!(q.type==='audio_map'||isBg||q.audio);cover.classList.remove('shown');cover.replaceChildren();cover.style.backgroundImage='';
+  if(q.type==='audio_map'||q.audio){cover.append(el('div','eq')),cover.firstChild.append(...[1,2,3,4,5].map(()=>el('i')))}
+  $('ctl').hidden=bomb||isBg||isOzq;$('vctl').hidden=isBg||isOzq;$('clip').hidden=isOzq;
   const tb=$('tierBadge');tb.hidden=!isBg;if(isBg){tb.textContent=TIER[q.tier];tb.style.setProperty('--c',TIERC[q.tier]);tb.style.animation='none';void tb.offsetWidth;tb.style.animation=''}
   if(isBg){V=null;try{if(ytReady)yt.pauseVideo()}catch(e){}showBg(q)}
   else if(q.clip)playClip(q.clip);else if(ytReady)try{yt.pauseVideo()}catch(e){}
@@ -679,7 +810,7 @@ function renderGame(){
   if(q.key!==lastKey)newQuestion(q);
   if(reveal)stopClip();   // round over: the clip stops
   const sp=spec(),you=st.players.find(p=>p.id===me)||{};$('specTag').hidden=!sp;
-  $('rd').textContent=bomb?'Turn '+q.i+' · '+((st.players.find(p=>p.id===q.cur)||{}).name||'')+(myTurn?' (you!)':''):(daily()?'Daily ozu · ':'')+'Round '+q.i+' / '+st.cfg.rounds;
+  $('rd').textContent=bomb?'Turn '+q.i+' · '+((st.players.find(p=>p.id===q.cur)||{}).name||'')+(myTurn?' (you!)':''):(daily()?(isOz()?'Daily Ozillion · ':'Daily ozu · '):(isOz()?'Ozillion · ':''))+'Round '+q.i+' / '+st.cfg.rounds;
   if(st.spectators)$('rd').textContent+=' · 👁 '+st.spectators;
   const sc=$('sc');if(sp){sc.textContent=''}else if(bomb){sc.textContent=hearts(you.lives)}else if(lastScore!==you.score){const was=lastScore;lastScore=you.score;sc.replaceChildren(el('span'),el('small',null,'pts'));countUp(sc.firstChild,you.score,2,was==null?0:800);if(was!=null){sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump')}}
   $('game').classList.toggle('bomb',bomb);
@@ -688,10 +819,11 @@ function renderGame(){
   const locked=sp||reveal||sent||(bomb&&!myTurn);
   $('form').hidden=sp||reveal||(bomb&&!myTurn);paintLive();$('subrow').hidden=locked;paintHint();
   $('form').querySelectorAll('input').forEach(i=>i.disabled=locked);$('submit').hidden=locked;
-  $('clip').classList.toggle('reveal',reveal&&!bomb);
+  $('clip').classList.toggle('reveal',reveal&&!bomb);if(!reveal&&!$('ozfx').hidden&&!q.text)fxClear();
   $('wait').textContent=reveal?'':q.held?'Timer paused: an ad seems to be playing for someone. It continues right after.':q.gate?(q.type==='bg'||q.type==='bg_map'?'Waiting for everyone’s background to load…':'Waiting for everyone’s clip to start…'):'';
   const res=$('res'),rk=q.key+'|'+st.phase+'|'+(reveal?JSON.stringify(st.reveal)+(st.host===me):'');if(res._k===rk)return;res._k=rk;res.replaceChildren();
-  if(st.phase==='reveal'){const R=st.reveal,mine=R.res.find(r=>r.id===me)||{guess:{},pts:{},total:0},rt=el('div','rt');
+  if(st.phase==='reveal'&&st.reveal.oz)ozReveal(res,st.reveal,sp);
+  else if(st.phase==='reveal'){const R=st.reveal,mine=R.res.find(r=>r.id===me)||{guess:{},pts:{},total:0},rt=el('div','rt');
     if(!sp)sfxp(mine.total>=R.max*.95?'good':mine.total>0?'ok':'miss');
     {const hr=el('div','rr h');['','Your guess','Answer','Points'].forEach(h=>hr.append(el('div',null,h)));hr.lastChild.style.textAlign='right';rt.append(hr)}
     q.fields.forEach((k,i)=>{const p=mine.pts[k]||0,m=R.fmax[k]||1,j=p>=m-.005?['300','j300']:p>=m*.5?['100','j100']:p>0?['50','j50']:['miss','jm'];
@@ -703,7 +835,8 @@ function renderGame(){
     if(st.host===me){const nb=el('button','btn go pulse',q.i>=st.cfg.rounds?'Show final results':'Next round');nb.type='button';nb.id='next';nb.style.marginTop='14px';nb.onclick=()=>{nb.disabled=true;tx({t:'next'})};res.append(nb)}
     else res.append(el('p','muted','Waiting for the host to continue…'))}
 
-  if(st.phase==='turnReveal'){const R=st.reveal;sfxp(R.ok?'good':'boom');const who=(st.players.find(p=>p.id===R.cur)||{}).name||'Player';
+  if(st.phase==='turnReveal'&&st.reveal.oz)ozTurnReveal(res,st.reveal);
+  else if(st.phase==='turnReveal'){const R=st.reveal;sfxp(R.ok?'good':'boom');const who=(st.players.find(p=>p.id===R.cur)||{}).name||'Player';
     res.append(el('p','big',R.ok?'✔ '+who+' got it':'✖ '+who+(R.guess==null?' ran out of time':' missed')+' and loses a life'),
       el('p','muted','Answer: '+R.answer.artist+' – '+R.answer.song+(R.answer.bpm!=null?' · '+R.answer.bpm+' BPM':'')+(R.answer.pp?' · '+R.answer.pp+'pp':'')))}
 }
@@ -713,8 +846,9 @@ function renderEnd(){
   if(box._sig!==sig){box._sig=sig;box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl r'+(i+1)+(i===0?' cur':'')),av=mkAv(p.name,p.acct);d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
       d.append(el('span','rk',i===0?'🏆':i+1),av,el('span',null,p.name+(p.id===me?' (you)':'')),el('i',null,bomb?hearts(p.lives):f2(p.score)+' pts'));return d}));
     if(list[0]&&(list[0].id===me||list.length===1)){setTimeout(confetti,350);sfxp('win')}else if(!spec())sfxp('ok')}
-  $('finalNote').textContent=daily()?'Your score is on today’s leaderboard (your best score of the day counts).':'';
+  $('finalNote').textContent=daily()?'Your score is on today’s leaderboard (your best score of the day counts).':'';fxClear();
   const votes=st.rematch||[],mineV=votes.includes(me),sp=spec();paintStreak();
+  ozFinal();
   $('again').hidden=daily()||sp;$('again').textContent=solo()?'Play again':(mineV?'Rematch · you voted':'Rematch')+' ('+votes.length+'/'+st.players.length+')';$('again').classList.toggle('on',mineV);
   $('rmNote').textContent=daily()?'':sp?'You joined during the game: you will play in the next one.':solo()?'':'Rematch needs more than half of the players. '+(votes.length?'Voted: '+votes.map(id=>(st.players.find(p=>p.id===id)||{}).name).filter(Boolean).join(', ')+'.':'')
 }
@@ -730,19 +864,21 @@ setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.p
 
 /* ---------- buttons ---------- */
 async function makeLobby(k){
-  if(k==='daily'){const a=AUTH();
-    if(MINE)return status('You already played today’s Daily ozu ('+f2(MINE.score)+' pts). A new set comes at midnight Rome time.');
+  if(k==='daily'||k==='ozdaily'){const M=k==='daily'?MINE:OZMINE;
+    if(M){status('');return showResume(k==='daily'?'ozu':'oz')}
     if(!$('nick').value.trim())return status('Type a name first: it shows on the leaderboard.')}
+  $('rs').hidden=true;
   try{if(API.includes('YOURNAME'))return connect('XXXXX');
     const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',rnd=crypto.getRandomValues(new Uint8Array(5)),codeNew=[...rnd].map(n=>A[n%32]).join('');   // no round trip to the server just to get a code
     kind=k;connect(codeNew,true)}
   catch(e){kind=null;status('Couldn’t reach the server ('+(e.message||e)+').')}
 }
-$('create').onclick=()=>makeLobby('lobby');$('solo').onclick=()=>makeLobby('solo');$('bgsolo').onclick=()=>makeLobby('bgsolo');$('daily').onclick=()=>makeLobby('daily');
+$('create').onclick=()=>makeLobby('lobby');$('solo').onclick=()=>makeLobby('solo');$('bgsolo').onclick=()=>makeLobby('bgsolo');$('daily').onclick=()=>makeLobby('daily');$('ozdaily').onclick=()=>makeLobby('ozdaily');$('ozsolo').onclick=()=>makeLobby('ozsolo');
 $('join').onclick=()=>{kind='lobby';const c=$('code').value.trim().toUpperCase();c.length===5?connect(c,false):(kind=null,status('Enter the 5-letter lobby code.'))};
 $('leave').onclick=$('leave2').onclick=leave;
+$('c_content').onchange=()=>{if($('c_content').value==='oz'&&+$('c_time').value>=40)$('c_time').value=25;else if($('c_content').value!=='oz'&&+$('c_time').value===25)$('c_time').value=45;push()};
 $('start').onclick=()=>{sfxp('start');err('');tx({t:'start'})};$('again').onclick=()=>{err('');tx({t:'again'})};
-['c_mode','c_content','c_tier','c_time','c_clip','c_hints','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
+['c_mode','c_tier','c_time','c_clip','c_hints','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
 $('copy').onclick=async()=>{const url=location.href.replace(/Apps\/OzuGuessr\.html.*$/,'index.html#Apps/OzuGuessr.html?lobby='+code);
   try{await navigator.clipboard.writeText(url);$('copy').textContent='Copied!'}catch(e){prompt('Invite link',url)}setTimeout(()=>$('copy').textContent='Copy invite link',1500)};
 $('submit').onclick=e=>{if(sent||!st||spec())return;sfxp('submit');const bomb=st.cfg.mode==='bomb';sent=true;if(e&&e.clientX)burst(e.clientX,e.clientY);
@@ -769,20 +905,21 @@ async function openAdmin(){
   if(!m.firstChild){
     try{aKey=sessionStorage.getItem('ozu:ak')||''}catch(e){}
     m.innerHTML=`<div class="admbox" role="dialog" aria-label="Scoring settings">
-      <div class="admhead"><h2>Scoring</h2><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><button class="btn" id="admClose" type="button">Close</button></div>
+      <div class="admhead"><h2>Admin</h2><button class="btn" id="admClose" type="button">Close</button></div>
       <div class="admkey"><input id="admkey" type="password" placeholder="Admin key" autocomplete="off" value=""><button class="btn" id="admUnlock" type="button">Check key</button><span class="admst" id="admSt"></span></div>
-      <div class="admgrid"><div>
+      <div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="pool" aria-pressed="false">Map pool</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button></div>
+      <div id="tab_sc"><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><div class="admgrid"><div>
         <div class="legend" id="legend"></div>
         <div class="chartwrap" id="cw"><svg id="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points by relative error for AR, BPM, SR and PP"></svg><div class="tip" id="tip" hidden></div></div>
         <div id="admTable" hidden></div>
         <div class="row"><button class="btn" id="admTbl" type="button">Table view</button></div>
-      </div><div class="admctl" id="admctl"></div></div></div>`;
+      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_pool" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div></div>`;
     $('admkey').value=aKey;
     $('admClose').onclick=closeAdmin;m.addEventListener('pointerdown',e=>{if(e.target===m)closeAdmin()});
     $('admTbl').onclick=()=>{tableOn=!tableOn;$('admTbl').textContent=tableOn?'Graph view':'Table view';$('cw').hidden=tableOn;$('legend').hidden=tableOn;$('admTable').hidden=!tableOn;drawTable()};
     $('admUnlock').onclick=async()=>{aKey=$('admkey').value;try{sessionStorage.setItem('ozu:ak',aKey)}catch(e){}
       try{const r=await fetch(API+'/admin/check',{headers:{'x-admin-key':aKey}}),d=await r.json();admSt(r.ok?'Key accepted.':d.error||'Not accepted.',r.ok)}catch(e){admSt('Couldn’t reach the server.',false)}};
-    bindChart();
+    bindChart();admTabs();
   }
   try{const r=await fetch(API+'/scoring'),d=await r.json();A=cl(d.cfg);D=cl(d.defaults)}catch(e){admSt('Couldn’t load the current scoring from the server.',false);if(!A){D=cl({w:{song:3,artist:2,ar:1,bpm:1,sr:1,pp:1},curve:Object.fromEntries(['ar','bpm','sr','pp'].map(k=>[k,{full:.02,zero:.2,k:2.5}])),bgMult:[1,1.5,2,2.5,3]});A=cl(D)}}
   buildCtl();draw();
@@ -844,6 +981,227 @@ function buildCtl(){
 }
 function syncCtl(){const c=A.curve[sel],set=(id,v)=>{const e=$(id);if(e&&document.activeElement!==e)e.value=v};
   set('a_w',A.w[sel]);set('a_full',Math.round(c.full*100));set('a_zero',Math.round(c.zero*100));set('a_k',c.k);set('a_song',A.w.song);set('a_artist',A.w.artist);TIER.forEach((t,i)=>set('bg'+i,A.bgMult[i]))}
+
+/* ---------- Ozillion: rarity, the dive animation, answer tables, recaps, reports ---------- */
+const OZN=['Doo Doo','Those Who Know...','Ball Knowledge','WYSI','Ozillion!'],OZP=[10,30,50,80,100],OZC=['var(--t0)','var(--t1)','var(--t2)','var(--t3)','var(--t4)'];
+const GRADES=[['D','#e0505e','Fresh from the tutorial'],['C','#b06ee0','Casual clicker'],['B','#5aa9ff','Getting somewhere'],['A','#8fd19e','Ball knower'],['S','#f0b94a','Absolute ozu brain'],['SS','#ffe9a8','Perfect: pure Ozillion']];
+// 0-50 / 51-150 / 151-250 / 251-400 / 401-500 points (scaled when there are not 5 questions), a perfect run gets SS
+const gradeOf=(pts,max)=>{if(!max)return 0;if(pts>=max)return 5;const r=pts/max;return r<=.1?0:r<=.3?1:r<=.5?2:r<=.8?3:4};
+const chip=t=>{const c=el('span','tchip t'+t,OZN[t]);c.style.setProperty('--tc',OZC[t]);return c};
+const isOz=()=>!!(st&&st.cfg&&st.cfg.content==='oz');
+
+/* The dive: like going down an iceberg. The screen sinks layer by layer (gray, blue, red, black, osu pink) and stops where the answer lives.
+   The deeper it stops, the longer the suspense and the wilder the finish. Click anywhere to skip. */
+let fxT=[];
+function fxClear(){fxT.forEach(clearTimeout);fxT=[];const f=$('ozfx');if(!f)return;f.hidden=true;f.replaceChildren();f.className='';document.body.classList.remove('pshake')}
+function ozDive(o){
+  fxClear();if(RM)return;const f=$('ozfx'),t=o.hit?o.tier:0,K=o.fast?.75:1,at=(ms,fn)=>fxT.push(setTimeout(fn,ms*K));
+  f.hidden=false;f.className=o.hit?'':'x';
+  const sc=el('div','scroll');OZN.forEach((n,i)=>{const b=el('div','band b'+i);b.append(el('div','lname',n));sc.append(b)});
+  const orb=el('div','fxorb');orb.append(el('i','ap'),el('i','ap'),el('i','hc'));
+  const main=el('div','fxmain'),who=el('div','fxwho',o.who||''),ans=el('div','fxans'),tier=el('div','fxtier'),pts=el('div','fxpts');main.append(who,ans,tier,pts);
+  const dig=el('div','fxdig','Checking the depths');dig.append(el('i',null,'...'));
+  f.append(sc,orb,main,dig,el('div','fxskip','click to skip'));f.onclick=fxClear;
+  const bandPct=i=>-(i*20);orb.style.setProperty('--oc',['#cfd3dc','#6fb2ff','#ff7a8a','#d9c2ff','#ff7ab3'][0]);
+  const go=i=>{sc.style.transform='translateY('+bandPct(i)+'%)';orb.style.setProperty('--oc',['#cfd3dc','#6fb2ff','#ff7a8a','#b69cff','#ff7ab3'][i])};
+  const END=[900,1200,1500,2000,3400];
+  const finish=()=>{
+    dig.style.opacity=0;orb.style.opacity=0;who.classList.add('in');
+    if(!o.hit){ans.textContent=o.guess?'“'+o.guess+'” isn’t on the list':'No answer';sfxp('miss');ans.classList.add('in');pts.textContent='0 pts';pts.classList.add('in');fxT.push(setTimeout(fxClear,1400));return}
+    ans.textContent=o.name||o.guess;tier.textContent=OZN[t];tier.style.color=['#e3e6ea','#9cc8ff','#ff9aa6','#ff2e6e','#fff'][t];
+    pts.textContent=o.pts!=null?'+'+o.pts+' pts':(o.heal?'+1 life':'safe');
+    requestAnimationFrame(()=>{ans.classList.add('in');tier.classList.add('in');pts.classList.add('in')});
+    if(t===0)sfxp('pop');
+    if(t===1){sfxp('good');for(let k=0;k<3;k++){const r=el('i','fxring');r.style.setProperty('--c','#8fc4ff');r.style.setProperty('--w',k*.25+'s');f.append(r)}}
+    if(t===2){sfxp('good');sfxp('rumble');f.classList.add('shake');for(let k=0;k<18;k++){const p=el('i','fxpt');p.style.cssText='--s:'+(8+Math.random()*10)+'px;--c:#ffb36b;--x:'+(Math.random()*700-350)+'px;--y:'+(-Math.random()*420-60)+'px;--d:'+(1+Math.random())+'s';f.append(p)}}
+    if(t===3){sfxp('wysi');f.classList.add('t3','shake2');document.body.classList.add('pshake');f.append(el('div','fxflash'));for(let k=0;k<3;k++){const r=el('i','fxring');r.style.setProperty('--c','#ff2e6e');r.style.setProperty('--w',k*.2+'s');f.append(r)}}
+    if(t===4){sfxp('ozillion');sfxp('boom');f.classList.add('t4','shake2');document.body.classList.add('pshake');f.append(el('div','fxflash'));
+      for(let k=0;k<4;k++){const r=el('i','fxring');r.style.setProperty('--c',k%2?'#fff':'#ff66aa');r.style.setProperty('--w',k*.18+'s');f.append(r)}
+      const cols=['#ff7ab3','#fff','#ffd1e8','#ff4d9a','#7cc7ff'];for(let k=0;k<46;k++){const p=el('i','fxpt'),a=Math.random()*Math.PI*2,r=240+Math.random()*520;p.style.cssText='--s:'+(14+Math.random()*26)+'px;--c:'+cols[k%5]+';--x:'+Math.cos(a)*r+'px;--y:'+Math.sin(a)*r+'px;--d:'+(1.1+Math.random()*1.1)+'s';f.append(p)}
+      confetti()}
+    fxT.push(setTimeout(()=>document.body.classList.remove('pshake'),1700));
+    fxT.push(setTimeout(fxClear,END[t]*K+400));
+  };
+  // the descent: layer by layer, each one longer than the one before it
+  sfxp('dive');go(0);let ms=500;
+  for(let i=1;i<=t;i++){const j=i;ms+=[0,650,750,950,1250][i];at(ms,()=>{go(j);sfxp('layer',{i:j});if(j>=3)sfxp('rumble');dig.firstChild.textContent=['',' Going deeper','',' Deeper still','...?!'][j>3?3:j]||' Going deeper'})}
+  ms+=[500,550,700,950,1500][t];if(o.hit&&t>=2)at(ms-350,()=>{sfxp('layer',{i:t});orb.style.transition='none';orb.animate([{scale:1},{scale:1.5},{scale:1}],{duration:350})});
+  at(ms,finish);
+}
+
+/* ---------- answer tables ---------- */
+const reported=new Set();
+function reportBtn(i){
+  const b=el('button','repbtn','Report this answer');b.type='button';b.dataset.sfx='pop';
+  if(reported.has(i)){b.textContent='Reported, thanks';b.disabled=true;return b}
+  b.onclick=()=>{const row=b.closest('.orr,.rcard');if(row.querySelector('.repform'))return;
+    const fm=el('div','repform'),sel=el('select'),tg=el('input'),go=el('button','btn sm','Send');sel.innerHTML='<option value="answer">It should be an answer (missing answer)</option><option value="alias">It is another name for an answer (missing alias)</option>';
+    tg.placeholder='Which answer is it? (optional)';tg.maxLength=80;tg.hidden=true;sel.onchange=()=>tg.hidden=sel.value!=='alias';go.type='button';go.style.margin='0';
+    go.onclick=()=>{tx({t:'report',i,kind:sel.value,target:tg.value});go.disabled=true;go.textContent='Sent'};fm.append(sel,tg,go);row.append(fm)};
+  return b}
+function ozRows(R,i,key){   // everybody's answers for a finished question
+  const rt=el('div','rt');
+  R.res.forEach((r,k)=>{const row=el('div','orr'+(r.id===me?' me':''));row.style.setProperty('--i',k);const nm=(st.players.find(p=>p.id===r.id)||{}).name||r.name;
+    const pt=el('div','pt',(r.hit?'+':'')+r.total);row.append(el('div',null,nm+(r.id===me?' (you)':'')),el('div',null,r.guess&&r.guess.a?r.guess.a:'—'),el('div'),pt);
+    const mid=row.children[2];if(r.hit){mid.append(chip(r.tier),' '+r.match)}else mid.append(el('span','muted',r.guess&&r.guess.a?'not on the list':'no answer'));
+    if(r.id===me&&!r.hit&&r.guess&&r.guess.a&&!spec())mid.append(' ',reportBtn(i));rt.append(row)});
+  return rt}
+function ozReveal(res,R,sp){   // classic round: my dive, then the table of answers
+  const i=st.q.i-1,mine=R.res.find(r=>r.id===me);
+  if(mine&&!sp)ozDive({hit:mine.hit,tier:mine.tier,name:mine.match,guess:mine.guess.a,pts:mine.total,who:'Your answer'});
+  res.append(ozRows(R,i),el('p','topline','Most given answers: '+(R.top&&R.top.length?R.top.join(' · '):'—')));
+  const sc=el('p','tot');sc.append(sp?'Round result':'You scored +'+(mine?mine.total:0)+' of 100.');res.append(sc);
+  if(st.host===me){const nb=el('button','btn go pulse',st.q.i>=st.cfg.rounds?'Show final results':'Next round');nb.type='button';nb.id='next';nb.style.marginTop='14px';nb.onclick=()=>{nb.disabled=true;fxClear();tx({t:'next'})};res.append(nb)}
+  else res.append(el('p','muted','Waiting for the host to continue…'))}
+function ozTurnReveal(res,R){   // bomb: the dive of the player on the bomb, everybody watches
+  const who=(st.players.find(p=>p.id===R.cur)||{}).name||'Player';
+  ozDive({hit:R.ok,tier:R.tier,name:R.match,guess:R.guess,heal:R.ok&&R.tier>=3,who:who+(R.cur===me?' (you)':'')+' answered',fast:true});
+  res.append(el('p','big',R.ok?'✔ '+who+': '+R.match:R.dup?'✖ '+who+' used an answer that was already given and loses a life':'✖ '+who+(R.guess?' — “'+R.guess+'” isn’t on the list':' ran out of time')+' and loses a life'));
+  if(R.ok){const p=el('p','muted');p.append(chip(R.tier),R.tier>=3?' A rare answer: +1 life':'');res.append(p)}}
+
+/* ---------- final screen: rank + recap of my answers ---------- */
+function ozFinal(){
+  const rk=$('rank'),box=$('recap');rk.hidden=true;box.replaceChildren();
+  if(!(isOz()&&st.cfg.mode==='classic'))return;
+  const me0=st.players.find(p=>p.id===me);if(!me0)return;const max=(st.hist||[]).length*100||st.cfg.rounds*100,g=gradeOf(me0.score,max),G=GRADES[g];
+  rk.hidden=false;rk.style.setProperty('--gc',G[1]);rk.replaceChildren(el('div','gr',G[0]),(()=>{const d=el('div');d.append(el('b',null,G[2]),el('span',null,f2(me0.score)+' of '+max+' points'));return d})());
+  rk.firstChild.dataset.sfx='off';if(rk._g!==g+'|'+me0.score){rk._g=g+'|'+me0.score;sfxp(g>=4?'ozillion':g>=2?'win':'ok')}
+  const rows=(st.hist||[]).map((h,i)=>({i,text:h.text,r:h.res.find(x=>x.id===me)})).filter(x=>x.r);
+  box.className='recap';box.append(el('h3',null,'Your answers'),...rows.map(({i,text,r})=>recapCard(text,r,reportBtn,i)))}
+function recapCard(text,r,rep,i){const c=el('div','rcard'),l=el('div','line');c.append(el('div','q',text),l);
+  l.append(el('span',null,'You: '),el('b',null,r.guess&&(r.guess.a||r.guess)?(r.guess.a||r.guess):'—'));
+  if(r.hit||r.match){l.append('→',el('b',null,r.match),chip(r.tier),el('span',null,'+'+(r.total!=null?r.total:OZP[r.tier])+' pts'))}
+  else{l.append(el('span',null,'not on the list · 0 pts'));if(rep&&r.guess&&(r.guess.a||r.guess))l.append(rep(i))}
+  return c}
+
+/* ---------- recap of a played Daily (ozu or Ozillion) ---------- */
+function showResume(kind){
+  const M=kind==='oz'?OZMINE:MINE;if(!M)return;const box=$('rsB'),oz=kind==='oz';$('rsT').textContent=(oz?'Daily Ozillion':'Daily ozu')+': your answers · '+f2(M.score)+' pts';box.replaceChildren();
+  if(oz){const max=(M.rounds||[]).length*100||500,g=GRADES[gradeOf(M.score,max)],rk=el('div');rk.id='rank';rk.style.setProperty('--gc',g[1]);const d=el('div');d.append(el('b',null,g[2]),el('span',null,f2(M.score)+' of '+max+' points'));rk.append(el('div','gr',g[0]),d);box.append(rk)}
+  const list=el('div','recap');
+  if(!(M.rounds||[]).length)list.append(el('p','muted','No answers were saved for this run.'));
+  for(const r of M.rounds||[]){
+    if(oz){list.append(recapCard(r.text,r,null,0));continue}
+    const c=el('div','rcard');c.append(el('div','q','Round '+r.i+': '+r.answer.artist+' – '+r.answer.song));
+    const rt=el('div','rt');for(const k of Object.keys(r.pts||{})){const p=r.pts[k]||0,row=el('div','rr');row.append(el('div',null,NAME[k]||k),el('div',null,r.guess&&r.guess[k]?String(r.guess[k]):'—'),el('div',null,String(r.answer[k])),el('div','pt',f2(p)+' pts'));rt.append(row)}
+    const ln=el('div','line');ln.append('Total: ',el('b',null,f2(r.total)+' / '+f2(r.max)));c.append(rt,ln);list.append(c)}
+  box.append(list);$('rs').hidden=false;$('rs').classList.remove('enter');void $('rs').offsetWidth;$('rs').classList.add('enter');$('rs').scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
+$('rsX').onclick=()=>{$('rs').hidden=true};
+
+/* ---------- admin: map pool + Ozillion tabs (the Scoring tab is above) ---------- */
+async function adm(path,body){aKey=($('admkey')&&$('admkey').value)||aKey;
+  const r=await fetch(API+path,body===undefined?{headers:{'x-admin-key':aKey}}:{method:'POST',headers:{'content-type':'application/json','x-admin-key':aKey},body:JSON.stringify(body)});
+  let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||('The server answered '+r.status+(r.status===401?' (check the admin key above)':'')));return d}
+const say=(e,t,k)=>{e.textContent=t||'';e.className='stat '+(k||'')};
+const dl=(name,obj)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+const readJson=inp=>new Promise((res,rej)=>{const f=inp.files[0];if(!f)return rej(new Error('Choose a file first'));const r=new FileReader();r.onload=()=>{try{res(JSON.parse(r.result))}catch(e){rej(new Error('Not a valid JSON file'))}};r.readAsText(f)});
+const inited={};
+function admTabs(){
+  const bar=$('admtabs'),T={sc:$('tab_sc'),pool:$('tab_pool'),oz:$('tab_oz')};
+  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+    for(const k in T)T[k].hidden=k!==b.dataset.t;if(b.dataset.t==='pool'&&!inited.pool){inited.pool=1;initPool()}if(b.dataset.t==='oz'&&!inited.oz){inited.oz=1;initOz()}})}
+
+/* ----- map pool ----- */
+function initPool(){
+  const box=$('tab_pool');box.innerHTML=`<p class="stat" id="pStat">Loading…</p>
+    <h3>Fill the pool</h3>
+    <p class="stat">The pool is the list of maps the game draws from. Maps with a gameplay video play that clip, the others play the osu! preview audio. Backgrounds are only links to the images, nothing is stored. Maps with a play count are used for backgrounds (the play count sets the difficulty).</p>
+    <div class="row"><button class="btn go" id="pFill" type="button">Fill the pool (recommended)</button><button class="btn" id="pYt" type="button">Import channel clips only</button>
+      <label>Most played maps <input id="pN" type="number" min="50" max="3000" step="50" value="1000"></label><label>Status <select id="pS"><option value="ranked">Ranked</option><option value="loved">Loved</option><option value="any">Any</option></select></label></div>
+    <p class="stat" id="pProg"></p>
+    <h3>Add maps</h3>
+    <div class="row"><input id="pQ" type="search" placeholder="Search osu! maps (title / artist) or paste a beatmapset link or id" style="flex:1;min-width:220px"><select id="pQs"><option value="any">Any status</option><option value="ranked">Ranked</option><option value="loved">Loved</option></select><button class="btn" id="pGo" type="button">Search</button></div>
+    <div id="pRes" class="admp"></div>
+    <h3>The pool</h3>
+    <div class="row"><input id="pF" type="search" placeholder="Filter by title or artist" style="flex:1;min-width:200px"><select id="pFs"><option value="all">All</option><option value="video">With video</option><option value="preview">Preview audio only</option><option value="off">Disabled</option></select></div>
+    <div id="pList" class="admp"></div>
+    <div class="row"><button class="btn" id="pPrev" type="button">Previous</button><span class="stat" id="pPage"></span><button class="btn" id="pNext" type="button">Next</button></div>
+    <h3>Backup</h3><div class="row"><button class="btn" id="pExp" type="button">Download the pool (JSON)</button><input type="file" id="pFile" accept=".json"><button class="btn" id="pRes2" type="button">Restore from file</button></div>`;
+  let off=0,total=0;const L=30,prog=(t,k)=>say($('pProg'),t,k);
+  const thumb=m=>{const i=document.createElement('img');i.loading='lazy';i.alt='';if(m.s)i.src='https://assets.ppy.sh/beatmaps/'+m.s+'/covers/list.jpg';return i};
+  const meta=m=>(m.v?'▶ video':'♪ preview')+(m.c!=null?' · '+Number(m.c).toLocaleString()+' plays':' · no play count')+(m.b?' · '+m.b+' BPM':'')+(m.a!=null?' · AR '+m.a:'')+(m.p?' · '+m.p+'pp':'');
+  async function load(){try{const d=await adm('/admin/pool/list?q='+encodeURIComponent($('pF').value)+'&f='+$('pFs').value+'&off='+off+'&lim='+L);total=d.total;const s=d.stats;
+      say($('pStat'),s.all?s.all+' maps in the pool · '+s.on+' enabled · '+s.video+' with a gameplay video · '+s.preview+' preview audio only · '+s.bg+' usable for backgrounds':'The pool is empty: games still use the old YouTube channel list. Press “Fill the pool” to build it.',s.all?'':'warn');
+      $('pList').replaceChildren(...d.items.map(m=>{const r=el('div','mrow'+(m.on?'':' off')),mid=el('div'),act=el('div','act'),tg=el('button','btn',m.on?'Disable':'Enable'),rm=el('button','btn','Remove');
+        mid.append(el('b',null,m.so+' — '+m.ar),el('small',null,meta(m)));tg.type=rm.type='button';
+        tg.onclick=async()=>{try{await adm('/admin/pool/toggle',{k:m.k,on:!m.on});load()}catch(e){prog(e.message,'bad')}};
+        rm.onclick=async()=>{if(!confirm('Remove “'+m.so+'” from the pool? Imports will not add it back.'))return;try{await adm('/admin/pool/remove',{k:m.k});load()}catch(e){prog(e.message,'bad')}};
+        act.append(tg,rm);r.append(thumb(m),mid,act);return r}));
+      $('pPage').textContent=total?(off+1)+'–'+Math.min(total,off+L)+' of '+total:'nothing here';$('pPrev').disabled=off<=0;$('pNext').disabled=off+L>=total}
+    catch(e){say($('pStat'),e.message,'bad')}}
+  $('pF').oninput=()=>{off=0;clearTimeout(load.t);load.t=setTimeout(load,250)};$('pFs').onchange=()=>{off=0;load()};$('pPrev').onclick=()=>{off=Math.max(0,off-L);load()};$('pNext').onclick=()=>{off+=L;load()};
+  const run=async(label,body)=>{prog(label+'…');return adm('/admin/pool/import',body)};
+  $('pYt').onclick=async()=>{try{const r=await run('Reading the channel’s videos and play counts',{mode:'yt'});prog('Channel clips: '+r.added+' new, '+r.updated+' updated. '+r.total+' maps in the pool.','ok');load()}catch(e){prog(e.message,'bad')}};
+  $('pFill').onclick=async()=>{const b=$('pFill');b.disabled=true;
+    try{try{const r=await run('1/2 Channel clips',{mode:'yt'});prog('Channel clips: '+r.added+' new, '+r.updated+' updated.')}catch(e){prog('Channel import failed ('+e.message+'). Continuing with the most played maps…','warn')}
+      const target=Math.max(50,Math.min(3000,+$('pN').value||1000));let cur='',n=0,pages=0;
+      while(n<target){const p=Math.min(20,Math.ceil((target-n)/50));const r=await run('2/2 Most played maps ('+n+' / '+target+')',{mode:'top',cursor:cur,pages:p,status:$('pS').value});n+=p*50;pages++;cur=r.cursor;prog('Most played maps: '+Math.min(n,target)+' / '+target+' · '+r.total+' in the pool');load();if(r.done||pages>80)break}
+      prog('Done. The game picks it up within a few minutes.','ok')}
+    catch(e){prog(e.message,'bad')}b.disabled=false;load()};
+  $('pGo').onclick=async()=>{const q=$('pQ').value.trim(),res=$('pRes');if(!q)return;
+    try{if(/^\d+$/.test(q)||/beatmapsets\/\d+/.test(q)){const r=await adm('/admin/pool/add',{set:q});res.replaceChildren(el('p','stat ok',r.added?'Added.':'That map was already in the pool (updated).'));load();return}
+      res.replaceChildren(el('p','stat','Searching…'));const d=await adm('/admin/osu/search?q='+encodeURIComponent(q)+'&s='+$('pQs').value);
+      res.replaceChildren(...(d.items.length?d.items.map(m=>{const r=el('div','mrow'),mid=el('div'),act=el('div','act'),b=el('button','btn',m.inPool?'In pool':'Add');b.type='button';b.disabled=m.inPool;
+        mid.append(el('b',null,m.so+' — '+m.ar),el('small',null,meta(m)));b.onclick=async()=>{b.disabled=true;try{await adm('/admin/pool/add',{set:m.s});b.textContent='Added';load()}catch(e){b.textContent='Error';prog(e.message,'bad')}};
+        act.append(b);r.append(thumb(m),mid,act);return r}):[el('p','stat','No maps found.')]))}
+    catch(e){res.replaceChildren(el('p','stat bad',e.message))}};
+  $('pQ').addEventListener('keydown',e=>{if(e.key==='Enter')$('pGo').click()});
+  $('pExp').onclick=async()=>{try{dl('ozu-pool.json',await adm('/admin/pool/export'))}catch(e){prog(e.message,'bad')}};
+  $('pRes2').onclick=async()=>{try{const d=await readJson($('pFile')),r=await adm('/admin/pool/restore',{maps:d.maps||d});prog('Restored: '+r.added+' added, '+r.updated+' replaced.','ok');load()}catch(e){prog(e.message,'bad')}};
+  load();
+}
+
+/* ----- Ozillion: questions, answers (+ aliases, counts), reports ----- */
+function initOz(){
+  const box=$('tab_oz');box.innerHTML=`<p class="stat">A question needs at least 3 answers to be asked. <b>Count</b> = how often the answer is given for that question; the rarity follows from it (the most given answers that cover the first 50 % of all counts are Doo Doo, then 30 % Those Who Know..., 13 % Ball Knowledge, 5.5 % WYSI, the rest Ozillion!). You can also pin a tier on an answer.</p>
+    <div class="ozadm"><div><div class="row"><input id="oqNew" type="text" maxlength="200" placeholder="New question…" style="flex:1;min-width:0"><button class="btn go" id="oqAdd" type="button">Add</button></div><div class="qlist" id="oqList"></div></div>
+    <div id="oqEd"><p class="stat">Pick a question on the left, or create one.</p></div></div>
+    <h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>
+    <h3>Backup</h3><div class="row"><button class="btn" id="oExp" type="button">Download all questions (JSON)</button><input type="file" id="oFile" accept=".json"><button class="btn" id="oRes" type="button">Restore from file</button></div><p class="stat" id="oMsg"></p>`;
+  let sel=null;const msg=(t,k)=>say($('oMsg'),t,k);
+  const OZA=['#9aa0a6','#4f9cff','#ff4d62','#17131d','#ff66aa'];
+  async function list(){try{const d=await adm('/admin/oz/overview');
+      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,q.answers+' answers'+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;list();edit()};return b}));
+      $('oRepN').textContent='('+d.reports+')';return d}catch(e){msg(e.message,'bad')}}
+  async function edit(){const ed=$('oqEd');if(!sel){return}
+    try{const {q}=await adm('/admin/oz/q?id='+sel);ed.replaceChildren();
+      const top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
+      const sv=el('button','btn','Save text'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
+      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
+      dq.onclick=async()=>{if(!confirm('Delete this question and all its answers?'))return;try{await adm('/admin/oz/q/del',{id:q.id});sel=null;ed.replaceChildren(el('p','stat','Deleted.'));list();reps()}catch(e){msg(e.message,'bad')}};
+      top.append(tx,sv,dq);ed.append(top,el('p','stat',q.ans.length+' answers · total count '+q.total.toLocaleString()));
+      const head=el('div','arow h');['Answer','Aliases (comma separated)','Count','Tier',''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
+      const row=(a)=>{const r=el('div','arow'),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
+        nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
+        tr.innerHTML='<option value="">Auto'+(a.auto!=null?' ('+OZN[a.auto]+')':'')+'</option>'+OZN.map((t,i)=>'<option value="'+i+'">'+t+'</option>').join('');tr.value=a.tier==null?'':String(a.tier);
+        if(a.auto!=null)tr.style.borderLeft='6px solid '+OZA[a.tier!=null?a.tier:a.auto];
+        const s=el('button','btn',a.id?'Save':'Add'),x=el('button','btn','✕');s.type=x.type='button';x.title='Delete answer';
+        s.onclick=async()=>{try{await adm('/admin/oz/a/save',{qid:q.id,a:{id:a.id,name:nm.value,al:al.value,n:n.value,tier:tr.value}});msg('Saved.','ok');edit();list()}catch(e){msg(e.message,'bad')}};
+        x.onclick=async()=>{try{await adm('/admin/oz/a/del',{qid:q.id,id:a.id});edit();list()}catch(e){msg(e.message,'bad')}};
+        act.append(s);if(a.id)act.append(x);r.append(nm,al,n,tr,act);return r};
+      ed.append(row({}),...q.ans.map(row));
+      const bulk=el('textarea');bulk.placeholder='Paste many answers, one per line:\nanswer | alias, alias | count\n(aliases and count are optional; an existing answer just gets its count increased)';
+      const bb=el('button','btn','Add the lines');bb.type='button';bb.onclick=async()=>{try{const r=await adm('/admin/oz/a/bulk',{qid:q.id,text:bulk.value});msg(r.added+' added, '+r.merged+' increased.','ok');edit();list()}catch(e){msg(e.message,'bad')}};
+      ed.append(el('h3',null,'Add many'),bulk,bb)}
+    catch(e){msg(e.message,'bad')}}
+  async function reps(){try{const {reports}=await adm('/admin/oz/reports'),box=$('oRep');$('oRepN').textContent='('+reports.length+')';
+      if(!reports.length){box.replaceChildren(el('p','stat','No reports.'));return}
+      box.replaceChildren(...reports.map(r=>{const c=el('div','rep'),head=el('div'),ctl=el('div','row');head.append(chip(r.kind==='alias'?1:3),' ');head.lastChild.textContent=r.kind==='alias'?'Missing alias':'Missing answer';
+        head.append(' · ',el('b',null,r.qtext),' · typed “'+r.text+'” ×'+r.n+(r.target?' · player says it is: “'+r.target+'”':''));c.append(head,ctl);
+        const dis=el('button','btn','Dismiss');dis.type='button';dis.onclick=async()=>{try{await adm('/admin/oz/report/resolve',{id:r.id,action:'dismiss'});reps();list()}catch(e){msg(e.message,'bad')}};
+        if(r.kind==='answer'){const nm=el('input');nm.type='text';nm.value=r.text;const ok=el('button','btn go','Add as answer');ok.type='button';
+          ok.onclick=async()=>{try{await adm('/admin/oz/report/resolve',{id:r.id,action:'answer',name:nm.value});reps();list()}catch(e){msg(e.message,'bad')}};ctl.append(nm,ok,dis)}
+        else{const sl=el('select');sl.innerHTML='<option value="">Pick the answer…</option>';const ok=el('button','btn go','Add as alias');ok.type='button';
+          adm('/admin/oz/q?id='+r.qid).then(({q})=>{sl.innerHTML='<option value="">Pick the answer…</option>'+q.ans.map(a=>'<option value="'+a.id+'">'+a.name.replace(/</g,'&lt;')+'</option>').join('');
+            const hit=q.ans.find(a=>r.target&&a.name.toLowerCase()===r.target.toLowerCase());if(hit)sl.value=hit.id}).catch(()=>{});
+          ok.onclick=async()=>{try{await adm('/admin/oz/report/resolve',{id:r.id,action:'alias',target:sl.value});reps();list()}catch(e){msg(e.message,'bad')}};ctl.append(sl,ok,dis)}
+        return c}))}catch(e){msg(e.message,'bad')}}
+  $('oqAdd').onclick=async()=>{const t=$('oqNew').value.trim();if(!t)return;try{const r=await adm('/admin/oz/q/save',{text:t});$('oqNew').value='';sel=r.id;await list();edit()}catch(e){msg(e.message,'bad')}};
+  $('oqNew').addEventListener('keydown',e=>{if(e.key==='Enter')$('oqAdd').click()});
+  $('oExp').onclick=async()=>{try{dl('ozillion-questions.json',await adm('/admin/oz/export'))}catch(e){msg(e.message,'bad')}};
+  $('oRes').onclick=async()=>{try{const d=await readJson($('oFile'));await adm('/admin/oz/restore',{qs:d.qs||d});msg('Restored.','ok');list()}catch(e){msg(e.message,'bad')}};
+  list();reps();
+}
 </script>
 
 <script src="../assets/site.js"></script>

@@ -26,12 +26,17 @@ const S={
   miss:()=>{tone(300,0,.22,'sawtooth',.1,150)},
   pass:()=>{tone(300,0,.08,'square',.07,620);tone(620,.08,.08,'square',.06)},               // the bomb moves on
   boom:()=>{noise(0,.7,.5,700);tone(120,0,.5,'sawtooth',.22,38)},
+  dive:()=>{noise(0,.55,.2,500);tone(420,0,.55,'sine',.12,110)},
+  layer:o=>{const i=(o&&o.i)||0,f=300*Math.pow(1.26,i);tone(f,0,.5,'sine',.2);tone(f*2,.06,.35,'sine',.08);tone(70+i*12,0,.3,'sine',.25,45)},   // a sonar ping per layer, deeper = higher
+  rumble:()=>{noise(0,1.1,.28,260);tone(48,0,1.1,'sawtooth',.14,36)},
+  wysi:()=>{[0,.11,.22].forEach(t=>tone(727,t,.07,'square',.09));noise(.05,.3,.18,3000);tone(90,0,.5,'sawtooth',.14,40)},
+  ozillion:()=>{[523,659,784,1046,1318,1568].forEach((f,i)=>tone(f,i*.05,1.1,'triangle',.13));[2093,2637,3136].forEach((f,i)=>tone(f,.3+i*.09,.4,'sine',.07));noise(0,.4,.25,2500)},
   win:()=>{[523,659,784,1046,1318].forEach((f,i)=>tone(f,i*.09,.34,'triangle',.18));tone(1568,.5,.5,'sine',.12)}
 };
 let last=0;
 const play=(name,opt)=>{const lv=level();if(lv<=0||!S[name])return;const c=get();if(!c)return;
   const now=performance.now();if(name==='hover'&&now-last<70)return;if(name==='hover')last=now;
-  master.gain.value=lv*lv*(name==='hover'?1:1);try{S[name]()}catch(e){}};
+  master.gain.value=lv*lv*(name==='hover'?1:1);try{S[name](opt)}catch(e){}};
 window.SFX={play,unlock:get};
 // wake the audio engine on the first touch/click (browsers need a gesture)
 ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>get(),{once:true,passive:true}));
