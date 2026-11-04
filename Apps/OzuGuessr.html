@@ -1205,6 +1205,7 @@ function initOz(){
   const box=$('tab_oz');box.innerHTML=`<p class="stat">A question needs at least 3 answers to be asked. <b>Count</b> = how often the answer is used for that question. It is the starting value, and every time a player gives the answer it goes up by 1 (the “given” number in the list). The fewer, the rarer: (the most given answers that cover the first 50 % of all counts are Doo Doo, then 30 % Those Who Know..., 13 % Ball Knowledge, 5.5 % WYSI, the rest Ozillion!). You can also pin a tier on an answer.</p>
     <div class="ozadm"><div><div class="row"><input id="oqNew" type="text" maxlength="200" placeholder="New question…" style="flex:1;min-width:0"><button class="btn go" id="oqAdd" type="button">Add</button></div><div class="row" style="flex-wrap:wrap"><select id="oqKind" title="Question type"><option value="list">Typed answers</option><option value="scrape">Scraped from osu!</option><option value="live">Live osu! search</option></select><label id="oqDl" hidden><input type="checkbox" id="oqD"> needs the difficulty</label><input id="oqF" type="text" maxlength="300" placeholder="osu! filter, e.g. bpm>{bpm 150,200} stars>6" style="flex:1 1 100%;min-width:0" hidden></div><div class="qlist" id="oqList"></div></div>
     <div id="oqEd"><p class="stat">Pick a question on the left, or create one.</p></div></div>
+    <h3>Fill all</h3><div class="row"><button class="btn go" id="oFillAll" type="button">Fill all empty scraped questions</button><label>Maps per question <input id="oFillN" type="number" min="50" max="3000" step="50" value="500"></label></div><p class="stat" id="oFillMsg"></p>
     <h3>Backup</h3><div class="row"><button class="btn" id="oExp" type="button">Download all questions (JSON)</button><input type="file" id="oFile" accept=".json"><button class="btn" id="oRes" type="button">Restore from file</button></div><p class="stat" id="oMsg"></p>`;
   $('tab_rep').innerHTML='<p class="stat">Players can report an answer they gave that was not accepted: a missing answer (add it to the question) or a missing alias (another name for an answer).</p><h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>';
   let sel=null;const msg=(t,k)=>say($('oMsg'),t,k);
@@ -1275,6 +1276,15 @@ function initOz(){
   $('oqKind').onchange=()=>{$('oqF').hidden=$('oqKind').value==='list';$('oqDl').hidden=$('oqKind').value!=='live'};
   $('oqAdd').onclick=async()=>{const t=$('oqNew').value.trim();if(!t)return;try{const r=await adm('/admin/oz/q/save',{text:t,kind:$('oqKind').value,f:$('oqF').value,diff:$('oqD').checked});$('oqF').value='';$('oqNew').value='';sel=r.id;await list();edit()}catch(e){msg(e.message,'bad')}};
   $('oqNew').addEventListener('keydown',e=>{if(e.key==='Enter')$('oqAdd').click()});
+  $('oFillAll').onclick=async()=>{const b=$('oFillAll'),pm=$('oFillMsg');b.disabled=true;
+    try{const d=await adm('/admin/oz/overview'),todo=d.questions.filter(q=>q.kind==='scrape'&&q.answers<d.min),N=Math.max(50,Math.min(3000,+$('oFillN').value||500));let done=0,waits=0;
+      if(!todo.length){pm.textContent='Nothing to fill: every scraped question already has answers.';b.disabled=false;return}
+      for(const q of todo){let cur='',left=Math.ceil(N/50),calls=0;
+        while(left>0&&calls++<200){pm.textContent='('+(done+1)+'/'+todo.length+') '+q.text+'…';const r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:Math.min(5,left),group:q.group});
+          if(r.rateLimited){if(++waits>12)throw new Error('osu! keeps saying “too many requests”. '+done+' questions are filled: press the button again later to continue.');pm.textContent='osu! asked to slow down, continuing in 15 s…';await new Promise(z=>setTimeout(z,15000));continue}
+          waits=0;left-=Math.min(5,left);cur=r.cursor;if(r.done)break}
+        done++}
+      pm.textContent='Done: '+done+' questions filled.';list()}catch(e){pm.textContent=e.message}b.disabled=false};
   $('oExp').onclick=async()=>{try{dl('ozillion-questions.json',await adm('/admin/oz/export'))}catch(e){msg(e.message,'bad')}};
   $('oRes').onclick=async()=>{try{const d=await readJson($('oFile'));await adm('/admin/oz/restore',{qs:d.qs||d});msg('Restored.','ok');list()}catch(e){msg(e.message,'bad')}};
   list();reps();
