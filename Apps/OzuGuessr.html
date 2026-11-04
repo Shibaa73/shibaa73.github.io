@@ -591,7 +591,7 @@ const TYPES={oz:'Your answer',clip_map:'Guess the map (song name)',audio_map:'Gu
 const TIER=['Autoplay','Relax','NM','HR','DT'],TIERC=['#8fd19e','#7cc7ff','#f0b94a','#ff9a5c','#ff6b8b'];
 const norm=s=>String(s||'').normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9぀-ヿ一-鿿]+/g,' ').trim();
 const f2=n=>String(+(+n).toFixed(2));
-let kind=null,lbEnd=0,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null,CAPS={bg:null,why:'',oz:null};
+let rejT=0,kind=null,lbEnd=0,ws=null,me=null,st=null,code='',off=0,NAMES={song:[],artist:[]},lastKey=null,tot=1,sent=false,V=null,CAPS={bg:null,why:'',oz:null};
 const solo=()=>kind==='solo'||kind==='bgsolo'||kind==='ozsolo',daily=()=>kind==='daily'||kind==='ozdaily';
 const tx=o=>{if(ws&&ws.readyState===1){ws.send(JSON.stringify(o));return true}err('Lost the connection to the server. Press Leave and join again.');return false};
 const sfx=()=>Math.round((window.SITE&&SITE.sfxLevel?SITE.sfxLevel():1)*100);
@@ -689,6 +689,7 @@ function connect(c,create){
     else if(m.t==='caps'){CAPS={...CAPS,bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
     else if(m.t==='hint'){if(st&&st.q&&st.q.key===m.key){hintOn=true;$('hinttxt').textContent=m.text;$('hintbtn').hidden=true;sfxp('hint')}}
     else if(m.t==='typing'){if(st&&st.q&&st.q.key===m.key){liveT=m.v;paintLive()}}
+    else if(m.t==='reject'){sent=false;$('submit').hidden=false;$('form').querySelectorAll('input').forEach(i=>i.readOnly=false);$('form').querySelectorAll('select').forEach(i=>i.disabled=false);err(m.m);clearTimeout(rejT);rejT=setTimeout(()=>err(''),4000);sfxp('miss');const f=$('g_a');if(f){f.focus();f.select()}}
     else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
   ws.onclose=()=>{fxClear();const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
   ws.onerror=()=>status('Couldn’t connect to the server.');
@@ -1212,7 +1213,7 @@ function initOz(){
       $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='live'?'Live osu! search':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;list();edit()};return b}));
       $('oRepN').textContent='('+d.reports+')';const rb=$('repTab');if(rb)rb.textContent='Reports'+(d.reports?' ('+d.reports+')':'');return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
-    try{const {q}=await adm('/admin/oz/q?id='+sel);ed.replaceChildren();
+    try{const data=await adm('/admin/oz/q?id='+sel),q=data.q;ed.replaceChildren();
       const kindOf=q.kind||'list',dc=kindOf==='live'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
       const sv=el('button','btn','Save text'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
       sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:q.kind,f:fi?fi.value:'',diff:dc?dc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
@@ -1224,13 +1225,26 @@ function initOz(){
         tr.onclick=async()=>{out.className='stat';out.textContent='Asking osu!…';try{const r=await adm('/admin/oz/q/preview',{text:tx.value,f:fi.value});out.className='stat ok';out.textContent='Rolled: “'+r.text+'” → '+r.f+' · '+r.total.toLocaleString()+' maps found. Most played: '+(r.items.join(' | ')||'none')}catch(e){out.className='stat bad';out.textContent=e.message}};
         if(dc){dc.type='checkbox';dc.checked=!!q.diff;const dl2=el('label');dl2.append(dc,' The player also picks the difficulty (the numbers in the filter, like bpm or stars, then have to hold for that difficulty). Save the text to apply.');ed.append(dl2)}
         ed.append(fr,help,out);
-        if(kindOf==='scrape'){const sr=el('div','row'),n=el('input'),go=el('button','btn go','Scrape now'),rp=el('input'),pg=el('span','stat');n.type='number';n.min=50;n.max=5000;n.step=50;n.value=300;rp.type='checkbox';rp.checked=true;go.type='button';
-          const lb=el('label',null,'Number of maps ');lb.append(n);const lb2=el('label');lb2.append(rp,' replace the scraped answers (your own answers stay)');sr.append(lb,go,lb2);
-          go.onclick=async()=>{go.disabled=true;try{let cur='',got=0,r,pagesLeft=Math.max(1,Math.ceil((+n.value||300)/50)),first=true;
-              while(pagesLeft>0){const p=Math.min(8,pagesLeft);pg.textContent='Scraping… '+got+' maps';r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:p,replace:rp.checked&&first});first=false;pagesLeft-=p;got+=r.added+r.updated;cur=r.cursor;if(r.done)break}
-              msg('Scraped: '+r.total+' answers now.','ok');edit();list()}catch(e){msg(e.message,'bad')}go.disabled=false};
-          ed.append(sr,pg,el('p','stat','Scraping takes the most played maps first. Press it again any time to refresh the play counts.'))}}
-      if(kindOf==='live'){ed.append(el('p','stat','Nothing to fill in: there are no answers to manage and nothing to report.'));return}
+}
+      if(kindOf!=='live'){   // fill the answers from osu!: songs, mappers or artists of the most played maps
+        const sr=el('details','pcard'),gs=el('select'),ff=fi||el('input'),n=el('input'),go=el('button','btn go','Scrape now'),rp=el('input'),pg=el('p','stat'),body=el('div');sr.open=kindOf==='scrape';
+        gs.innerHTML='<option value="song">Songs (title)</option><option value="mapper">Mappers (who made the map)</option><option value="artist">Artists</option>';gs.value=(q.scraped&&q.scraped.group)||'song';
+        if(!fi){ff.type='text';ff.placeholder='optional osu! filter, e.g. status=ranked stars>5 (empty = all ranked and loved maps)';ff.style.cssText='flex:1;min-width:200px'}
+        n.type='number';n.min=50;n.max=10000;n.step=50;n.value=kindOf==='scrape'?300:3000;rp.type='checkbox';rp.checked=false;go.type='button';
+        const r1=el('div','row'),r2=el('div','row'),lb=el('label',null,'Answers are '),lb2=el('label',null,'Look at the most played '),lb3=el('label');lb.append(gs);lb2.append(n,' maps');lb3.append(rp,' replace what an earlier scrape added (your own answers stay)');
+        r1.append(lb,lb2,go);r2.append(lb3);if(!fi)r1.prepend(ff);
+        body.append(r1,r2,pg,el('p','stat','Takes the most played maps first and adds up the play counts of every set of the same song / mapper into the start count (1 per 20,000 plays); every time a player gives an answer it goes up by 1. Your own answers, aliases and counts stay. It runs in steps (about one osu! request a second) and keeps going if osu! asks to slow down.'));
+        sr.append(el('summary',null,'Fill the answers from osu!'),body);ed.append(sr);
+        go.onclick=async()=>{go.disabled=true;try{let cur='',got=0,r,left=Math.max(1,Math.ceil((+n.value||300)/50)),first=true,waits=0,calls=0;
+            while(left>0&&calls++<500){const p=Math.min(5,left);pg.textContent='Reading osu!… '+got+' maps';r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:p,replace:rp.checked&&first,group:gs.value,f:ff.value});
+              if(r.rateLimited){if(++waits>12)throw new Error('osu! keeps saying “too many requests”: '+got+' maps were read and saved. Press again in a few minutes to continue.');pg.textContent=got+' maps · osu! asked to slow down, continuing in 15 s…';await new Promise(z=>setTimeout(z,15000));continue}
+              waits=0;first=false;left-=p;got+=r.fetched||0;cur=r.cursor;if(r.done)break}
+            msg('Done: '+got+' maps read, '+r.total+' answers now.','ok');pg.textContent='';edit();list()}catch(e){msg(e.message,'bad');pg.textContent=''}go.disabled=false}}
+      
+      if(kindOf==='live'){const lv=data.live||{T:0,n:0,top:[]},rs=el('button','btn','Forget the recorded answers');rs.type='button';
+        rs.onclick=async()=>{if(!confirm('Forget every answer recorded for this question? Its rarity starts again from the play counts.'))return;try{await adm('/admin/oz/q/lclear',{qid:q.id});msg('Forgotten.','ok');edit()}catch(e){msg(e.message,'bad')}};
+        ed.append(el('p','stat',lv.n+' different answers recorded from '+lv.T+' correct answers. Every correct answer is saved here with its map numbers (bpm, ar, stars…), so later rolls can be checked without asking osu!, and the rarer an answer is in this list, the more points it gives.'),rs);
+        if(lv.top.length){const t=el('div','admp');t.append(...lv.top.map(e=>el('p','stat',e.lb+' · given '+e.n+'×')));ed.append(t)}return}
       ed.append(el('p','stat',q.ans.length+' answers · total count '+q.total.toLocaleString()));
       const head=el('div','arow h');['Answer','Aliases (comma separated)','Count','Tier',''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
       const row=(a)=>{const r=el('div','arow'),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
