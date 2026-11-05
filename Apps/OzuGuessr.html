@@ -346,7 +346,7 @@ body.ingame .wrap{max-width:1120px}
 #form .fld{min-width:0}#form .fld input{width:100%;min-width:0;box-sizing:border-box}
 
 /* ---------- Ozillion ---------- */
-:root{--t0:#9aa0a6;--t1:#4f9cff;--t2:#ff4d62;--t3:#17131d;--t4:#ff66aa}
+:root{--t0:#7bd66b;--t1:#4fa8ff;--t2:#ffc23d;--t3:#ff4d8d;--t4:#c070ff}
 .mode.half{grid-column:auto}.mode.wide{grid-column:1/-1}
 .mode.oz{--ac:var(--cyan);--acr:124,199,255}
 .mode.half{background:linear-gradient(120deg,rgba(var(--acr),.14),var(--panel-2) 62%);border-color:rgba(var(--acr),.28)}
@@ -374,24 +374,6 @@ body.ingame .wrap{max-width:1120px}
 .rcard .line b{color:var(--text);font-weight:600}.rcard .rr{font-size:.8rem;padding:6px 8px;grid-template-columns:70px 1fr 1fr auto}
 /* the dive */
 #ozfx{position:fixed;inset:0;z-index:90;overflow:hidden;cursor:pointer;background:#000;animation:fade .25s ease both}
-#ozfx .scroll{position:absolute;left:0;right:0;top:0;height:500%;transition:transform 1s cubic-bezier(.65,0,.2,1)}
-#ozfx .band{height:20%;position:relative;overflow:hidden;display:grid;place-items:start center}
-#ozfx .lname{margin-top:9vh;font:600 clamp(1rem,3.4vw,1.8rem) 'Fredoka',sans-serif;letter-spacing:.3em;text-transform:uppercase;color:#fff;opacity:.6;text-align:center;padding:0 12px}
-.band.b0{background:radial-gradient(circle at 50% 45%,#6d747c,#2b2f34 75%)}
-.band.b1{background:radial-gradient(circle at 50% 45%,#2f7cf0,#0b2658 78%)}
-.band.b2{background:radial-gradient(circle at 50% 45%,#ff4a5f,#4a0712 78%)}
-.band.b3{background:radial-gradient(circle at 50% 45%,#221b2c,#000 80%)}
-.band.b4{background:radial-gradient(circle at 50% 45%,#ffa3d0,#e0498f 40%,#3b0a28 100%)}
-.band::before,.band::after{content:'';position:absolute;inset:0;pointer-events:none}
-.band.b0::before{background:radial-gradient(40% 30% at 20% 60%,rgba(255,255,255,.14),transparent),radial-gradient(40% 30% at 80% 35%,rgba(255,255,255,.1),transparent);animation:ozfog 7s ease-in-out infinite alternate}
-.band.b1::before{background:repeating-radial-gradient(circle at 50% 50%,transparent 0 38px,rgba(255,255,255,.12) 40px 42px,transparent 44px 90px);animation:ozripple 3s linear infinite}
-.band.b2::before{background:radial-gradient(circle,rgba(255,200,120,.9) 0 2px,transparent 3px) 0 0/46px 70px,radial-gradient(circle,rgba(255,120,90,.8) 0 2px,transparent 3px) 20px 30px/62px 90px;animation:ozembers 2.4s linear infinite}
-.band.b3::before{background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 2px,transparent 2px 5px);animation:ozflick .18s steps(2) infinite}
-.band.b3::after{content:'727';position:absolute;inset:auto;left:50%;top:52%;translate:-50% -50%;font:700 clamp(7rem,30vw,20rem) 'Fredoka',sans-serif;color:rgba(255,255,255,.05);animation:ozghost 2.2s steps(1) infinite}
-.band.b4::before{background:conic-gradient(from 0deg at 50% 45%,rgba(255,255,255,.28),transparent 8%,rgba(255,255,255,.2) 16%,transparent 25%,rgba(255,255,255,.28) 33%,transparent 41%,rgba(255,255,255,.2) 50%,transparent 58%,rgba(255,255,255,.28) 66%,transparent 75%,rgba(255,255,255,.2) 83%,transparent 91%);animation:ozspin 9s linear infinite}
-.fxorb{position:absolute;left:50%;top:45%;width:128px;height:128px;margin:-64px 0 0 -64px;pointer-events:none;transition:opacity .4s}
-.fxorb .hc{position:absolute;inset:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--oc,#ff7ab3) 62%);box-shadow:0 0 0 5px rgba(255,255,255,.9),0 0 38px var(--oc,#ff7ab3);animation:ozbeat 1s ease-in-out infinite}
-.fxorb .ap{position:absolute;inset:-8px;border-radius:50%;border:4px solid rgba(255,255,255,.85);animation:ozapp 1.1s ease-out infinite}.fxorb .ap+.ap{animation-delay:.55s}
 .fxmain{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:10px;padding:0 14px;pointer-events:none}
 .fxwho{font:600 .9rem 'Fredoka',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:0}.fxwho.in{opacity:.8;transition:opacity .4s}
 .fxans{font:700 clamp(2rem,8vw,4.6rem)/1.05 'Fredoka',sans-serif;color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.5);opacity:0;scale:.5;max-width:92vw;word-break:break-word}
@@ -464,10 +446,100 @@ body.pshake{animation:ozshake .5s linear}
 .gcols.oz #res>*{animation:rise .35s var(--ease) both}
 .gcols.oz .gright .rr,.gcols.oz .orr{font-size:.9rem}
 @media (max-width:900px){.gcols.oz .ozq{top:50px}.gcols.oz .gright{min-height:0}}
+
+/* ---------- themed scrollbars ---------- */
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:10px}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#f7a3c6,var(--pink-2));border-radius:10px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#ffc2dc,var(--pink));background-clip:padding-box;border:2px solid transparent}
+::-webkit-scrollbar-button{display:none}::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--pink-2) rgba(255,255,255,.05)}}
+
+/* ---------- Ozillion scene: one long descent through the difficulty spectrum ---------- */
+:root{--notch:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px);--sky:linear-gradient(180deg,#ffd0e4 0,#ff9fcb 3%,#6fb8ff 9%,#2c7bd0 20%,#16406f 38%,#1d1650 58%,#160a2e 78%,#06020d 100%)}
+#ozscene{display:none;position:fixed;inset:0;z-index:0;overflow:hidden;background:#06020d}
+body.ozs #ozscene{display:block}
+body.ozs .ambient,body.ozs .watermark,body.ozs header{display:none}
+body.ozs{padding-top:10px;padding-bottom:130px;background:#06020d}
+.ozw{position:absolute;left:0;right:0;top:0;height:500vh;background:var(--sky);transform:translateY(calc(var(--cam,0)*-400vh));transition:transform 1.8s cubic-bezier(.5,0,.2,1)}
+.dcrt{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+#ozscene .dcrt{position:fixed}
+.ozship{position:absolute;left:6vw;top:11vh;width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffb3d2,var(--pink-2));box-shadow:0 0 0 5px #fff,0 0 40px rgba(255,122,179,.8);display:grid;place-items:center;animation:ozbob 3.2s ease-in-out infinite}
+.ozship b{font:700 2rem 'Fredoka',sans-serif;color:#fff}.ozship .ap{position:absolute;inset:-22px;border-radius:50%;border:4px solid rgba(255,255,255,.8);animation:ozapp2 2.2s ease-out infinite}
+@keyframes ozbob{50%{translate:0 -8px}}@keyframes ozapp2{0%{scale:1.5;opacity:0}30%{opacity:1}100%{scale:1;opacity:0}}
+.ozwave{position:absolute;left:0;right:0;top:20vh;height:6px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.7) 0 12px,transparent 12px 24px)}
+.ozamb{position:absolute;left:5%;font:500 .78rem 'IBM Plex Mono',monospace;letter-spacing:.12em;color:rgba(255,255,255,.4)}
+.dc{position:absolute;width:var(--s);height:var(--s);pointer-events:none;opacity:.5;color:var(--c)}
+.dc0{border-radius:50%;border:3px solid var(--c);background:color-mix(in srgb,var(--c) 22%,transparent);animation:ozfl 6s ease-in-out var(--d) infinite alternate}
+.dc0::after{content:attr(data-n);position:absolute;inset:0;display:grid;place-items:center;font:700 calc(var(--s)*.42) 'Fredoka',sans-serif;color:#fff}
+.dc1{border-radius:50%;border:2px solid var(--c);animation:ozapp3 3.4s ease-out var(--d) infinite}
+.dc2{height:calc(var(--s)*.5);width:calc(var(--s)*2.4);border-radius:99px;border:3px solid var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
+.dc3{border-radius:50%;border:3px dashed var(--c);animation:ozspin2 7s linear infinite}
+@keyframes ozfl{to{translate:14px -18px}}@keyframes ozapp3{0%{scale:1.7;opacity:0}30%{opacity:.6}100%{scale:.7;opacity:.1}}@keyframes ozspin2{to{rotate:360deg}}
+/* HUD + prompt panel */
+body.ozs #game.sec{background:none;border:0;box-shadow:none;padding:0;margin-bottom:0}
+body.ozs .ghead{justify-content:center;margin-bottom:14px}
+body.ozs .ghead h2,body.ozs .score{flex:none;margin:0;padding:9px 18px;background:rgba(8,10,26,.8);clip-path:var(--notch);font:600 .8rem 'IBM Plex Mono',monospace;letter-spacing:.2em;text-transform:uppercase;color:#cfe3ff}
+body.ozs .score{font-size:1.3rem;letter-spacing:.05em;color:var(--pink)}
+body.ozs .timer .tr{stroke:rgba(255,255,255,.14)}body.ozs .timer b{font-family:'IBM Plex Mono',monospace;color:#9fe8ff}body.ozs .timer .tp{stroke:#4fd8ff}
+body.ozs .gcols.oz .ozq{background:rgba(8,10,26,.84);border:2px solid rgba(255,255,255,.16);border-radius:0;clip-path:var(--notch);text-align:center;padding:22px 24px 16px}
+body.ozs .ozq small{color:#ff7ab3;font:600 .72rem 'IBM Plex Mono',monospace;letter-spacing:.32em}
+body.ozs .ozq h3{font:700 clamp(1.3rem,3.6vw,2rem)/1.3 'IBM Plex Mono',monospace;color:#fff}
+body.ozs .ozq::after{content:'▼  rarer answers sink deeper  ▼';display:block;margin-top:12px;font:500 .68rem 'IBM Plex Mono',monospace;letter-spacing:.2em;color:rgba(255,255,255,.45)}
+/* the answer bar */
+#ozbar{display:none}
+body.ozs #ozbar:not([hidden]){display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;gap:10px;align-items:flex-end;justify-content:center;padding:34px 14px calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(4,4,14,.94) 40%)}
+body.ozs #ozbar #form{display:flex;flex:1;max-width:560px;margin:0;gap:8px}
+body.ozs #ozbar #form .fld{flex:1;margin:0}
+body.ozs #ozbar #form .fld label{position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden}
+body.ozs #ozbar #form input,body.ozs #ozbar #form select{background:rgba(5,14,30,.92);border:2px solid #35c6e8;border-radius:0;color:#e9fbff;font:500 1rem 'IBM Plex Mono',monospace;padding:14px 14px}
+body.ozs #ozbar #form select{max-width:190px}
+body.ozs #ozbar #form input:focus{box-shadow:0 0 0 3px rgba(53,198,232,.25);outline:none}
+body.ozs #ozbar .subrow{position:static;display:flex;gap:8px;margin:0;padding:0;background:none;box-shadow:none}
+body.ozs #ozbar .subrow .btn{width:auto;border-radius:0;clip-path:var(--notch);padding:15px 22px;font:700 .95rem 'IBM Plex Mono',monospace;letter-spacing:.18em;text-transform:uppercase;margin:0}
+body.ozs #ozbar .subrow .btn.go{background:#d63c7c;color:#fff;box-shadow:none}
+body.ozs #ozbar .subrow #skip{background:rgba(255,255,255,.08);color:#b9c6e6;border-color:transparent}
+body.ozs #ozbar .ac{top:auto;bottom:100%;margin:0 0 6px;background:rgba(8,10,26,.96);border:2px solid #35c6e8;border-radius:0;font-family:'IBM Plex Mono',monospace}
+body.ozs #ozbar .ac li{border-radius:0}
+body.ozs #gerr{position:fixed;left:50%;translate:-50% 0;bottom:96px;z-index:60;max-width:92vw;background:rgba(40,8,20,.95);border-radius:0;clip-path:var(--notch);font-family:'IBM Plex Mono',monospace;margin:0}
+body.ozs .orr,body.ozs .rcard{background:rgba(8,10,26,.82);border:2px solid rgba(255,255,255,.12);border-radius:0;clip-path:var(--notch);font-family:'IBM Plex Mono',monospace}
+body.ozs .orr.me{border-color:rgba(255,122,179,.7)}
+body.ozs .topline,body.ozs .tot,body.ozs #res .muted{color:#b9c6e6;font-family:'IBM Plex Mono',monospace}
+body.ozs #board .pcard,body.ozs #board>*{background:rgba(8,10,26,.7)}
+@media (max-width:700px){body.ozs #ozbar:not([hidden]){flex-wrap:wrap}body.ozs #ozbar #form{flex:1 1 100%;max-width:none}body.ozs #ozbar .subrow{flex:1 1 100%}body.ozs #ozbar .subrow .btn.go{flex:1}body.ozs #gerr{bottom:150px}body.ozs #ozbar #form input{font-size:16px}}
+/* the descent overlay */
+#ozfx{background:#06020d}
+.dwrap{position:absolute;left:0;right:0;top:0;height:500%;transition:transform 1s cubic-bezier(.65,0,.2,1)}
+.dband{height:20%;position:relative;overflow:hidden}
+.dband.d0{background:linear-gradient(#2c7bd0,#1b5a9c)}.dband.d1{background:linear-gradient(#1b5a9c,#16406f)}.dband.d2{background:linear-gradient(#16406f,#1d1650)}.dband.d3{background:linear-gradient(#1d1650,#160a2e)}.dband.d4{background:linear-gradient(#160a2e,#06020d)}
+.dline{position:absolute;left:12%;right:12%;top:46%;border-top:3px dashed rgba(255,255,255,.55);color:var(--c)}
+.dline span{position:absolute;right:0;bottom:8px;font:700 .85rem 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--c);text-shadow:0 0 12px var(--c)}
+.damb{position:absolute;left:6%;top:30%;font:500 .8rem 'IBM Plex Mono',monospace;letter-spacing:.12em;color:rgba(255,255,255,.45)}
+.dcur{position:absolute;left:50%;top:46%;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--oc,#ff7ab3) 70%);border:3px solid #fff;box-shadow:0 0 24px var(--oc,#ff7ab3);pointer-events:none}
+.dcur .tr{position:absolute;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--oc,#ff7ab3);opacity:0;animation:oztrail .7s linear infinite}
+.dcur .tr:nth-child(2){animation-delay:.14s}.dcur .tr:nth-child(3){animation-delay:.28s}.dcur .tr:nth-child(4){animation-delay:.42s}
+@keyframes oztrail{0%{top:0;opacity:.7}100%{top:-90px;opacity:0;scale:.3}}
+.dcur.land .tr{display:none}.dcur.land::after{content:'';position:absolute;inset:-16px;border-radius:50%;border:3px solid #fff;animation:ozring2 .9s ease-out both}
+@keyframes ozring2{from{scale:.4;opacity:1}to{scale:2.4;opacity:0}}
+.dtag{position:absolute;left:50%;top:calc(46% - 74px);translate:-50% 0;rotate:-8deg;padding:8px 14px;background:rgba(8,10,26,.9);border:2px solid rgba(255,255,255,.5);clip-path:var(--notch);font:700 .95rem 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#cfe3ff;white-space:nowrap;display:flex;gap:8px;animation:ozbob 1.4s ease-in-out infinite}
+.dtag.land{animation:none;rotate:0deg;top:calc(46% - 62px)}
+#ozfx .fxmain{inset:auto 0 0 0;top:54%;align-content:start;gap:8px}
+#ozfx .fxtier{order:1;font:700 clamp(1.5rem,5.6vw,3rem) 'IBM Plex Mono',monospace;letter-spacing:.14em;text-shadow:0 0 26px var(--tc,#fff)}
+#ozfx .fxans{order:2;font:600 clamp(1.1rem,3.4vw,1.8rem) 'IBM Plex Mono',monospace;scale:1;text-shadow:none;color:#fff}
+#ozfx .fxpts{order:3;font:700 clamp(.9rem,2.6vw,1.3rem) 'IBM Plex Mono',monospace;letter-spacing:.14em;color:var(--tc,#fff)}
+.fxdesc{order:4;font:500 .85rem 'IBM Plex Mono',monospace;letter-spacing:.12em;color:rgba(255,255,255,.55);opacity:0}.fxdesc.in{opacity:1;transition:opacity .5s .8s}
+#ozfx .fxwho{order:0}
+.fxgo{position:absolute;left:50%;bottom:7vh;translate:-50% 0;padding:15px 38px;background:#0b1a36;border:3px solid #4fd8ff;color:#e9fbff;font:700 1rem 'IBM Plex Mono',monospace;letter-spacing:.22em;cursor:pointer;clip-path:var(--notch);animation:rise .4s both}
+.fxgo:hover{background:#12305c}
+body.ozs .ghead{position:static;background:none;box-shadow:none;padding:0;border:0;flex-wrap:wrap;gap:8px}
+body.ozs .gcols.oz .gleft{position:static;background:none;box-shadow:none;padding:0}
+@media (max-width:700px){body.ozs{padding-top:58px}body.ozs .ghead h2{font-size:.68rem;padding:8px 12px}body.ozs .gcols.oz .ozq{padding:16px 14px 12px}}
+body.ozs #game .ghead{position:static;background:none;box-shadow:none;padding:0;border-radius:0}
 </style>
 </head>
 <body>
 <div class="ambient" aria-hidden="true"><i></i><i></i><i></i></div>
+<div id="ozscene" aria-hidden="true"></div>
 <a class="home-btn" href="../index.html" aria-label="Back">
   <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
   Back
@@ -565,7 +637,7 @@ body.pshake{animation:ozshake .5s linear}
         <div id="form"></div>
         <div class="live" id="live" hidden><span class="who" id="liveWho"></span><div class="box"><span id="liveTxt"></span><i class="caret"></i></div></div>
         <div class="hintrow" id="hintrow" hidden><button class="btn" id="hintbtn" type="button" data-sfx="off">Hint</button><span id="hinttxt"></span></div>
-        <div class="subrow" id="subrow"><button class="btn go" id="submit" type="button" data-sfx="off">Submit</button></div>
+        <div class="subrow" id="subrow"><button class="btn go" id="submit" type="button" data-sfx="off">Submit</button><button class="btn" id="skip" type="button" data-sfx="off" hidden>Skip</button></div>
         <div id="res"></div>
         <div id="board" style="margin-top:14px"></div>
       </div>
@@ -585,6 +657,7 @@ body.pshake{animation:ozshake .5s linear}
     <div class="lbtabs"><button class="btn sm" id="lbT1" type="button" aria-pressed="true">Daily ozu</button><button class="btn sm" id="lbT2" type="button" aria-pressed="false">Daily Ozillion</button></div><div id="lbList"></div>
   </section>
 </div>
+<div id="ozbar" hidden></div>
 <div id="ozfx" hidden></div>
 <audio id="pa" preload="auto"></audio>
 <div id="adm" hidden></div>
@@ -698,7 +771,7 @@ function connect(c,create){
     else if(m.t==='caps'){CAPS={...CAPS,bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
     else if(m.t==='hint'){if(st&&st.q&&st.q.key===m.key){hintOn=true;$('hinttxt').textContent=m.text;$('hintbtn').hidden=true;sfxp('hint')}}
     else if(m.t==='typing'){if(st&&st.q&&st.q.key===m.key){liveT=m.v;paintLive()}}
-    else if(m.t==='reject'){sent=false;$('submit').hidden=false;$('form').querySelectorAll('input').forEach(i=>i.readOnly=false);$('form').querySelectorAll('select').forEach(i=>i.disabled=false);err(m.m);clearTimeout(rejT);rejT=setTimeout(()=>err(''),4000);sfxp('miss');const f=$('g_a');if(f){f.focus();f.select()}}
+    else if(m.t==='reject'){sent=false;$('skip').disabled=false;$('submit').hidden=false;$('form').querySelectorAll('input').forEach(i=>i.readOnly=false);$('form').querySelectorAll('select').forEach(i=>i.disabled=false);err(m.m);if(m.rep){const rb=el('button','repbtn','Report: it should count');rb.type='button';rb.onclick=()=>{tx({t:'reportnow',kind:'answer'});rb.textContent='Reported, thanks';rb.disabled=true};$('gerr').append(' ',rb)}clearTimeout(rejT);rejT=setTimeout(()=>err(''),m.rep?7000:4000);sfxp('miss');const f=$('g_a');if(f){f.focus();f.select()}}
     else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
   ws.onclose=()=>{fxClear();const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
   ws.onerror=()=>status('Couldn’t connect to the server.');
@@ -798,12 +871,12 @@ function showBg(q){const cover=$('cover'),key=q.key,urls=[q.bg,q.bg.replace('raw
 function newQuestion(q){
   lastKey=q.key;liveT='';hintOn=false;$('hinttxt').textContent='';$('hintbtn').hidden=false;sfxp(q.i===1?'start':'pop');sent=false;draftSent=false;readyFor=null;adSeen=0;adNow=false;$('res').replaceChildren();$('res')._k=null;$('pp').textContent='Pause';$('clip').classList.remove('reveal');
   fxClear();const bomb=st.cfg.mode==='bomb',isBg=q.type==='bg'||q.type==='bg_map',isOzq=q.type==='oz',keys=isOzq?(bomb?(q.diff?['a','d']:['a']):q.fields):bomb?['a']:q.fields;
-  $('ozq').hidden=!isOzq;document.querySelector('.gcols').classList.toggle('oz',isOzq);if(isOzq)$('ozqt').textContent=q.text;try{if(!q.clip)pa.pause()}catch(e){}
+  $('ozq').hidden=!isOzq;if(isOzq)document.querySelector('#ozq small').textContent=bomb?'QUESTION':'PROMPT '+q.i+' OF '+st.cfg.rounds;$('submit').textContent=isOzq&&!bomb?'Dive':'Submit';$('skip').disabled=false;document.querySelector('.gcols').classList.toggle('oz',isOzq);if(isOzq)$('ozqt').textContent=q.text;try{if(!q.clip)pa.pause()}catch(e){}
   const nText=keys.filter(k=>TEXT.includes(k)).length;$('form').className=bomb?'':'f4';
   $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(isOzq?' w4':bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,isOzq?(k==='d'?'Difficulty':q.live?(q.diff?'Map · the less played, the more points (10 to 100)':'Name a map · the less played, the more points (10 to 100)'):bomb?'Your answer':'Your answer · the rarer, the more points (10 to 100)'):bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el(isOzq&&k==='d'?'select':'input');i.id='g_'+k;i.name='ozu-'+k+'-'+Math.random().toString(36).slice(2,7);i.setAttribute('data-lpignore','true');i.setAttribute('data-1p-ignore','true');i.setAttribute('data-form-type','other');i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
     if(bomb?(q.type==='clip_bpm'||q.type==='clip_pp'):NUMS.includes(k)){i.type='text';i.inputMode='decimal'}
     d.append(l,i);if(!isOzq&&(k==='song'||k==='artist'))attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');return d}));
-  if(isOzq&&(q.live||q.ac))attachLiveAc($('g_a'),q.diff?$('g_d'):null,q.ac);
+  if(isOzq)$('g_a').placeholder='type one answer…';if(isOzq&&(q.live||q.ac))attachLiveAc($('g_a'),q.diff?$('g_d'):null,q.ac);
   const cover=$('cover');cover.hidden=!(q.type==='audio_map'||isBg||q.audio);cover.classList.remove('shown');cover.replaceChildren();cover.style.backgroundImage='';
   if(q.type==='audio_map'||q.audio){cover.append(el('div','eq')),cover.firstChild.append(...[1,2,3,4,5].map(()=>el('i')))}
   $('ctl').hidden=bomb||isBg||isOzq;$('vctl').hidden=isBg||isOzq;$('clip').hidden=isOzq;
@@ -850,7 +923,7 @@ function renderGame(){
   if(bomb)arena(q);else{const bd=$('board');if(bd._arena){bd.replaceChildren();bd._arena=false;bd._tiles=null;bd.className=''}
     players(bd,{cls:p=>'',info:p=>p.score+' pts'+(p.done&&!reveal?' ✓':'')})}
   const locked=sp||reveal||sent||(bomb&&!myTurn);
-  $('form').hidden=sp||reveal||(bomb&&!myTurn);paintLive();$('subrow').hidden=locked;paintHint();
+  $('form').hidden=sp||reveal||(bomb&&!myTurn);paintLive();$('subrow').hidden=locked;paintHint();$('skip').hidden=!(isOz()&&!bomb);$('ozbar').hidden=$('form').hidden&&$('subrow').hidden;
   $('form').querySelectorAll('input').forEach(i=>i.disabled=locked);$('submit').hidden=locked;
   $('clip').classList.toggle('reveal',reveal&&!bomb);if(!reveal&&!$('ozfx').hidden&&!q.text)fxClear();
   $('wait').textContent=reveal?'':q.held?'Timer paused: an ad seems to be playing for someone. It continues right after.':q.gate?(q.type==='bg'||q.type==='bg_map'?'Waiting for everyone’s background to load…':'Waiting for everyone’s clip to start…'):'';
@@ -885,7 +958,7 @@ function renderEnd(){
   $('again').hidden=daily()||sp;$('again').textContent=solo()?'Play again':(mineV?'Rematch · you voted':'Rematch')+' ('+votes.length+'/'+st.players.length+')';$('again').classList.toggle('on',mineV);
   $('rmNote').textContent=daily()?'':sp?'You joined during the game: you will play in the next one.':solo()?'':'Rematch needs more than half of the players. '+(votes.length?'Voted: '+votes.map(id=>(st.players.find(p=>p.id===id)||{}).name).filter(Boolean).join(', ')+'.':'')
 }
-function render(){const ph=st.phase;if(ph!=='lobby')lastN=0;if(ph==='lobby'||ph==='end'){lastKey=null;$('res')._k=null;liveT=''}   // a new game must never be mistaken for the old one (question keys can repeat)
+function render(){const ph=st.phase;ozMode();if(ph!=='lobby')lastN=0;if(ph==='lobby'||ph==='end'){lastKey=null;$('res')._k=null;liveT=''}   // a new game must never be mistaken for the old one (question keys can repeat)
   ph==='lobby'?renderLobby():ph==='end'?renderEnd():renderGame()}
 let tickS=-1;
 setInterval(()=>{if(!st||!st.q||$('game').hidden)return;const q=st.q,reveal=st.phase==='reveal'||st.phase==='turnReveal',t=reveal?0:Math.max(0,timeLeft(q));
@@ -917,6 +990,7 @@ $('copy').onclick=async()=>{const url=location.href.replace(/Apps\/OzuGuessr\.ht
 $('submit').onclick=e=>{if(sent||!st||spec())return;sfxp('submit');const bomb=st.cfg.mode==='bomb';sent=true;if(e&&e.clientX)burst(e.clientX,e.clientY);
   const v=bomb?$('g_a').value.trim()+(st.q.diff?'\u0001'+$('g_d').value:''):Object.fromEntries(st.q.fields.map(k=>[k,$('g_'+k).value.trim()]));
   tx(bomb?{t:'answer',v}:{t:'guess',v});$('submit').hidden=true;$('form').querySelectorAll('input').forEach(i=>i.readOnly=true);$('form').querySelectorAll('select').forEach(i=>i.disabled=true)};
+$('skip').onclick=()=>{if(sent||!st||spec())return;sent=true;sfxp('pop');tx({t:'skip'});$('submit').hidden=true;$('skip').disabled=true;$('form').querySelectorAll('input').forEach(i=>i.readOnly=true);$('form').querySelectorAll('select').forEach(i=>i.disabled=true)};
 addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'&&e.target.closest('#form')&&!document.querySelector('.ac:not([hidden]) li.on')){const b=$('submit');b.onclick({clientX:b.getBoundingClientRect().left+20,clientY:b.getBoundingClientRect().top+10})}});
 {try{$('nick').value=localStorage.getItem('ozu:nick')||''}catch(e){}const l=new URLSearchParams(location.search).get('lobby');if(l)$('code').value=l.toUpperCase().slice(0,5)}
 show('menu');
@@ -1023,44 +1097,57 @@ const gradeOf=(pts,max)=>{if(!max)return 0;if(pts>=max)return 5;const r=pts/max;
 const chip=t=>{const c=el('span','tchip t'+t,OZN[t]);c.style.setProperty('--tc',OZC[t]);return c};
 const isOz=()=>!!(st&&st.cfg&&st.cfg.content==='oz');
 
-/* The dive: like going down an iceberg. The screen sinks layer by layer (gray, blue, red, black, osu pink) and stops where the answer lives.
-   The deeper it stops, the longer the suspense and the wilder the finish. Click anywhere to skip. */
+/* ---------- the descent: osu! themed. A pink cursor falls through the difficulty spectrum and lands on the line of the answer's rarity ---------- */
+const OZCOL=['#7bd66b','#4fa8ff','#ffc23d','#ff4d8d','#c070ff'],OZSTAR=[1,2.5,4.5,6.5,8.5];
+const OZFL=['Doo doo. Everybody says it.','Those who know… know.','Ball knowledge. Respect.','727 WYSI. Rare air.','OZILLION! One in a million.'];
+const OZAMB=['approach circles shrink slowly here','sliders get longer below','spinners spin down here','nobody FCs below this line','the end of the beatmap'];
 let fxT=[];
 function fxClear(){fxT.forEach(clearTimeout);fxT=[];const f=$('ozfx');if(!f)return;f.hidden=true;f.replaceChildren();f.className='';document.body.classList.remove('pshake')}
+function ozDecor(host,n,seed){let s=seed*9301+49297;const r=()=>(s=(s*9301+49297)%233280)/233280;
+  for(let k=0;k<n;k++){const d=el('i','dc dc'+(k%4)),sz=16+r()*46;d.style.cssText='left:'+(r()*94)+'%;top:'+(r()*88)+'%;--s:'+sz+'px;--c:'+OZCOL[Math.floor(r()*5)]+';--d:'+(r()*4)+'s';if(k%4===0)d.dataset.n=1+Math.floor(r()*9);host.append(d)}}
 function ozDive(o){
   fxClear();if(RM)return;const f=$('ozfx'),t=o.hit?o.tier:0,K=o.fast?.75:1,at=(ms,fn)=>fxT.push(setTimeout(fn,ms*K));
   f.hidden=false;f.className=o.hit?'':'x';
-  const sc=el('div','scroll');OZN.forEach((n,i)=>{const b=el('div','band b'+i);b.append(el('div','lname',n));sc.append(b)});
-  const orb=el('div','fxorb');orb.append(el('i','ap'),el('i','ap'),el('i','hc'));
-  const main=el('div','fxmain'),who=el('div','fxwho',o.who||''),ans=el('div','fxans'),tier=el('div','fxtier'),pts=el('div','fxpts');main.append(who,ans,tier,pts);
-  const dig=el('div','fxdig','Checking the depths');dig.append(el('i',null,'...'));
-  f.append(sc,orb,main,dig,el('div','fxskip','click to skip'));f.onclick=fxClear;
-  const bandPct=i=>-(i*20);orb.style.setProperty('--oc',['#cfd3dc','#6fb2ff','#ff7a8a','#d9c2ff','#ff7ab3'][0]);
-  const go=i=>{sc.style.transform='translateY('+bandPct(i)+'%)';orb.style.setProperty('--oc',['#cfd3dc','#6fb2ff','#ff7a8a','#b69cff','#ff7ab3'][i])};
+  const world=el('div','dwrap');
+  OZN.forEach((n,i)=>{const b=el('div','dband d'+i),l=el('div','dline');l.style.setProperty('--c',OZCOL[i]);l.append(el('span',null,n+' · '+OZP[i]));b.append(el('div','damb','— '+OZAMB[i]),l);ozDecor(b,9,i+3);world.append(b)});
+  const cur=el('div','dcur');cur.append(el('i','tr'),el('i','tr'),el('i','tr'),el('i','tr'),el('b'));
+  const tag=el('div','dtag');tag.append(el('span',null,String(o.guess||o.name||'…').slice(0,28)),el('i',null,'▼'));
+  const main=el('div','fxmain'),who=el('div','fxwho',o.who||''),tier=el('div','fxtier'),ans=el('div','fxans'),pts=el('div','fxpts'),desc=el('div','fxdesc');main.append(who,tier,ans,pts,desc);
+  const go=el('button','fxgo','DESCEND ▼');go.type='button';go.hidden=true;go.onclick=e=>{e.stopPropagation();fxClear()};
+  const dig=el('div','fxdig','Falling');dig.append(el('i',null,'...'));
+  f.append(world,el('div','dcrt'),cur,tag,main,dig,go,el('div','fxskip','click to skip'));f.onclick=fxClear;
+  const col=OZCOL[t],goto=i=>{world.style.transform='translateY('+(-i*20)+'%)';cur.style.setProperty('--oc',OZCOL[i])};
   const END=[900,1200,1500,2000,3400];
   const finish=()=>{
-    dig.style.opacity=0;orb.style.opacity=0;who.classList.add('in');
-    if(!o.hit){ans.textContent=o.guess?'“'+o.guess+'” isn’t on the list':'No answer';sfxp('miss');ans.classList.add('in');pts.textContent='0 pts';pts.classList.add('in');fxT.push(setTimeout(fxClear,1400));return}
-    ans.textContent=o.name||o.guess;tier.textContent=OZN[t];tier.style.color=['#e3e6ea','#9cc8ff','#ff9aa6','#ff2e6e','#fff'][t];
-    pts.textContent=o.pts!=null?'+'+o.pts+' pts':(o.heal?'+1 life':'safe');
-    requestAnimationFrame(()=>{ans.classList.add('in');tier.classList.add('in');pts.classList.add('in')});
+    dig.style.opacity=0;cur.classList.add('land');tag.classList.add('land');who.classList.add('in');
+    if(!o.hit){sfxp('miss');ans.textContent=o.guess?'“'+o.guess+'”':'No answer';tier.textContent='MISS';tier.style.color='#ff6b7a';pts.textContent='0 PTS';desc.textContent=o.guess?'Not on the list.':'The cursor drifted away.';
+      requestAnimationFrame(()=>[tier,ans,pts,desc].forEach(x=>x.classList.add('in')));if(o.fast)fxT.push(setTimeout(fxClear,1600));else{go.hidden=false}return}
+    main.style.setProperty('--tc',col);tier.textContent=OZN[t].toUpperCase();tier.style.color=col;ans.textContent='“'+(o.name||o.guess)+'”';
+    pts.textContent=o.pts!=null?'+'+o.pts+' PTS · sink '+OZSTAR[t].toFixed(1)+'★':(o.heal?'+1 LIFE':'SAFE');desc.textContent=OZFL[t];
+    requestAnimationFrame(()=>[tier,ans,pts,desc].forEach(x=>x.classList.add('in')));
     if(t===0)sfxp('pop');
-    if(t===1){sfxp('good');for(let k=0;k<3;k++){const r=el('i','fxring');r.style.setProperty('--c','#8fc4ff');r.style.setProperty('--w',k*.25+'s');f.append(r)}}
-    if(t===2){sfxp('good');sfxp('rumble');f.classList.add('shake');for(let k=0;k<18;k++){const p=el('i','fxpt');p.style.cssText='--s:'+(8+Math.random()*10)+'px;--c:#ffb36b;--x:'+(Math.random()*700-350)+'px;--y:'+(-Math.random()*420-60)+'px;--d:'+(1+Math.random())+'s';f.append(p)}}
-    if(t===3){sfxp('wysi');f.classList.add('t3','shake2');document.body.classList.add('pshake');f.append(el('div','fxflash'));for(let k=0;k<3;k++){const r=el('i','fxring');r.style.setProperty('--c','#ff2e6e');r.style.setProperty('--w',k*.2+'s');f.append(r)}}
+    if(t===1){sfxp('good');for(let k=0;k<3;k++){const r=el('i','fxring');r.style.setProperty('--c',col);r.style.setProperty('--w',k*.25+'s');f.append(r)}}
+    if(t===2){sfxp('good');sfxp('rumble');f.classList.add('shake');for(let k=0;k<18;k++){const p=el('i','fxpt');p.style.cssText='--s:'+(8+Math.random()*10)+'px;--c:'+col+';--x:'+(Math.random()*700-350)+'px;--y:'+(-Math.random()*420-60)+'px;--d:'+(1+Math.random())+'s';f.append(p)}}
+    if(t===3){sfxp('wysi');f.classList.add('t3','shake2');document.body.classList.add('pshake');f.append(el('div','fxflash'));for(let k=0;k<3;k++){const r=el('i','fxring');r.style.setProperty('--c',col);r.style.setProperty('--w',k*.2+'s');f.append(r)}}
     if(t===4){sfxp('ozillion');sfxp('boom');f.classList.add('t4','shake2');document.body.classList.add('pshake');f.append(el('div','fxflash'));
-      for(let k=0;k<4;k++){const r=el('i','fxring');r.style.setProperty('--c',k%2?'#fff':'#ff66aa');r.style.setProperty('--w',k*.18+'s');f.append(r)}
-      const cols=['#ff7ab3','#fff','#ffd1e8','#ff4d9a','#7cc7ff'];for(let k=0;k<46;k++){const p=el('i','fxpt'),a=Math.random()*Math.PI*2,r=240+Math.random()*520;p.style.cssText='--s:'+(14+Math.random()*26)+'px;--c:'+cols[k%5]+';--x:'+Math.cos(a)*r+'px;--y:'+Math.sin(a)*r+'px;--d:'+(1.1+Math.random()*1.1)+'s';f.append(p)}
+      for(let k=0;k<4;k++){const r=el('i','fxring');r.style.setProperty('--c',k%2?'#fff':col);r.style.setProperty('--w',k*.18+'s');f.append(r)}
+      const cols=['#ff7ab3','#fff','#c070ff','#ff4d9a','#7cc7ff'];for(let k=0;k<46;k++){const p=el('i','fxpt'),a=Math.random()*Math.PI*2,r=240+Math.random()*520;p.style.cssText='--s:'+(14+Math.random()*26)+'px;--c:'+cols[k%5]+';--x:'+Math.cos(a)*r+'px;--y:'+Math.sin(a)*r+'px;--d:'+(1.1+Math.random()*1.1)+'s';f.append(p)}
       confetti()}
     fxT.push(setTimeout(()=>document.body.classList.remove('pshake'),1700));
-    fxT.push(setTimeout(fxClear,END[t]*K+400));
-  };
-  // the descent: layer by layer, each one longer than the one before it
-  sfxp('dive');go(0);let ms=500;
-  for(let i=1;i<=t;i++){const j=i;ms+=[0,650,750,950,1250][i];at(ms,()=>{go(j);sfxp('layer',{i:j});if(j>=3)sfxp('rumble');dig.firstChild.textContent=['',' Going deeper','',' Deeper still','...?!'][j>3?3:j]||' Going deeper'})}
-  ms+=[500,550,700,950,1500][t];if(o.hit&&t>=2)at(ms-350,()=>{sfxp('layer',{i:t});orb.style.transition='none';orb.animate([{scale:1},{scale:1.5},{scale:1}],{duration:350})});
-  at(ms,finish);
+    if(o.fast)fxT.push(setTimeout(fxClear,END[t]*K+400));else go.hidden=false};
+  sfxp('dive');goto(0);let ms=500;
+  for(let i=1;i<=t;i++){const j=i;ms+=[0,650,750,950,1250][i];at(ms,()=>{goto(j);sfxp('layer',{i:j});if(j>=3)sfxp('rumble');dig.firstChild.textContent=['',' Going deeper','',' Deeper still','...?!'][j>3?3:j]||' Going deeper'})}
+  ms+=[500,550,700,950,1500][t];at(ms,finish);
 }
+
+/* ---------- the scene behind an Ozillion round: the same descent, the camera sinks one step per question ---------- */
+function ozSceneBuild(s){const w=el('div','ozw'),sh=el('div','ozship');sh.append(el('i','ap'),el('b',null,'1'));
+  w.append(sh,el('div','ozwave'));ozDecor(w,46,11);
+  [['sliders ahead',16],['approach rate rising',30],['spinners spin here',46],['nobody FCs below here',62],['the end of the beatmap',78]].forEach(([t,y])=>{const a=el('div','ozamb','— '+t);a.style.top=y+'%';w.append(a)});
+  s.append(w,el('div','dcrt'))}
+function ozSceneOn(on,cam){document.body.classList.toggle('ozs',on);const s=$('ozscene');if(!s)return;if(on&&!s._b){s._b=1;ozSceneBuild(s)}s.style.setProperty('--cam',cam)}
+function ozMount(on){const bar=$('ozbar');if(on){if(!bar.contains($('form')))bar.append($('form'),$('subrow'))}else if(bar.contains($('form'))){$('res').before($('subrow'));document.querySelector('.gright').prepend($('form'))}}
+function ozMode(){const on=!!st&&isOz()&&st.cfg.mode==='classic'&&(st.phase==='round'||st.phase==='reveal');ozMount(on);ozSceneOn(on,on&&st.q?((st.q.i-1)+(st.phase==='reveal'?1:0))/Math.max(1,st.cfg.rounds):0)}
 
 /* ---------- answer tables ---------- */
 const reported=new Set();
