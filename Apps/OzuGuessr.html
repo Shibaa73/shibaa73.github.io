@@ -560,6 +560,22 @@ header p{font-family:'IBM Plex Mono',monospace;letter-spacing:.2em;text-transfor
 .fixsug b{color:#ffc23d}
 body.ozs #ozbar .fixsug{top:auto;bottom:100%;margin:0 0 8px}
 html{background:#05071a}
+/* ---------- no inner scrollbars, no clipped borders ---------- */
+.gright{max-height:none;overflow:visible;padding-right:0}
+.gleft,.gright,.gcols{overflow:visible}
+.admbox{width:min(1180px,100%)}
+.ozadm{grid-template-columns:minmax(240px,340px) minmax(0,1fr)}
+.qlist{overflow-x:hidden}.qlist button{white-space:normal;overflow-wrap:anywhere;min-width:0}
+.ozadm>div{min-width:0}
+@media (max-width:900px){.ozadm{grid-template-columns:minmax(0,1fr)}.qlist{max-height:260px}}
+/* ---------- the three top buttons (Back, account, volume) look the same ---------- */
+body .home-btn,body #acBtn,body #siteVol>button{height:38px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 14px;background:#121a40;border:2px solid rgba(160,190,255,.22);border-radius:0;clip-path:var(--notch);color:var(--text);font:600 .74rem 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;transition:border-color .15s,background .2s}
+body #siteVol>button{width:auto;min-width:42px;padding:0 10px}
+body .home-btn{top:16px;left:16px;translate:none}
+body .home-btn:hover,body #acBtn:hover,body #siteVol>button:hover{border-color:#4fd8ff;background:#18235a;translate:none}
+body .home-btn svg,body #siteVol svg{stroke:var(--gold);color:var(--gold)}
+body #acBtn img,body #acBtn .av{border-radius:50%}
+body #siteMenu,body #acMenu{border-radius:0;border:2px solid var(--border)}body #siteSkip{border-radius:0}
 </style>
 </head>
 <body>
