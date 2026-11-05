@@ -8,7 +8,7 @@ const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return 
 // Optional per-song loudness fix: attenuate loud songs, e.g. GAIN={'dQw4w9WgXcQ':0.6}. (Can't be measured automatically from a YouTube embed.)
 const GAIN={};
 let title='',ducked=false;
-const vol=Object.assign({music:.1,sfx:1},ls.get(VK)||{});
+const vol=Object.assign({music:0,sfx:1},ls.get(VK)||{});
 window.SITE={shell:true,playSfx(src){const a=new Audio(src);a.volume=vol.sfx;a.play().catch(()=>{});return a}};
 
 SITE.sfxLevel=()=>vol.sfx;                                // apps: current SFX volume (0-1)
