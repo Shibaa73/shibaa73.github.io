@@ -1408,7 +1408,7 @@ function initOz(){
       ed.append(el('p','stat',(kindOf==='osu'?q.count+' answers recorded'+(ansFilter?' · '+q.matching+' match':'')+' · page '+(q.page+1)+' of '+q.pages:q.count+' answers'+(ansFilter?' · '+q.matching+' match':'')+' · page '+(q.page+1)+' of '+q.pages)+' · total count '+q.total.toLocaleString()));
       const head=el('div','arow h');['Answer','Aliases (comma separated)','Count','Tier',''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
       const row=(a)=>{const r=el('div','arow'),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
-        nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
+        nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';if(a.cat)nm.title='Rarity list: '+a.cat;nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
         tr.innerHTML='<option value="">Auto'+(a.auto!=null?' ('+OZN[a.auto]+')':'')+'</option>'+OZN.map((t,i)=>'<option value="'+i+'">'+t+'</option>').join('');tr.value=a.tier==null?'':String(a.tier);
         if(a.auto!=null)tr.style.borderLeft='6px solid '+OZA[a.tier!=null?a.tier:a.auto];
         const s=el('button','btn',a.id?'Save':'Add'),x=el('button','btn','✕');s.type=x.type='button';x.title='Delete answer';
