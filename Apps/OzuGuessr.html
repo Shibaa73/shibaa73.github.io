@@ -1357,13 +1357,13 @@ function initOz(){
     <h3>Fill all</h3><div class="row"><button class="btn go" id="oFillAll" type="button">Seed all osu! questions that have few answers</button><label>Maps per question <input id="oFillN" type="number" min="50" max="3000" step="50" value="500"></label></div><p class="stat" id="oFillMsg"></p>
     <h3>Backup</h3><div class="row"><button class="btn" id="oExp" type="button">Download all questions (JSON)</button><input type="file" id="oFile" accept=".json"><button class="btn" id="oRes" type="button">Restore from file</button></div><p class="stat" id="oMsg"></p>`;
   $('tab_rep').innerHTML='<p class="stat">Players can report an answer they gave that was not accepted: a missing answer (add it to the question) or a missing alias (another name for an answer).</p><h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>';
-  let sel=null,ansFilter='';const msg=(t,k)=>say($('oMsg'),t,k);
+  let sel=null,ansFilter='',ansPage=0;const msg=(t,k)=>say($('oMsg'),t,k);
   const OZA=['#9aa0a6','#4f9cff','#ff4d62','#17131d','#ff66aa'];
   async function list(){try{const d=await adm('/admin/oz/overview');
-      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='osu'||q.kind==='live'?'osu! · '+q.answers+' known answers':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;ansFilter='';list();edit()};return b}));
+      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='osu'||q.kind==='live'?'osu! · '+q.answers+' known answers':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;ansFilter='';ansPage=0;list();edit()};return b}));
       $('oRepN').textContent='('+d.reports+')';const rb=$('repTab');if(rb)rb.textContent='Reports'+(d.reports?' ('+d.reports+')':'');return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
-    try{const data=await adm('/admin/oz/q?id='+sel+(ansFilter?'&s='+encodeURIComponent(ansFilter):'')),q=data.q;ed.replaceChildren();
+    try{const data=await adm('/admin/oz/q?id='+sel+(ansFilter?'&s='+encodeURIComponent(ansFilter):'')+'&p='+ansPage),q=data.q;ed.replaceChildren();
       const kindOf=q.kind==='live'?'osu':q.kind||'list',gq=kindOf==='osu'?el('select'):null,dc=kindOf==='osu'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
       const sv=el('button','btn','Save text'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
       sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:kindOf,group:gq?gq.value:undefined,f:fi?fi.value:'',diff:dc&&gq.value==='song'?dc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
@@ -1394,8 +1394,8 @@ function initOz(){
       if(kindOf==='osu'){const lv=data.live||{T:0,n:0,top:[]},rs=el('button','btn','Forget the recorded answers');rs.type='button';
         rs.onclick=async()=>{if(!confirm('Forget every answer recorded for this question? Its rarity starts again from the play counts.'))return;try{await adm('/admin/oz/lclear',{qid:q.id});msg('Forgotten.','ok');edit()}catch(e){msg(e.message,'bad')}};
         ed.append(el('p','stat',lv.n+' different answers recorded from '+lv.T+' correct answers. Every correct answer is saved here with its map numbers (bpm, ar, stars…), so later rolls can be checked without asking osu!, and the rarer an answer is in this list, the more points it gives.'),rs);
-        const sf=el('input');sf.type='text';sf.placeholder='Search the recorded answers…';sf.value=ansFilter;sf.onkeydown=e=>{if(e.key==='Enter'){ansFilter=sf.value;edit()}};const sb=el('button','btn','Search');sb.type='button';sb.onclick=()=>{ansFilter=sf.value;edit()};const sr2=el('div','row');sr2.append(sf,sb);ed.append(sr2)}
-      ed.append(el('p','stat',(kindOf==='osu'?q.count+' answers recorded'+(q.count>q.ans.length?' (showing the '+q.ans.length+' with the highest count)':''):q.ans.length+' answers')+' · total count '+q.total.toLocaleString()));
+        const sf=el('input');sf.type='text';sf.placeholder='Search the recorded answers…';sf.value=ansFilter;sf.onkeydown=e=>{if(e.key==='Enter'){ansFilter=sf.value;ansPage=0;edit()}};const sb=el('button','btn','Search');sb.type='button';sb.onclick=()=>{ansFilter=sf.value;ansPage=0;edit()};const sr2=el('div','row');sr2.append(sf,sb);ed.append(sr2)}
+      ed.append(el('p','stat',(kindOf==='osu'?q.count+' answers recorded'+(ansFilter?' · '+q.matching+' match':'')+' · page '+(q.page+1)+' of '+q.pages:q.ans.length+' answers')+' · total count '+q.total.toLocaleString()));
       const head=el('div','arow h');['Answer','Aliases (comma separated)','Count','Tier',''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
       const row=(a)=>{const r=el('div','arow'),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
         nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
@@ -1406,6 +1406,8 @@ function initOz(){
         x.onclick=async()=>{try{await adm('/admin/oz/a/del',{qid:q.id,id:a.id});edit();list()}catch(e){msg(e.message,'bad')}};
         act.append(s);if(a.id)act.append(x);r.append(nm,al,n,tr,act);return r};
       ed.append(row({}),...q.ans.map(row));
+      if(kindOf==='osu'&&q.pages>1){const pr=el('div','row'),mk=(t,p,dis)=>{const b=el('button','btn',t);b.type='button';b.disabled=dis;b.onclick=()=>{ansPage=p;edit()};return b};
+        pr.append(mk('« First',0,q.page===0),mk('‹ Previous',q.page-1,q.page===0),el('span','stat','Page '+(q.page+1)+' of '+q.pages),mk('Next ›',q.page+1,q.page>=q.pages-1),mk('Last »',q.pages-1,q.page>=q.pages-1));ed.append(pr)}
       const bulk=el('textarea');bulk.placeholder='Paste many answers, one per line:\nanswer | alias, alias | count\n(aliases and count are optional; an existing answer just gets its count increased)';
       const bb=el('button','btn','Add the lines');bb.type='button';bb.onclick=async()=>{try{const r=await adm('/admin/oz/a/bulk',{qid:q.id,text:bulk.value});msg(r.added+' added, '+r.merged+' increased.','ok');edit();list()}catch(e){msg(e.message,'bad')}};
       ed.append(el('h3',null,'Add many'),bulk,bb)}
