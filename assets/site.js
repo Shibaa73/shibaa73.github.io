@@ -1,6 +1,9 @@
 /* Shared on every page: background music (random track from a YouTube playlist, loops forever)
    and the volume button/menu (top right). SITE.playSfx(url) plays a sound at the SFX volume. */
 (()=>{
+// calm mode (less motion): the switch in the volume menu decides; without a choice the device setting does. Every page and frame follows it.
+const CK='site:vol2',calmNow=()=>{try{const v=JSON.parse(localStorage.getItem(CK));if(v&&v.calm!=null)return!!v.calm}catch(e){}return matchMedia('(prefers-reduced-motion: reduce)').matches};
+const applyCalm=()=>document.documentElement.classList.toggle('calm',calmNow());applyCalm();addEventListener('storage',e=>{if(!e.key||e.key===CK)applyCalm()});
 // inside the home page's frame the shell (index.html) already owns the music + volume button
 try{if(window.parent!==window&&window.parent.SITE&&window.parent.SITE.shell)return}catch(e){}
 const PLAYLIST='PLEimrAJXv9ps',VK='site:vol2',IK='site:ids',TK='site:track';
@@ -28,7 +31,8 @@ st.textContent=`#siteVol{position:fixed;top:16px;right:16px;z-index:50;font-fami
 #siteMenu[hidden]{display:none}
 #siteMenu label{display:grid;gap:6px;font-size:.82rem;color:var(--muted,#a58891)}
 #siteMenu label span{display:flex;justify-content:space-between}
-#siteMenu input{width:100%;margin:0;accent-color:var(--teal,#c98aa0)}`;
+#siteMenu input{width:100%;margin:0;accent-color:var(--teal,#c98aa0)}
+#siteMenu label.chk{display:flex;align-items:center;gap:8px;cursor:pointer}#siteMenu label.chk input{width:auto}`;
 document.head.append(st);
 const box=document.createElement('div');box.id='siteVol';
 box.innerHTML=`<button type="button" aria-label="Volume" aria-expanded="false" aria-controls="siteMenu"></button>
@@ -37,6 +41,7 @@ box.innerHTML=`<button type="button" aria-label="Volume" aria-expanded="false" a
   <button type="button" id="siteSkip">Skip song</button>
   <label><span>Music <b id="vmV"></b></span><input id="vm" type="range" min="0" max="100"></label>
   <label><span>SFX <b id="vsV"></b></span><input id="vs" type="range" min="0" max="100"></label>
+  <label class="chk"><input id="vc" type="checkbox"><span>Calm mode (less motion)</span></label>
 </div>`;
 document.body.append(box);
 const btn=box.querySelector('button'),menu=box.querySelector('#siteMenu'),vm=box.querySelector('#vm'),vs=box.querySelector('#vs');
@@ -53,6 +58,7 @@ vm.oninput=()=>{vol.music=vm.value/100;ls.set(VK,vol);sync();
   if(!cur)begin(true);   // volume changes never pause or skip a song
   setNow()};
 vs.oninput=()=>{vol.sfx=vs.value/100;ls.set(VK,vol);sync()};
+const vc=box.querySelector('#vc');vc.checked=document.documentElement.classList.contains('calm');vc.onchange=()=>{vol.calm=vc.checked;ls.set(VK,vol);applyCalm()};
 sync();
 
 /* ---------- background music ---------- */
