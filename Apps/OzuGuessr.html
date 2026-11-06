@@ -1055,20 +1055,20 @@ async function openAdmin(){
     try{aKey=sessionStorage.getItem('ozu:ak')||''}catch(e){}
     m.innerHTML=`<div class="admbox" role="dialog" aria-label="Scoring settings">
       <div class="admhead"><h2>Admin</h2><button class="btn" id="admClose" type="button">Close</button></div>
-      <div class="admkey"><input id="admkey" type="text" name="ozu-adm-key" class="secret" placeholder="Admin key" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" value=""><button class="btn" id="admUnlock" type="button">Check key</button><span class="admst" id="admSt"></span></div>
-      <div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button><button type="button" data-t="rep" aria-pressed="false" id="repTab">Reports</button></div>
+      <div class="admkey"><input id="admkey" type="text" name="ozu-adm-key" class="secret" placeholder="Admin code" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" value=""><button class="btn" id="admUnlock" type="button">Unlock</button><span class="admst" id="admSt"></span></div>
+      <div id="admBody" hidden><div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button><button type="button" data-t="rep" aria-pressed="false" id="repTab">Reports</button></div>
       <div id="tab_sc"><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><div class="admgrid"><div>
         <div class="legend" id="legend"></div>
         <div class="chartwrap" id="cw"><svg id="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points by relative error for AR, BPM, SR and PP"></svg><div class="tip" id="tip" hidden></div></div>
         <div id="admTable" hidden></div>
         <div class="row"><button class="btn" id="admTbl" type="button">Table view</button></div>
-      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div><div id="tab_rep" class="admp" hidden></div></div>`;
+      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div><div id="tab_rep" class="admp" hidden></div></div></div>`;
     $('admkey').value=aKey;
     $('admClose').onclick=closeAdmin;m.addEventListener('pointerdown',e=>{if(e.target===m)closeAdmin()});
     $('admTbl').onclick=()=>{tableOn=!tableOn;$('admTbl').textContent=tableOn?'Graph view':'Table view';$('cw').hidden=tableOn;$('legend').hidden=tableOn;$('admTable').hidden=!tableOn;drawTable()};
     $('admUnlock').onclick=async()=>{aKey=$('admkey').value;try{sessionStorage.setItem('ozu:ak',aKey)}catch(e){}
-      try{const r=await fetch(API+'/admin/check',{headers:{'x-admin-key':aKey}}),d=await r.json();admSt(r.ok?'Key accepted.':d.error||'Not accepted.',r.ok);if(r.ok)repBadge()}catch(e){admSt('Couldn’t reach the server.',false)}};
-    bindChart();admTabs();
+      try{const r=await fetch(API+'/admin/check',{headers:{'x-admin-key':aKey}}),d=await r.json();admSt(r.ok?'':d.error||'That code is not accepted.',false);if(r.ok){$('admBody').hidden=false;document.querySelector('#adm .admkey').hidden=true;repBadge()}}catch(e){admSt('Couldn’t reach the server.',false)}};
+    bindChart();admTabs();$('admkey').addEventListener('keydown',e=>{if(e.key==='Enter')$('admUnlock').click()});if(aKey)$('admUnlock').click();else $('admkey').focus();
   }
   try{const r=await fetch(API+'/scoring'),d=await r.json();A=cl(d.cfg);D=cl(d.defaults)}catch(e){admSt('Couldn’t load the current scoring from the server.',false);if(!A){D=cl({w:{song:3,artist:2,ar:1,bpm:1,sr:1,pp:1},curve:Object.fromEntries(['ar','bpm','sr','pp'].map(k=>[k,{full:.02,zero:.2,k:2.5}])),bgMult:[1,1.5,2,2.5,3]});A=cl(D)}}
   buildCtl();draw();
@@ -1357,13 +1357,13 @@ function initOz(){
     <h3>Fill all</h3><div class="row"><button class="btn go" id="oFillAll" type="button">Seed all osu! questions that have few answers</button><label>Maps per question <input id="oFillN" type="number" min="50" max="3000" step="50" value="500"></label></div><p class="stat" id="oFillMsg"></p>
     <h3>Backup</h3><div class="row"><button class="btn" id="oExp" type="button">Download all questions (JSON)</button><input type="file" id="oFile" accept=".json"><button class="btn" id="oRes" type="button">Restore from file</button></div><p class="stat" id="oMsg"></p>`;
   $('tab_rep').innerHTML='<p class="stat">Players can report an answer they gave that was not accepted: a missing answer (add it to the question) or a missing alias (another name for an answer).</p><h3>Reports <span class="stat" id="oRepN"></span></h3><div id="oRep" class="admp"></div>';
-  let sel=null;const msg=(t,k)=>say($('oMsg'),t,k);
+  let sel=null,ansFilter='';const msg=(t,k)=>say($('oMsg'),t,k);
   const OZA=['#9aa0a6','#4f9cff','#ff4d62','#17131d','#ff66aa'];
   async function list(){try{const d=await adm('/admin/oz/overview');
-      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='osu'||q.kind==='live'?'osu! · '+q.answers+' known answers':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;list();edit()};return b}));
+      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='osu'||q.kind==='live'?'osu! · '+q.answers+' known answers':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;ansFilter='';list();edit()};return b}));
       $('oRepN').textContent='('+d.reports+')';const rb=$('repTab');if(rb)rb.textContent='Reports'+(d.reports?' ('+d.reports+')':'');return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
-    try{const data=await adm('/admin/oz/q?id='+sel),q=data.q;ed.replaceChildren();
+    try{const data=await adm('/admin/oz/q?id='+sel+(ansFilter?'&s='+encodeURIComponent(ansFilter):'')),q=data.q;ed.replaceChildren();
       const kindOf=q.kind==='live'?'osu':q.kind||'list',gq=kindOf==='osu'?el('select'):null,dc=kindOf==='osu'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
       const sv=el('button','btn','Save text'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
       sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:kindOf,group:gq?gq.value:undefined,f:fi?fi.value:'',diff:dc&&gq.value==='song'?dc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
@@ -1383,19 +1383,19 @@ function initOz(){
         n.type='number';n.min=50;n.max=10000;n.step=50;n.value=kindOf==='scrape'?300:3000;rp.type='checkbox';rp.checked=false;go.type='button';
         const r1=el('div','row'),r2=el('div','row'),lb=el('label',null,'Answers are '),lb2=el('label',null,'Look at the most played '),lb3=el('label');lb.append(gs);lb2.append(n,' maps');lb3.append(rp,' replace what an earlier scrape added (your own answers stay)');
         r1.append(...(kindOf==='osu'?[]:[lb]),lb2,go);r2.append(lb3);r1.prepend(ff);
-        body.append(r1,r2,pg,el('p','stat','Takes the most played maps first and adds up the play counts of every set of the same song / mapper into the start count (1 per 20,000 plays); every time a player gives an answer it goes up by 1. Your own answers, aliases and counts stay. It runs in steps (about one osu! request a second) and keeps going if osu! asks to slow down.'));
+        body.append(r1,r2,pg,el('p','stat','For an osu! question the answers come from the question\u2019s own filter: every choice of a {keyword} is searched on its own (for example each artist of {a: xi|Camellia|…}), and only maps that really fit are kept; the box above is an extra filter added to every search. Takes the most played maps first and adds up the play counts of every set of the same song / mapper into the start count (1 per 20,000 plays); every time a player gives an answer it goes up by 1. Your own answers, aliases and counts stay. It runs in steps (about one osu! request a second) and keeps going if osu! asks to slow down.'));
         sr.append(el('summary',null,'Fill the answers from osu!'),body);ed.append(sr);
         go.onclick=async()=>{go.disabled=true;try{let cur='',got=0,r,left=Math.max(1,Math.ceil((+n.value||300)/50)),first=true,waits=0,calls=0;
-            while(left>0&&calls++<500){const p=Math.min(5,left);pg.textContent='Reading osu!… '+got+' maps';r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:p,replace:rp.checked&&first,group:kindOf==='osu'?undefined:gs.value,f:ff.value});
+            while((kindOf==='osu'||left>0)&&calls++<800){const p=Math.min(5,left);pg.textContent='Reading osu!… '+got+' maps'+(r&&r.filters>1?' · search '+r.at+'/'+r.filters:'');r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:kindOf==='osu'?5:p,count:+n.value||500,replace:rp.checked&&first,group:kindOf==='osu'?undefined:gs.value,f:ff.value});
               if(r.rateLimited){if(++waits>12)throw new Error('osu! keeps saying “too many requests”: '+got+' maps were read and saved. Press again in a few minutes to continue.');pg.textContent=got+' maps · osu! asked to slow down, continuing in 15 s…';await new Promise(z=>setTimeout(z,15000));continue}
-              waits=0;first=false;left-=p;got+=r.fetched||0;cur=r.cursor;if(r.done)break}
+              waits=0;first=false;if(kindOf!=='osu')left-=p;got+=r.fetched||0;cur=r.cursor;if(r.done)break}
             msg('Done: '+got+' maps read, '+r.total+' answers now.','ok');pg.textContent='';edit();list()}catch(e){msg(e.message,'bad');pg.textContent=''}go.disabled=false}}
       
       if(kindOf==='osu'){const lv=data.live||{T:0,n:0,top:[]},rs=el('button','btn','Forget the recorded answers');rs.type='button';
-        rs.onclick=async()=>{if(!confirm('Forget every answer recorded for this question? Its rarity starts again from the play counts.'))return;try{await adm('/admin/oz/q/lclear',{qid:q.id});msg('Forgotten.','ok');edit()}catch(e){msg(e.message,'bad')}};
+        rs.onclick=async()=>{if(!confirm('Forget every answer recorded for this question? Its rarity starts again from the play counts.'))return;try{await adm('/admin/oz/lclear',{qid:q.id});msg('Forgotten.','ok');edit()}catch(e){msg(e.message,'bad')}};
         ed.append(el('p','stat',lv.n+' different answers recorded from '+lv.T+' correct answers. Every correct answer is saved here with its map numbers (bpm, ar, stars…), so later rolls can be checked without asking osu!, and the rarer an answer is in this list, the more points it gives.'),rs);
-        if(lv.top.length){const t=el('div','admp');t.append(...lv.top.map(e=>el('p','stat',e.lb+' · given '+Math.max(0,e.n-(e.s||0))+'× · count '+e.n)));ed.append(t)}return}
-      ed.append(el('p','stat',q.ans.length+' answers · total count '+q.total.toLocaleString()));
+        const sf=el('input');sf.type='text';sf.placeholder='Search the recorded answers…';sf.value=ansFilter;sf.onkeydown=e=>{if(e.key==='Enter'){ansFilter=sf.value;edit()}};const sb=el('button','btn','Search');sb.type='button';sb.onclick=()=>{ansFilter=sf.value;edit()};const sr2=el('div','row');sr2.append(sf,sb);ed.append(sr2)}
+      ed.append(el('p','stat',(kindOf==='osu'?q.count+' answers recorded'+(q.count>q.ans.length?' (showing the '+q.ans.length+' with the highest count)':''):q.ans.length+' answers')+' · total count '+q.total.toLocaleString()));
       const head=el('div','arow h');['Answer','Aliases (comma separated)','Count','Tier',''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
       const row=(a)=>{const r=el('div','arow'),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
         nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
@@ -1429,7 +1429,7 @@ function initOz(){
     try{const d=await adm('/admin/oz/overview'),todo=d.questions.filter(q=>(q.kind==='osu'&&q.answers<20)||(q.kind==='scrape'&&q.answers<d.min)),N=Math.max(50,Math.min(3000,+$('oFillN').value||500));let done=0,waits=0;
       if(!todo.length){pm.textContent='Nothing to fill: every scraped question already has answers.';b.disabled=false;return}
       for(const q of todo){let cur='',left=Math.ceil(N/50),calls=0;
-        while(left>0&&calls++<200){pm.textContent='('+(done+1)+'/'+todo.length+') '+q.text+'…';const r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:Math.min(5,left),});
+        while((q.kind==='osu'||left>0)&&calls++<800){pm.textContent='('+(done+1)+'/'+todo.length+') '+q.text+'…';const r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:q.kind==='osu'?5:Math.min(5,left),count:N});
           if(r.rateLimited){if(++waits>12)throw new Error('osu! keeps saying “too many requests”. '+done+' questions are filled: press the button again later to continue.');pm.textContent='osu! asked to slow down, continuing in 15 s…';await new Promise(z=>setTimeout(z,15000));continue}
           waits=0;left-=Math.min(5,left);cur=r.cursor;if(r.done)break}
         done++}
