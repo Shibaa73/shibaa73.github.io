@@ -462,7 +462,7 @@ body.ozs #ozscene{display:block}
 body.ozs .ambient,body.ozs .watermark,body.ozs header{display:none}
 body.ozs{padding-top:10px;padding-bottom:130px;background:#06020d}
 .ozw{position:absolute;left:0;right:0;top:0;height:500vh;background:var(--sky);transform:translateY(calc(var(--cam,0)*-400vh));transition:transform 1.8s cubic-bezier(.5,0,.2,1)}
-.dcrt{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+.dcrt{position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='3'%3E%3Crect width='1' height='1' fill='black' fill-opacity='.08'/%3E%3C/svg%3E");opacity:.8}
 #ozscene .dcrt{position:fixed}
 .ozship{position:absolute;left:6vw;top:11vh;width:84px;height:84px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffb3d2,var(--pink-2));box-shadow:0 0 0 5px #fff,0 0 40px rgba(255,122,179,.8);display:grid;place-items:center;animation:ozbob 3.2s ease-in-out infinite}
 .ozship b{font:700 2rem 'Fredoka',sans-serif;color:#fff}.ozship .ap{position:absolute;inset:-22px;border-radius:50%;border:4px solid rgba(255,255,255,.8);animation:ozapp2 2.2s ease-out infinite}
@@ -537,8 +537,9 @@ body.ozs .gcols.oz .gleft{position:static;background:none;box-shadow:none;paddin
 body.ozs #game .ghead{position:static;background:none;box-shadow:none;padding:0;border-radius:0}
 
 /* ---------- the Ozillion look for the whole site: deep difficulty-spectrum night, CRT scanlines, mono type, notched pixel panels ---------- */
-body{background:linear-gradient(180deg,#1b1038 0,#0b1030 38%,#05071a 100%) fixed;font-family:'Inter',sans-serif}
-body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;background:repeating-linear-gradient(0deg,rgba(0,0,0,.08) 0 1px,transparent 1px 3px)}
+body{background:#05071a;font-family:'Inter',sans-serif}
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,#1b1038 0,#0b1030 38%,#05071a 100%);transform:translateZ(0)}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='3'%3E%3Crect width='1' height='1' fill='black' fill-opacity='.08'/%3E%3C/svg%3E")}
 .ambient i{border-color:rgba(127,220,255,.14)}
 h1{font-family:'IBM Plex Mono',monospace;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-shadow:3px 0 rgba(255,46,110,.55),-3px 0 rgba(38,230,255,.55)}
 header p{font-family:'IBM Plex Mono',monospace;letter-spacing:.2em;text-transform:uppercase;font-size:.78rem}
@@ -576,6 +577,12 @@ body .home-btn:hover,body #acBtn:hover,body #siteVol>button:hover{border-color:#
 body .home-btn svg,body #siteVol svg{stroke:var(--gold);color:var(--gold)}
 body #acBtn img,body #acBtn .av{border-radius:50%}
 body #siteMenu,body #acMenu{border-radius:0;border:2px solid var(--border)}body #siteSkip{border-radius:0}
+
+/* performance */
+#ozscene,.ozw{contain:layout paint;will-change:transform}
+#ozscene *{backface-visibility:hidden}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+body:not(.ozs) #ozscene,body:not(.ozs) #ozfx{display:none}
 </style>
 </head>
 <body>
@@ -1184,7 +1191,7 @@ function ozDive(o){
 
 /* ---------- the scene behind an Ozillion round: the same descent, the camera sinks one step per question ---------- */
 function ozSceneBuild(s){const w=el('div','ozw'),sh=el('div','ozship');sh.append(el('i','ap'),el('b',null,'1'));
-  w.append(sh,el('div','ozwave'));ozDecor(w,46,11);
+  w.append(sh,el('div','ozwave'));ozDecor(w,26,11);
   [['sliders ahead',16],['approach rate rising',30],['spinners spin here',46],['nobody FCs below here',62],['the end of the beatmap',78]].forEach(([t,y])=>{const a=el('div','ozamb','— '+t);a.style.top=y+'%';w.append(a)});
   s.append(w,el('div','dcrt'))}
 function ozSceneOn(on,cam){document.body.classList.toggle('ozs',on);const s=$('ozscene');if(!s)return;if(on&&!s._b){s._b=1;ozSceneBuild(s)}s.style.setProperty('--cam',cam)}
@@ -1360,13 +1367,13 @@ function initOz(){
   let sel=null,ansFilter='',ansPage=0;const msg=(t,k)=>say($('oMsg'),t,k);
   const OZA=['#9aa0a6','#4f9cff','#ff4d62','#17131d','#ff66aa'];
   async function list(){try{const d=await adm('/admin/oz/overview');
-      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='osu'||q.kind==='live'?'osu! · '+q.answers+' known answers':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{sel=q.id;ansFilter='';ansPage=0;list();edit()};return b}));
+      $('oqList').replaceChildren(...d.questions.map(q=>{const b=el('button');b.type='button';b.setAttribute('aria-pressed',q.id===sel);b.append(q.text,el('small',null,(q.kind==='osu'||q.kind==='live'?'osu! · '+q.answers+' known answers':q.kind==='scrape'?'Scraped · '+q.answers+' maps':q.answers+' answers')+(q.playable?'':' · needs '+d.min+' to be asked')));b.onclick=()=>{if(sel!==q.id){ansFilter='';ansPage=0}sel=q.id;ansFilter='';ansPage=0;list();edit()};return b}));
       $('oRepN').textContent='('+d.reports+')';const rb=$('repTab');if(rb)rb.textContent='Reports'+(d.reports?' ('+d.reports+')':'');return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
     try{const data=await adm('/admin/oz/q?id='+sel+(ansFilter?'&s='+encodeURIComponent(ansFilter):'')+'&p='+ansPage),q=data.q;ed.replaceChildren();
-      const kindOf=q.kind==='live'?'osu':q.kind||'list',gq=kindOf==='osu'?el('select'):null,dc=kindOf==='osu'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
-      const sv=el('button','btn','Save text'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
-      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:kindOf,group:gq?gq.value:undefined,f:fi?fi.value:'',diff:dc&&gq.value==='song'?dc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
+      let nlc=null;const kindOf=q.kind==='live'?'osu':q.kind||'list',gq=kindOf==='osu'?el('select'):null,dc=kindOf==='osu'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
+      const sv=el('button','btn','Save question'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
+      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:kindOf,group:gq?gq.value:undefined,f:fi?fi.value:'',diff:dc&&gq.value==='song'?dc.checked:false,nl:nlc?nlc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
       dq.onclick=async()=>{if(!confirm('Delete this question and all its answers?'))return;try{await adm('/admin/oz/q/del',{id:q.id});sel=null;ed.replaceChildren(el('p','stat','Deleted.'));list();reps()}catch(e){msg(e.message,'bad')}};
       top.append(tx,sv,dq);ed.append(top);
       if(fi){fi.type='text';fi.value=q.f||'';fi.maxLength=300;fi.placeholder='osu! filter, e.g. bpm{dir: >|<}{bpm 150,200} stars>5';fi.style.cssText='flex:1;min-width:200px';
@@ -1374,6 +1381,7 @@ function initOz(){
         help.innerHTML='<summary>Filters and {keywords}</summary><p class="stat">Same filters as the osu! website search: <code>bpm&gt;180</code> <code>ar&lt;8</code> <code>stars&gt;6</code> <code>length&gt;300</code> <code>artist=xi</code> <code>mapper=name</code> <code>tag=…</code> <code>status=loved</code>. Keywords: <code>{bpm 150,200}</code> is a random number from 150 to 200 (both included), <code>{dir: higher|lower}</code> picks one option. The same name always rolls the same value, so write <code>{bpm}</code> again in the question text; <code>{dir: &gt;|&lt;}</code> in the filter follows the same pick by position. '+(kindOf==='osu'?'osu!: players pick from this question\u2019s own answer list; an answer not in it yet is looked up on osu! and added. The rarer (less played / given), the more points.</p>':'Scraped: the filter is fixed (no keywords); the maps it finds become the answers and the play counts become the counts.</p>');
         tr.onclick=async()=>{out.className='stat';out.textContent='Asking osu!…';try{const r=await adm('/admin/oz/q/preview',{text:tx.value,f:fi.value});out.className='stat ok';out.textContent='Rolled: “'+r.text+'” → '+r.f+' · '+r.total.toLocaleString()+' maps found. Most played: '+(r.items.join(' | ')||'none')}catch(e){out.className='stat bad';out.textContent=e.message}};
         if(gq){gq.innerHTML='<option value="song">Answer = a song</option><option value="mapper">Answer = a mapper</option><option value="artist">Answer = an artist</option>';gq.value=q.group||'song';dc.type='checkbox';dc.checked=!!q.diff;const dl2=el('label');dl2.append(dc,' The player also picks the difficulty (numbers like bpm or stars then have to hold for that difficulty; songs only).');const gr=el('div','row');gr.append(gq,dl2);ed.append(gr)}
+        if(kindOf==='osu'){nlc=el('input');nlc.type='checkbox';nlc.checked=!!q.nl;const nl2=el('label');nl2.append(nlc,' Only the scraped answers count: no live osu! search, nothing new is added while playing (press Save question)');ed.append(nl2)}
         ed.append(fr,help,out);
 }
       {   // fill the answers from osu!
@@ -1383,7 +1391,7 @@ function initOz(){
         n.type='number';n.min=50;n.max=10000;n.step=50;n.value=kindOf==='scrape'?300:3000;rp.type='checkbox';rp.checked=false;go.type='button';
         const r1=el('div','row'),r2=el('div','row'),lb=el('label',null,'Answers are '),lb2=el('label',null,'Look at the most played '),lb3=el('label');lb.append(gs);lb2.append(n,' maps');lb3.append(rp,' replace what an earlier scrape added (your own answers stay)');
         r1.append(...(kindOf==='osu'?[]:[lb]),lb2,go);r2.append(lb3);r1.prepend(ff);
-        body.append(r1,r2,pg,el('p','stat','For an osu! question the answers come from the question\u2019s own filter: every choice of a {keyword} is searched on its own (for example each artist of {a: xi|Camellia|…}), and only maps that really fit are kept; the box above is an extra filter added to every search. Takes the most played maps first and adds up the play counts of every set of the same song / mapper into the start count (1 per 20,000 plays); every time a player gives an answer it goes up by 1. Your own answers, aliases and counts stay. It runs in steps (about one osu! request a second) and keeps going if osu! asks to slow down.'));
+        body.append(r1,r2,pg,el('p','stat','For an osu! question the answers come from the question\u2019s own filter: every choice of a {keyword} is searched on its own (for example each artist of {a: xi|Camellia|…}), and only maps that really fit are kept; the box above is an extra filter added to every search. Takes the most played maps first and adds up the play counts of every set of the same song / mapper into the start count (scaled so the most played answer starts at 300, same order and rarity); every time a player gives an answer it goes up by 1. Your own answers, aliases and counts stay. It runs in steps (about one osu! request a second) and keeps going if osu! asks to slow down.'));
         sr.append(el('summary',null,'Fill the answers from osu!'),body);ed.append(sr);
         go.onclick=async()=>{go.disabled=true;try{let cur='',got=0,r,left=Math.max(1,Math.ceil((+n.value||300)/50)),first=true,waits=0,calls=0;
             while((kindOf==='osu'||left>0)&&calls++<800){const p=Math.min(5,left);pg.textContent='Reading osu!… '+got+' maps'+(r&&r.filters>1?' · search '+r.at+'/'+r.filters:'');r=await adm('/admin/oz/q/scrape',{qid:q.id,cursor:cur,pages:kindOf==='osu'?5:p,count:+n.value||500,replace:rp.checked&&first,group:kindOf==='osu'?undefined:gs.value,f:ff.value});
@@ -1394,8 +1402,9 @@ function initOz(){
       if(kindOf==='osu'){const lv=data.live||{T:0,n:0,top:[]},rs=el('button','btn','Forget the recorded answers');rs.type='button';
         rs.onclick=async()=>{if(!confirm('Forget every answer recorded for this question? Its rarity starts again from the play counts.'))return;try{await adm('/admin/oz/lclear',{qid:q.id});msg('Forgotten.','ok');edit()}catch(e){msg(e.message,'bad')}};
         ed.append(el('p','stat',lv.n+' different answers recorded from '+lv.T+' correct answers. Every correct answer is saved here with its map numbers (bpm, ar, stars…), so later rolls can be checked without asking osu!, and the rarer an answer is in this list, the more points it gives.'),rs);
-        const sf=el('input');sf.type='text';sf.placeholder='Search the recorded answers…';sf.value=ansFilter;sf.onkeydown=e=>{if(e.key==='Enter'){ansFilter=sf.value;ansPage=0;edit()}};const sb=el('button','btn','Search');sb.type='button';sb.onclick=()=>{ansFilter=sf.value;ansPage=0;edit()};const sr2=el('div','row');sr2.append(sf,sb);ed.append(sr2)}
-      ed.append(el('p','stat',(kindOf==='osu'?q.count+' answers recorded'+(ansFilter?' · '+q.matching+' match':'')+' · page '+(q.page+1)+' of '+q.pages:q.ans.length+' answers')+' · total count '+q.total.toLocaleString()));
+      }
+      {        const sf=el('input');sf.type='text';sf.placeholder='Search the answers (name or alias)…';sf.value=ansFilter;sf.onkeydown=e=>{if(e.key==='Enter'){ansFilter=sf.value;ansPage=0;edit()}};const sb=el('button','btn','Search');sb.type='button';sb.onclick=()=>{ansFilter=sf.value;ansPage=0;edit()};const sr2=el('div','row');sr2.append(sf,sb);ed.append(sr2)}
+      ed.append(el('p','stat',(kindOf==='osu'?q.count+' answers recorded'+(ansFilter?' · '+q.matching+' match':'')+' · page '+(q.page+1)+' of '+q.pages:q.count+' answers'+(ansFilter?' · '+q.matching+' match':'')+' · page '+(q.page+1)+' of '+q.pages)+' · total count '+q.total.toLocaleString()));
       const head=el('div','arow h');['Answer','Aliases (comma separated)','Count','Tier',''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
       const row=(a)=>{const r=el('div','arow'),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
         nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
@@ -1406,7 +1415,7 @@ function initOz(){
         x.onclick=async()=>{try{await adm('/admin/oz/a/del',{qid:q.id,id:a.id});edit();list()}catch(e){msg(e.message,'bad')}};
         act.append(s);if(a.id)act.append(x);r.append(nm,al,n,tr,act);return r};
       ed.append(row({}),...q.ans.map(row));
-      if(kindOf==='osu'&&q.pages>1){const pr=el('div','row'),mk=(t,p,dis)=>{const b=el('button','btn',t);b.type='button';b.disabled=dis;b.onclick=()=>{ansPage=p;edit()};return b};
+      if(q.pages>1){const pr=el('div','row'),mk=(t,p,dis)=>{const b=el('button','btn',t);b.type='button';b.disabled=dis;b.onclick=()=>{ansPage=p;edit()};return b};
         pr.append(mk('« First',0,q.page===0),mk('‹ Previous',q.page-1,q.page===0),el('span','stat','Page '+(q.page+1)+' of '+q.pages),mk('Next ›',q.page+1,q.page>=q.pages-1),mk('Last »',q.pages-1,q.page>=q.pages-1));ed.append(pr)}
       const bulk=el('textarea');bulk.placeholder='Paste many answers, one per line:\nanswer | alias, alias | count\n(aliases and count are optional; an existing answer just gets its count increased)';
       const bb=el('button','btn','Add the lines');bb.type='button';bb.onclick=async()=>{try{const r=await adm('/admin/oz/a/bulk',{qid:q.id,text:bulk.value});msg(r.added+' added, '+r.merged+' increased.','ok');edit();list()}catch(e){msg(e.message,'bad')}};
