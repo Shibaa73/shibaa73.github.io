@@ -924,7 +924,7 @@ function newQuestion(q){
   $('form').replaceChildren(...keys.map((k,n)=>{const d=el('div','fld'+(isOzq?' w4':bomb?'':TEXT.includes(k)?(nText>1?' w2':' w4'):'')),l=el('label',null,isOzq?(k==='d'?'Difficulty':q.live?(q.diff?'Map · the less played, the more points (10 to 100)':'Name a map · the less played, the more points (10 to 100)'):bomb?'Your answer':'Your answer · the rarer, the more points (10 to 100)'):bomb?TYPES[q.type]:NAME[k]+' · '+ptsOf(k,q)+(ptsOf(k,q)==1?' pt':' pts')),i=el(isOzq&&k==='d'?'select':'input');i.id='g_'+k;i.name='ozu-'+k+'-'+Math.random().toString(36).slice(2,7);i.setAttribute('data-lpignore','true');i.setAttribute('data-1p-ignore','true');i.setAttribute('data-form-type','other');i.autocomplete='off';i.autocapitalize='off';i.spellcheck=false;i.setAttribute('autocorrect','off');i.enterKeyHint='go';d.style.setProperty('--i',n);
     if(bomb?(q.type==='clip_bpm'||q.type==='clip_pp'):NUMS.includes(k)){i.type='text';i.inputMode='decimal'}
     d.append(l,i);if(!isOzq&&(k==='song'||k==='artist'))attachAc(i,k);if(bomb&&(q.type.endsWith('_map')))attachAc(i,'song');return d}));
-  if(isOzq)$('g_a').placeholder='type one answer…';if(isOzq&&q.am==='fix')attachFix($('g_a'),q.ac);else if(isOzq&&(q.live||q.ac))attachLiveAc($('g_a'),q.diff?$('g_d'):null,q.ac);
+  if(isOzq)$('g_a').placeholder='type one answer…';if(isOzq&&q.ns){}else if(isOzq&&q.am==='fix')attachFix($('g_a'),q.ac);else if(isOzq&&(q.live||q.ac))attachLiveAc($('g_a'),q.diff?$('g_d'):null,q.ac);
   const cover=$('cover');cover.hidden=!(q.type==='audio_map'||isBg||q.audio);cover.classList.remove('shown');cover.replaceChildren();cover.style.backgroundImage='';
   if(q.type==='audio_map'||q.audio){cover.append(el('div','eq')),cover.firstChild.append(...[1,2,3,4,5].map(()=>el('i')))}
   $('ctl').hidden=bomb||isBg||isOzq;$('vctl').hidden=isBg||isOzq;$('clip').hidden=isOzq;
@@ -1371,9 +1371,9 @@ function initOz(){
       $('oRepN').textContent='('+d.reports+')';const rb=$('repTab');if(rb)rb.textContent='Reports'+(d.reports?' ('+d.reports+')':'');return d}catch(e){msg(e.message,'bad')}}
   async function edit(){const ed=$('oqEd');if(!sel){return}
     try{const data=await adm('/admin/oz/q?id='+sel+(ansFilter?'&s='+encodeURIComponent(ansFilter):'')+'&p='+ansPage),q=data.q;ed.replaceChildren();
-      let nlc=null;const kindOf=q.kind==='live'?'osu':q.kind||'list',gq=kindOf==='osu'?el('select'):null,dc=kindOf==='osu'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
+      let nlc=null,nsc=null;const kindOf=q.kind==='live'?'osu':q.kind||'list',gq=kindOf==='osu'?el('select'):null,dc=kindOf==='osu'?el('input'):null,fi=kindOf==='list'?null:el('input'),top=el('div','row'),tx=el('input');tx.type='text';tx.value=q.text;tx.maxLength=200;tx.style.cssText='flex:1;min-width:200px';
       const sv=el('button','btn','Save question'),dq=el('button','btn','Delete question');sv.type=dq.type='button';
-      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:kindOf,group:gq?gq.value:undefined,f:fi?fi.value:'',diff:dc&&gq.value==='song'?dc.checked:false,nl:nlc?nlc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
+      sv.onclick=async()=>{try{await adm('/admin/oz/q/save',{id:q.id,text:tx.value,kind:kindOf,group:gq?gq.value:undefined,f:fi?fi.value:'',diff:dc&&gq.value==='song'?dc.checked:false,nl:nlc?nlc.checked:false,ns:nsc?nsc.checked:false});msg('Saved.','ok');list()}catch(e){msg(e.message,'bad')}};
       dq.onclick=async()=>{if(!confirm('Delete this question and all its answers?'))return;try{await adm('/admin/oz/q/del',{id:q.id});sel=null;ed.replaceChildren(el('p','stat','Deleted.'));list();reps()}catch(e){msg(e.message,'bad')}};
       top.append(tx,sv,dq);ed.append(top);
       if(fi){fi.type='text';fi.value=q.f||'';fi.maxLength=300;fi.placeholder='osu! filter, e.g. bpm{dir: >|<}{bpm 150,200} stars>5';fi.style.cssText='flex:1;min-width:200px';
@@ -1382,6 +1382,7 @@ function initOz(){
         tr.onclick=async()=>{out.className='stat';out.textContent='Asking osu!…';try{const r=await adm('/admin/oz/q/preview',{text:tx.value,f:fi.value});out.className='stat ok';out.textContent='Rolled: “'+r.text+'” → '+r.f+' · '+r.total.toLocaleString()+' maps found. Most played: '+(r.items.join(' | ')||'none')}catch(e){out.className='stat bad';out.textContent=e.message}};
         if(gq){gq.innerHTML='<option value="song">Answer = a song</option><option value="mapper">Answer = a mapper</option><option value="artist">Answer = an artist</option>';gq.value=q.group||'song';dc.type='checkbox';dc.checked=!!q.diff;const dl2=el('label');dl2.append(dc,' The player also picks the difficulty (numbers like bpm or stars then have to hold for that difficulty; songs only).');const gr=el('div','row');gr.append(gq,dl2);ed.append(gr)}
         if(kindOf==='osu'){nlc=el('input');nlc.type='checkbox';nlc.checked=!!q.nl;const nl2=el('label');nl2.append(nlc,' Only the scraped answers count: no live osu! search, nothing new is added while playing (press Save question)');ed.append(nl2)}
+        nsc=el('input');nsc.type='checkbox';nsc.checked=!!q.ns;{const ns2=el('label');ns2.append(nsc,' No suggestions while typing (no autocomplete, no “did you mean”), so players can’t use it to look answers up (press Save question)');ed.append(ns2)}
         ed.append(fr,help,out);
 }
       {   // fill the answers from osu!
