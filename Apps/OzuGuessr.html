@@ -598,6 +598,65 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
 .ac li.on{outline:2px solid #ff7ab3;outline-offset:-2px}
 .calm *,.calm *::before,.calm *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 @media(max-width:760px){.hrow{grid-template-columns:1fr;gap:2px}.miss{grid-template-columns:1fr auto auto}.miss .mt{grid-column:1/-1}}
+
+/* ---------- bomb arena: fighters on a ring around the bomb ---------- */
+.arena .ring{position:relative;height:clamp(300px,50vh,440px);margin-top:6px;border-radius:50%/46%;background:radial-gradient(ellipse at center,rgba(255,106,60,.14),rgba(255,106,60,0) 62%),repeating-radial-gradient(ellipse at center,rgba(255,159,67,.07) 0 1px,transparent 1px 38px)}
+.arena .ring::before{content:'';position:absolute;inset:7% 9%;border-radius:50%;border:1px dashed rgba(255,159,67,.28);pointer-events:none}
+.arena .tile{position:absolute;width:112px;translate:-50% -50%;z-index:1;animation:rise .45s var(--ease) both;animation-delay:calc(var(--i,0)*70ms)}
+.arena .tile.cur{z-index:3}
+.arena .tile::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:var(--tc,transparent)}
+.arena .tile.tA{--tc:#ff7ab3}.arena .tile.tB{--tc:#7cc7ff}
+.arena .tile.tA .av{box-shadow:0 0 0 3px #ff7ab3}.arena .tile.tB .av{box-shadow:0 0 0 3px #7cc7ff}
+.tile .teamtag{font:600 .66rem 'Fredoka',sans-serif;letter-spacing:.12em;color:var(--tc,var(--muted))}
+.tile .sg{min-height:0;font:600 .66rem 'IBM Plex Mono',monospace;color:#f0b94a}.tile .sg:empty{display:none}
+.tile .pd{position:absolute;top:6px;right:6px}
+.core{position:absolute;left:50%;top:50%;translate:-50% -50%;display:grid;justify-items:center;gap:2px;z-index:2;pointer-events:none}
+.bombbig{font-size:3rem;filter:drop-shadow(0 6px 14px rgba(255,90,40,.55));animation:fuse .6s ease-in-out infinite alternate}
+.corenm{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 .8rem 'Fredoka',sans-serif;letter-spacing:.1em;color:#ff9f43}
+.core.ok .corenm{color:var(--mint)}.core.bad .corenm{color:#ff4d4d}.core.bad .bombbig{animation:boom .6s ease-out both}
+#game.bomb:has(.timer.urgent) .bombbig{animation-duration:.22s}
+.beam{position:absolute;left:50%;top:50%;height:3px;margin-top:-1.5px;transform-origin:0 50%;z-index:2;border-radius:3px;pointer-events:none;
+  background:repeating-linear-gradient(90deg,#ff9f43 0 10px,rgba(255,159,67,.2) 10px 16px);background-size:32px 3px;animation:beamflow .5s linear infinite;
+  transition:transform .55s cubic-bezier(.3,1.4,.5,1),width .55s cubic-bezier(.3,1.4,.5,1);filter:drop-shadow(0 0 6px rgba(255,140,60,.8))}
+.beam::after{content:'';position:absolute;right:-5px;top:-5px;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 0 14px 4px #ff9f43}
+.beam.ok{background:repeating-linear-gradient(90deg,#8fd19e 0 10px,rgba(143,209,158,.2) 10px 16px);filter:drop-shadow(0 0 6px rgba(143,209,158,.8))}
+.beam.bad{background:repeating-linear-gradient(90deg,#ff4d4d 0 10px,rgba(255,77,77,.2) 10px 16px);filter:drop-shadow(0 0 8px rgba(255,77,77,.9))}
+@keyframes beamflow{to{background-position:32px 0}}
+.arena.flat .ring{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:8px;height:auto;border-radius:0;background:none}.arena.flat .ring::before,.arena.flat .core,.arena.flat .beam{display:none}
+.arena.flat .tile{position:relative;width:auto;translate:none}
+.tbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:2px 0 6px}.tbar[hidden]{display:none}
+.tb{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;padding:8px 12px;background:var(--panel-2);border:1px solid var(--border)}
+.tb b{font:600 .8rem 'Fredoka',sans-serif;letter-spacing:.1em}.tb span{text-align:right;font:600 .8rem 'IBM Plex Mono',monospace;color:var(--muted)}
+.tb .bar{grid-column:1/-1;height:6px;background:rgba(255,255,255,.08);overflow:hidden}.tb .bar i{display:block;height:100%;transition:width .5s var(--ease)}
+.tb.A b{color:#ff7ab3}.tb.A .bar i{background:#ff7ab3}.tb.B b{color:#7cc7ff}.tb.B .bar i{background:#7cc7ff}
+.feed{display:grid;gap:3px;margin-top:8px;min-height:20px}
+.fe{font-size:.82rem;padding:4px 10px;border-left:3px solid var(--border);background:rgba(255,255,255,.03);animation:rise .3s var(--ease) both}
+.fe.ok{border-color:var(--mint)}.fe.bad{border-color:#ff4d4d}.fe.tg{border-color:#f0b94a;color:#f0b94a}
+/* predicting the rarity */
+.tgbox{margin:4px 0 10px;padding:10px 12px;background:var(--panel-2);border:1px solid rgba(240,185,74,.45);animation:rise .3s var(--ease) both}
+.tgbox .who{display:block;font:600 .78rem 'Fredoka',sans-serif;letter-spacing:.08em;color:#f0b94a;margin-bottom:8px}
+.tgbtns{display:flex;flex-wrap:wrap;gap:6px}.tgbtns[hidden]{display:none}
+.tgb{padding:7px 10px;font:600 .78rem 'Fredoka',sans-serif;color:var(--tc);background:rgba(255,255,255,.04);border:1px solid var(--tc);cursor:pointer}
+.tgb:hover{background:rgba(255,255,255,.09)}.tgb.on{background:var(--tc);color:#0b0d1f}
+.tgbox small{display:block;margin-top:8px;color:var(--muted)}
+.tgh{font:600 .85rem 'Fredoka',sans-serif;margin-bottom:4px}.tgr{font-size:.84rem;padding:2px 0;color:var(--muted)}.tgr.hit{color:#f0b94a}
+/* ping dots */
+.pd{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;background:#8fd19e;box-shadow:0 0 0 2px rgba(0,0,0,.3)}.pd.l1{background:#f0b94a}.pd.l2{background:#ff6b7a}.pd.lx{background:#5b6280}
+#pingdot{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:45;padding:3px 10px 3px 22px;font:600 .72rem 'IBM Plex Mono',monospace;color:var(--muted);background:rgba(5,7,26,.72);border:1px solid var(--border);border-radius:999px}
+#pingdot::before{content:'';position:absolute;left:8px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#8fd19e}
+#pingdot.l1::before{background:#f0b94a}#pingdot.l2::before{background:#ff6b7a}#pingdot.l2{color:#ff6b7a}
+.teamwin{margin:8px 0;padding:10px 14px;text-align:center;font:600 1.1rem 'Fredoka',sans-serif;letter-spacing:.1em;border:1px solid var(--border);background:var(--panel-2)}.teamwin[hidden]{display:none}
+.teamwin.A{color:#ff7ab3;border-color:#ff7ab3}.teamwin.B{color:#7cc7ff;border-color:#7cc7ff}
+/* admin: audit log */
+.lrow{display:grid;grid-template-columns:150px 150px 170px 1fr auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:.82rem}
+.lrow .lt{color:var(--muted)}.lrow .lw{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lrow .li{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lrow.undone{opacity:.5}
+#admname{width:180px}
+@media(max-width:900px){.lrow{grid-template-columns:1fr}.arena .tile{width:92px}.arena .ring{height:clamp(280px,56vh,420px)}}
+/* bomb: the arena is the main stage, the answer box sits right below it */
+#game.bomb .gright{display:flex;flex-direction:column}
+#game.bomb #board{order:-1;margin-top:0!important;margin-bottom:10px}
+.arena .ring{height:clamp(250px,40vh,350px)}
+.arena .tile{width:100px;padding:10px 4px 7px}
 </style>
 </head>
 <body>
@@ -674,6 +733,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
       <label id="l_lives">Lives <input id="c_lives" type="number" min="1" max="10"></label>
       <label id="l_clip">Clip length (s) <input id="c_clip" type="number" min="5" max="30"></label>
     </div>
+    <div class="opts" id="l_teams"><label><input id="c_teams" type="checkbox"> Teams: two teams share their lives, a rare answer heals the whole team</label></div>
     <div class="opts" id="l_wait"><label><input id="c_wait" type="checkbox"> Timer starts at the first guess and speeds up with every guess</label></div>
     <div class="opts" id="l_hints"><label><input id="c_hints" type="checkbox"> Hints: after half of the time, show the song title’s first letters (−40% song points)</label></div>
     <p class="muted" id="bgInfo"></p>
@@ -698,6 +758,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
       </div>
       <div class="gright">
         <div id="form"></div>
+        <div class="tgbox" id="tgbox" hidden><span class="who">PREDICT THE ANSWER</span><div class="tgbtns" id="tgbtns"></div><small id="tgnote"></small><div id="tgres"></div></div>
         <div class="live" id="live" hidden><span class="who" id="liveWho"></span><div class="box"><span id="liveTxt"></span><i class="caret"></i></div></div>
         <div class="hintrow" id="hintrow" hidden><button class="btn" id="hintbtn" type="button" data-sfx="off">Hint</button><span id="hinttxt"></span></div>
         <div class="subrow" id="subrow"><button class="btn go" id="submit" type="button" data-sfx="off">Submit</button><button class="btn" id="skip" type="button" data-sfx="off" hidden>Skip</button></div>
@@ -709,6 +770,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
 
   <section class="sec" id="end" hidden>
     <h2>Final</h2><div id="rank" hidden></div><div id="final"></div><div id="recap"></div>
+    <div id="teamEnd" class="teamwin" hidden></div><p class="muted" id="sgEnd" style="margin-top:8px"></p>
     <p class="muted" id="finalNote" style="margin-top:8px"></p>
     <p class="streak big" id="streakEnd" hidden></p>
     <p class="muted" id="rmNote" style="margin-top:6px"></p>
@@ -720,6 +782,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
     <div class="lbtabs"><button class="btn sm" id="lbT1" type="button" aria-pressed="true">Daily ozu</button><button class="btn sm" id="lbT2" type="button" aria-pressed="false">Daily Ozillion</button></div><div id="lbList"></div>
   </section>
 </div>
+<div id="pingdot" hidden></div>
 <div id="ozbar" hidden></div>
 <div id="ozfx" hidden></div>
 <audio id="pa" preload="auto"></audio>
@@ -823,20 +886,25 @@ $('seek').oninput=e=>{if(V&&V.preview){pa.currentTime=+e.target.value;return}if(
 $('pp').onclick=()=>{if(V&&V.preview){pa.paused?pa.play().catch(()=>{}):pa.pause();return}if(!ytReady)return;const on=yt.getPlayerState()===1;on?yt.pauseVideo():yt.playVideo();$('pp').textContent=on?'Play':'Pause'};
 
 /* ---------- connection ---------- */
+let pingT=0,myPing=null;
+const pbucket=ms=>ms==null?'x':ms<120?0:ms<300?1:2;
+const pdot=p=>{const ms=p.id===me&&myPing!=null?myPing:p.ms,d=el('b','pd l'+pbucket(ms));d.title=ms==null?'ping unknown':Math.round(ms)+' ms';return d};
+function paintPing(){const e=$('pingdot');if(!e)return;if(!ws||myPing==null){e.hidden=true;return}e.hidden=false;e.className='l'+pbucket(myPing);e.textContent=Math.round(myPing)+' ms';e.title='Your connection to the game server. If this is red, the lag is yours.'}
 function connect(c,create){
   if(API.includes('YOURNAME'))return status('Not connected yet: paste your server URL into API in this page’s script.');
   const name=$('nick').value.trim()||(solo()?'Player':'');if(!name){kind=null;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
   err('');svErr='';status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
-  ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':kind==='ozsolo'||kind==='ozdaily'?'oz':undefined,token})};
+  ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':kind==='ozsolo'||kind==='ozdaily'?'oz':undefined,token});clearInterval(pingT);myPing=null;const pg=()=>{if(ws&&ws.readyState===1)tx({t:'ping',ts:Date.now()})};setTimeout(pg,600);pingT=setInterval(pg,3000)};
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
     else if(m.t==='caps'){CAPS={...CAPS,bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
     else if(m.t==='hint'){if(st&&st.q&&st.q.key===m.key){hintOn=true;$('hinttxt').textContent=m.text;$('hintbtn').hidden=true;sfxp('hint')}}
+    else if(m.t==='pong'){myPing=Math.max(0,Date.now()-m.ts);paintPing();tx({t:'lat',ms:myPing})}
     else if(m.t==='typing'){if(st&&st.q&&st.q.key===m.key){liveT=m.v;paintLive()}}
     else if(m.t==='reject'){sent=false;$('skip').disabled=false;$('submit').hidden=false;$('form').querySelectorAll('input').forEach(i=>i.readOnly=false);$('form').querySelectorAll('select').forEach(i=>i.disabled=false);err(m.m);if(m.rep){const rb=el('button','repbtn','Report: it should count');rb.type='button';rb.onclick=()=>{tx({t:'reportnow',kind:'answer'});rb.textContent='Reported, thanks';rb.disabled=true};$('gerr').append(' ',rb)}clearTimeout(rejT);rejT=setTimeout(()=>err(''),m.rep?7000:4000);sfxp('miss');const f=$('g_a');if(f){f.focus();f.select()}}
     else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
-  ws.onclose=()=>{fxClear();const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
+  ws.onclose=()=>{clearInterval(pingT);myPing=null;paintPing();fxClear();const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
   ws.onerror=()=>status('Couldn’t connect to the server.');
 }
 function leave(){fxClear();const w=ws;ws=null;st=null;me=null;lastKey=null;kind=null;V=null;duck(false);err('');status('');
@@ -879,10 +947,10 @@ function setBgState(){const oe=$('ozState');if(CAPS.oz===0){oe.textContent='No q
 fetch(API+'/caps').then(r=>r.json()).then(d=>{CAPS={bg:!!d.bg,why:d.why||'',oz:d.oz};setBgState()}).catch(()=>{});
 
 /* ---------- lobby ---------- */
-function players(box,fn){const list=st.players,sig=JSON.stringify(list.map(p=>[p.id,p.name,fn.info(p),fn.cls?fn.cls(p):'',p.id===st.host,p.id===me])),ids=list.map(p=>p.id).join();
+function players(box,fn){const list=st.players,sig=JSON.stringify(list.map(p=>[p.id,p.name,fn.info(p),fn.cls?fn.cls(p):'',p.id===st.host,p.id===me,pbucket(p.id===me&&myPing!=null?myPing:p.ms)])),ids=list.map(p=>p.id).join();
   if(box._sig===sig)return;const still=box._ids===ids;box._sig=sig;box._ids=ids;
   box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl'+(fn.cls?fn.cls(p):'')+(still?' still':'')),av=mkAv(p.name,p.acct);d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
-    d.append(av,el('span',null,(p.id===st.host?'★ ':'')+p.name+(p.id===me?' (you)':'')),el('i',null,fn.info(p)));return d}))}
+    d.append(av,el('span',null,(p.id===st.host?'★ ':'')+p.name+(p.id===me?' (you)':'')),pdot(p),el('i',null,fn.info(p)));return d}))}
 const hearts=n=>n>0?'♥'.repeat(n):'out';
 {const box=$('cfgf');for(const k of ALL){const l=el('label'),i=el('input');l.id='lf_'+k;i.type='checkbox';i.id='c_'+k;i.onchange=push;l.append(i,NAME[k]);box.append(l)}}
 let lastN=0;
@@ -898,12 +966,12 @@ function renderLobby(){
   if(bomb&&!oz&&c.content!=='clips'&&c.content!=='all')$('c_content').value='clips';
   $('l_content').querySelector('select').options[0].textContent=bomb?'Clips and backgrounds':'Clips';
   vis('l_mode',!s);vis('l_content',!s);vis('l_tier',!bomb&&!oz&&c.content!=='clips'&&!(kind==='solo'));
-  vis('l_time',!s||oz);vis('l_clip',!bgOnly&&!oz);vis('l_hints',!bomb&&!oz);vis('l_lives',!s&&bomb);vis('l_wait',!s&&!bomb&&!oz);vis('l_rounds',!bomb);vis('cfgf',!bomb&&!oz);
+  vis('l_time',!s||oz);vis('l_clip',!bgOnly&&!oz);vis('l_hints',!bomb&&!oz);vis('l_lives',!s&&bomb);vis('l_teams',!s&&bomb);vis('l_wait',!s&&!bomb&&!oz);vis('l_rounds',!bomb);vis('cfgf',!bomb&&!oz);
   for(const k of ALL)vis('lf_'+k,!(bgOnly&&k!=='artist'));
   if(bgOnly)$('lf_artist').lastChild.textContent='Also guess the artist';else $('lf_artist').lastChild.textContent=NAME.artist;
   players($('plist'),{info:p=>''});
   const set=(id,v)=>{const e=$(id);if(document.activeElement!==e)e.value=v;e.disabled=!host};
-  set('c_mode',c.mode);if(!(bomb&&c.content!=='oz'&&c.content!=='clips'&&c.content!=='all'))set('c_content',c.content);set('c_tier',c.tier);set('c_time',c.time);set('c_clip',c.clipLen||20);$('c_hints').checked=!!c.hints;$('c_hints').disabled=!host;set('c_rounds',c.rounds);set('c_lives',c.lives);
+  set('c_mode',c.mode);if(!(bomb&&c.content!=='oz'&&c.content!=='clips'&&c.content!=='all'))set('c_content',c.content);set('c_tier',c.tier);set('c_time',c.time);set('c_clip',c.clipLen||20);$('c_hints').checked=!!c.hints;$('c_hints').disabled=!host;$('c_teams').checked=!!c.teams;$('c_teams').disabled=!host;set('c_rounds',c.rounds);set('c_lives',c.lives);
   $('c_wait').checked=c.waitFirst;$('c_wait').disabled=!host;for(const k of ALL){$('c_'+k).checked=!!c.fields[k];$('c_'+k).disabled=!host}
   $('bgInfo').textContent=oz?'Ozillion: name something that fits the question. '+(bomb?'On the bomb, any valid answer is safe, but an answer can only be given once per round, and a rare one (WYSI or Ozillion!) gives a life back.':'Points by rarity: Doo Doo 10 · Those Who Know... 30 · Ball Knowledge 50 · WYSI 80 · Ozillion! 100.'):(c.content!=='clips'||bomb)&&st.bgMult?'Background questions multiply the text points: '+st.bgMult.map((m,i)=>TIER[i]+' ×'+f2(m)).join(' · ')+'. In lobbies every player gets the same difficulty on the same question.':'';
   const nb=$('bgNote');nb.hidden=!(noBg&&(c.content!=='clips'||kind==='bgsolo'));nb.textContent='Backgrounds aren’t available on this server: '+(CAPS.why||'');
@@ -912,7 +980,7 @@ function renderLobby(){
   if(s&&host&&c.mode==='bomb'){$('c_mode').value='classic';push()}   // solo is classic only
 }
 function push(){const fields=Object.fromEntries(ALL.map(k=>[k,$('c_'+k).checked]));
-  tx({t:'settings',cfg:{mode:$('c_mode').value,content:kind==='bgsolo'?'bg':kind==='ozsolo'?'oz':kind==='solo'?'clips':$('c_content').value,tier:$('c_tier').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,waitFirst:$('c_wait').checked,clipLen:$('c_clip').value,hints:$('c_hints').checked,fields}})}
+  tx({t:'settings',cfg:{mode:$('c_mode').value,content:kind==='bgsolo'?'bg':kind==='ozsolo'?'oz':kind==='solo'?'clips':$('c_content').value,tier:$('c_tier').value,time:$('c_time').value,rounds:$('c_rounds').value,lives:$('c_lives').value,teams:$('c_teams').checked,waitFirst:$('c_wait').checked,clipLen:$('c_clip').value,hints:$('c_hints').checked,fields}})}
 function draftNow(){if(!st||st.cfg.mode!=='classic'||st.phase!=='round'||sent||!ws||ws.readyState!==1)return;
   tx({t:'draft',v:Object.fromEntries(st.q.fields.map(k=>[k,($('g_'+k)||{}).value||'']))})}
 let typT=0;
@@ -955,25 +1023,61 @@ function paintHint(){const b=$('hintbtn'),q=st&&st.q,ok=!!q&&st.cfg.hints&&st.cf
   b.textContent=can?'Hint (song points −40%)':'Hint unlocks at '+Math.ceil(half)+' s'}
 $('hintbtn').onclick=()=>{if(st&&st.q)tx({t:'hint'})};
 /* bomb mode: everybody sits in one arena, the bomb sits on whoever's turn it is, wrong answers cost a heart */
+/* ---- bomb arena: a ring of fighters around the bomb; the fuse swings to whoever holds it, a kill feed tells what just happened ---- */
+const feedL=[],elimO=[];let feedDone=0,tgMine=null,tgKey=null;
 function arena(q){const box=$('board');
-  if(!box._arena){box.replaceChildren();box._arena=true;box._tiles=new Map();box._sig=null;box.className='arena';
-    const f=el('div','ffa');f.append(el('b',null,'FREE FOR ALL'),el('span',null,''));box.append(f);box._ffa=f;box._grid=el('div','tiles');box.append(box._grid)}
-  const rev=st.phase==='turnReveal',alive=st.players.filter(p=>p.lives>0).length;
-  box._ffa.lastChild.textContent=alive+' of '+st.players.length+' alive · last one standing wins';
-  const seen=new Set();
-  st.players.forEach((p,i)=>{seen.add(p.id);let t=box._tiles.get(p.id);
+  if(!box._arena){box.replaceChildren();box._arena=true;box._tiles=new Map();box.className='arena';
+    const f=el('div','ffa');f.append(el('b',null,'FREE FOR ALL'),el('span',null,''));box.append(f);box._ffa=f;
+    box._tb=el('div','tbar');box.append(box._tb);
+    box._ring=el('div','ring');box._beam=el('div','beam');box._core=el('div','core');box._bomb=el('div','bombbig','💣');box._cn=el('div','corenm');box._core.append(box._bomb,box._cn);box._ring.append(box._beam,box._core);box.append(box._ring);
+    box._feed=el('div','feed');box.append(box._feed);
+    box._swing=()=>{const h=[...box._tiles.values()].find(t=>t.classList.contains('cur'));if(!h||!box._ring.clientWidth)return;const W=box._ring.clientWidth,H=box._ring.clientHeight,dx=h._x/100*W-W/2,dy=h._y/100*H-H/2,len=Math.max(0,Math.hypot(dx,dy)-34);
+      box._beam.style.width=len+'px';box._beam.style.transform='rotate('+Math.atan2(dy,dx)+'rad)'};
+    addEventListener('resize',()=>{if(box._arena)box._swing()})}
+  if(q.i<feedDone){feedDone=0;feedL.length=0;elimO.length=0}
+  const rev=st.phase==='turnReveal',n=st.players.length,T=st.teams,alive=st.players.filter(p=>p.lives>0).length;
+  box._ffa.firstChild.textContent=T?'TEAM BATTLE':'FREE FOR ALL';
+  box._ffa.lastChild.textContent=T?'the team that runs out of lives loses':alive+' of '+n+' alive · last one standing wins';
+  box._tb.hidden=!T;if(T){box._tb.replaceChildren(...['A','B'].map(k=>{const t=el('div','tb '+k),fill=el('i');fill.style.width=Math.round(100*T[k].lives/Math.max(1,T[k].max))+'%';
+      t.append(el('b',null,'TEAM '+(k==='A'?'PINK':'CYAN')),el('span',null,'♥ '+T[k].lives+' / '+T[k].max),el('div','bar',null));t.querySelector('.bar').append(fill);return t}))}
+  box.classList.toggle('flat',n>12);box.classList.toggle('teams',!!T);
+  if(!T)for(const p of st.players)if(p.lives<=0&&!elimO.includes(p.id))elimO.push(p.id);
+  if(rev&&feedDone!==q.i){feedDone=q.i;const R=st.reveal,P=st.players.find(p=>p.id===R.cur);
+    if(P){if(R.ok)feedL.unshift({c:'ok',t:R.heal?'✨ '+P.name+' healed '+(T?'the team':'a heart')+(R.tier!=null?' · '+OZN[R.tier]:''):'✔ '+P.name+' is safe'+(R.tier!=null?' · '+OZN[R.tier]:'')});
+      else feedL.unshift({c:'bad',t:(P.lives<=0&&!T?'☠ '+P.name+' is out':'💥 '+P.name+' lost a heart'+(T?' for the team':''))});
+      for(const g of (R.tg||[]))if(g.pts>=2)feedL.unshift({c:'tg',t:'🎯 '+g.name+' called it · +'+g.pts});
+      feedL.length=Math.min(feedL.length,6)}}
+  box._feed.replaceChildren(...feedL.map(x=>el('div','fe '+x.c,x.t)));
+  const order=T?[...st.players.filter(p=>p.team==='A'),...st.players.filter(p=>p.team!=='A')]:st.players,seen=new Set();
+  order.forEach((p,i)=>{seen.add(p.id);let t=box._tiles.get(p.id);
     if(!t){t=el('div','tile');t.style.setProperty('--i',i);const av=mkAv(p.name,p.acct);av.style.setProperty('--h',hue(p.name));
-      t._hp=el('div','hp');t.append(av,el('div','nm'),t._hp,el('div','tg'));t._nm=t.children[1];t._tg=t.children[3];t._lives=p.lives;box._grid.append(t);box._tiles.set(p.id,t)}
+      t._hp=el('div','hp');t._dot=el('b','pd');t._sg=el('div','sg');t.append(av,el('div','nm'),t._hp,el('div','tg'),t._sg,t._dot);t._nm=t.children[1];t._tg=t.children[3];t._lives=p.lives;box._ring.append(t);box._tiles.set(p.id,t)}
+    if(!box.classList.contains('flat')){const a=i/n*Math.PI*2-Math.PI/2;t._x=50+41*Math.cos(a);t._y=50+37*Math.sin(a);t.style.left=t._x+'%';t.style.top=t._y+'%'}else{t._x=t._y=50;t.style.left=t.style.top=''}
     t._nm.textContent=p.name+(p.id===me?' (you)':'');
     const cur=p.id===q.cur,out=p.lives<=0;
     if(cur&&!t.classList.contains('cur')){t.classList.remove('pass');void t.offsetWidth;t.classList.add('pass');sfxp('pass')}   // the bomb just arrived here
-    t.classList.toggle('cur',cur);t.classList.toggle('out',out);t.classList.toggle('me',p.id===me);
+    t.classList.toggle('cur',cur);t.classList.toggle('out',out);t.classList.toggle('me',p.id===me);t.classList.toggle('tA',p.team==='A');t.classList.toggle('tB',p.team==='B');
     t.classList.toggle('ok',cur&&rev&&!!st.reveal.ok);t.classList.toggle('bad',cur&&rev&&!st.reveal.ok);
-    t._tg.textContent=out?'ELIMINATED':cur?(rev?(st.reveal.ok?'SAFE':'BOOM'):'ON THE BOMB'):'';
-    const max=Math.max(st.cfg.lives||3,p.lives);if(t._hp.children.length!==max)t._hp.replaceChildren(...Array.from({length:max},()=>el('i',null,'♥')));
-    [...t._hp.children].forEach((h,k)=>h.classList.toggle('off',k>=p.lives));
+    t._tg.textContent=out?(T?'TEAM OUT':'#'+(n-elimO.indexOf(p.id))+' · OUT'):cur?(rev?(st.reveal.ok?'SAFE':'BOOM'):'ON THE BOMB'):'';
+    if(T){if(!t._hp.firstChild||t._hp.firstChild.nodeName!=='SPAN')t._hp.replaceChildren(el('span','teamtag',p.team==='A'?'PINK':'CYAN'))}
+    else{const max=Math.max(st.cfg.lives||3,p.lives);if(t._hp.children.length!==max||t._hp.firstChild.nodeName==='SPAN')t._hp.replaceChildren(...Array.from({length:max},()=>el('i',null,'♥')));
+      [...t._hp.children].forEach((h,k)=>h.classList.toggle('off',k>=p.lives))}
+    t._sg.textContent=p.sg>0?'🎯 '+p.sg:'';const d=pdot(p);t._dot.className=d.className;t._dot.title=d.title;
     if(p.lives<t._lives){t.classList.remove('hit');void t.offsetWidth;t.classList.add('hit')}t._lives=p.lives});
-  for(const [id,t] of box._tiles)if(!seen.has(id)){t.remove();box._tiles.delete(id)}}
+  for(const [id,t] of box._tiles)if(!seen.has(id)){t.remove();box._tiles.delete(id)}
+  const holder=st.players.find(p=>p.id===q.cur);box._cn.textContent=holder?(rev&&!st.reveal.ok?'BOOM':holder.name):'';box._beam.className='beam'+(rev?(st.reveal.ok?' ok':' bad'):'');box._core.className='core'+(rev?(st.reveal.ok?' ok':' bad'):'');
+  requestAnimationFrame(box._swing)}
+/* spectators (everybody who is not on the bomb) predict the rarity of the answer: 3 points exact, 1 next to it, a predicted miss pays 2 */
+function paintTg(){const b=$('tgbox'),q=st&&st.q,on=st&&st.cfg.mode==='bomb'&&q&&q.type==='oz'&&q.cur!==me&&(st.phase==='turn'||st.phase==='turnReveal');
+  if(!on){b.hidden=true;return}
+  if(tgKey!==q.key){tgKey=q.key;tgMine=null}
+  b.hidden=false;const bt=$('tgbtns'),turn=st.phase==='turn';bt.hidden=!turn;$('tgnote').hidden=!turn;$('tgres').hidden=turn;
+  if(!bt._built){bt._built=true;[['MISS',-1],...OZN.map((n,i)=>[n,i])].forEach(([n,v])=>{const x=el('button','tgb'+(v<0?' miss':''),n);x.type='button';x.dataset.v=v;x.style.setProperty('--tc',v<0?'#ff6b7a':OZC[v]);x.onclick=()=>{tgMine=v;tx({t:'tg',v});paintTg();sfxp('submit')};bt.append(x)})}
+  [...bt.children].forEach(x=>x.classList.toggle('on',tgMine!=null&&+x.dataset.v===tgMine));
+  $('tgnote').textContent=(tgMine==null?'Pick one. ':'Locked in, you can still change it. ')+'Exact tier 3 points · next to it 1 · a miss you predicted 2.';
+  if(!turn){const R=st.reveal||{},g=R.tg||[],r=$('tgres'),line=x=>el('div','tgr'+(x.pts?' hit':''),x.name+': '+(x.v<0?'MISS':OZN[x.v])+(x.pts?'  +'+x.pts:''));
+    r.replaceChildren(...(g.length?g.map(line):[el('div','tgr','Nobody predicted this one.')]));
+    r.prepend(el('div','tgh',R.ok&&R.tier!=null?'It was '+OZN[R.tier]:'It was a miss'))}}
 function renderGame(){
   show('game');const q=st.q,bomb=st.cfg.mode==='bomb',reveal=st.phase==='reveal'||st.phase==='turnReveal',myTurn=bomb&&q.cur===me&&st.phase==='turn';
   if(q.key!==lastKey)newQuestion(q);
@@ -981,12 +1085,12 @@ function renderGame(){
   const sp=spec(),you=st.players.find(p=>p.id===me)||{};$('specTag').hidden=!sp;
   $('rd').textContent=bomb?'Turn '+q.i+' · '+((st.players.find(p=>p.id===q.cur)||{}).name||'')+(myTurn?' (you!)':''):(daily()?(isOz()?'Daily Ozillion · ':'Daily ozu · '):(isOz()?'Ozillion · ':''))+'Round '+q.i+' / '+st.cfg.rounds;
   if(st.spectators)$('rd').textContent+=' · 👁 '+st.spectators;
-  const sc=$('sc');if(sp){sc.textContent=''}else if(bomb){sc.textContent=hearts(you.lives)}else if(lastScore!==you.score){const was=lastScore;lastScore=you.score;sc.replaceChildren(el('span'),el('small',null,'pts'));countUp(sc.firstChild,you.score,2,was==null?0:800);if(was!=null){sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump')}}
+  const sc=$('sc');if(sp){sc.textContent=''}else if(bomb){sc.textContent=st.teams?'TEAM ♥ '+you.lives:hearts(you.lives)}else if(lastScore!==you.score){const was=lastScore;lastScore=you.score;sc.replaceChildren(el('span'),el('small',null,'pts'));countUp(sc.firstChild,you.score,2,was==null?0:800);if(was!=null){sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump')}}
   $('game').classList.toggle('bomb',bomb);
   if(bomb)arena(q);else{const bd=$('board');if(bd._arena){bd.replaceChildren();bd._arena=false;bd._tiles=null;bd.className=''}
     players(bd,{cls:p=>'',info:p=>p.score+' pts'+(p.done&&!reveal?' ✓':'')})}
   const locked=sp||reveal||sent||(bomb&&!myTurn);
-  $('form').hidden=sp||reveal||(bomb&&!myTurn);paintLive();$('subrow').hidden=locked;paintHint();$('skip').hidden=!(isOz()&&!bomb);$('ozbar').hidden=$('form').hidden&&$('subrow').hidden;
+  $('form').hidden=sp||reveal||(bomb&&!myTurn);paintLive();paintTg();$('subrow').hidden=locked;paintHint();$('skip').hidden=!(isOz()&&!bomb);$('ozbar').hidden=$('form').hidden&&$('subrow').hidden;
   $('form').querySelectorAll('input').forEach(i=>i.disabled=locked);$('submit').hidden=locked;
   $('clip').classList.toggle('reveal',reveal&&!bomb);if(!reveal&&!$('ozfx').hidden&&!q.text)fxClear();
   $('wait').textContent=reveal?'':q.held?'Timer paused: an ad seems to be playing for someone. It continues right after.':q.gate?(q.type==='bg'||q.type==='bg_map'?'Waiting for everyone’s background to load…':'Waiting for everyone’s clip to start…'):'';
@@ -1013,8 +1117,10 @@ function renderEnd(){
   show('end');stopClip();lastScore=null;const bomb=st.cfg.mode==='bomb',list=[...st.players].sort((a,b)=>bomb?b.lives-a.lives:b.score-a.score);
   const box=$('final'),sig=JSON.stringify(list);
   if(box._sig!==sig){box._sig=sig;box.replaceChildren(...list.map((p,i)=>{const d=el('div','pl r'+(i+1)+(i===0?' cur':'')),av=mkAv(p.name,p.acct);d.style.setProperty('--i',i);av.style.setProperty('--h',hue(p.name));
-      d.append(el('span','rk',i===0?'🏆':i+1),av,el('span',null,p.name+(p.id===me?' (you)':'')),el('i',null,bomb?hearts(p.lives):f2(p.score)+' pts'));return d}));
-    if(list[0]&&(list[0].id===me||list.length===1)){setTimeout(confetti,350);sfxp('win')}else if(!spec())sfxp('ok')}
+      d.append(el('span','rk',(st.teams?p.lives>0:i===0)?'🏆':i+1),av,el('span',null,p.name+(p.id===me?' (you)':'')),el('i',null,st.teams?(p.team==='A'?'Pink':'Cyan')+' team':bomb?hearts(p.lives):f2(p.score)+' pts'));return d}));
+    if(list[0]&&((st.teams?((st.players.find(p=>p.id===me)||{}).lives>0):list[0].id===me)||list.length===1)){setTimeout(confetti,350);sfxp('win')}else if(!spec())sfxp('ok')}
+  {const te=$('teamEnd');if(st.teams){const w=st.teams.A.lives>0?'A':'B';te.textContent='🏆 TEAM '+(w==='A'?'PINK':'CYAN')+' WINS';te.className='teamwin '+w;te.hidden=false}else te.hidden=true;
+  $('sgEnd').textContent=st.sgBoard&&st.sgBoard.length?'🎯 Best predictors: '+st.sgBoard.map(x=>x.name+' '+x.pts).join(' · '):''}
   $('finalNote').textContent=daily()?'Your score is on today’s leaderboard (your best score of the day counts).':'';fxClear();
   const votes=st.rematch||[],mineV=votes.includes(me),sp=spec();paintStreak();
   ozFinal();
@@ -1047,7 +1153,7 @@ $('join').onclick=()=>{kind='lobby';const c=$('code').value.trim().toUpperCase()
 $('leave').onclick=$('leave2').onclick=leave;
 $('c_content').onchange=()=>{if($('c_content').value==='oz'&&+$('c_time').value>=40)$('c_time').value=25;else if($('c_content').value!=='oz'&&+$('c_time').value===25)$('c_time').value=45;push()};
 $('start').onclick=()=>{sfxp('start');err('');tx({t:'start'})};$('again').onclick=()=>{err('');tx({t:'again'})};
-['c_mode','c_tier','c_time','c_clip','c_hints','c_rounds','c_lives','c_wait'].forEach(id=>$(id).onchange=push);
+['c_mode','c_tier','c_time','c_clip','c_hints','c_rounds','c_lives','c_wait','c_teams'].forEach(id=>$(id).onchange=push);
 $('copy').onclick=async()=>{const url=location.href.replace(/Apps\/OzuGuessr\.html.*$/,'index.html#Apps/OzuGuessr.html?lobby='+code);
   try{await navigator.clipboard.writeText(url);$('copy').textContent='Copied!'}catch(e){prompt('Invite link',url)}setTimeout(()=>$('copy').textContent='Copy invite link',1500)};
 $('submit').onclick=e=>{if(sent||!st||spec())return;{const gi=$('g_a');if(gi&&gi._take&&gi._take())return}   // a suggested correction is taken first; the next press submits it
@@ -1061,6 +1167,7 @@ show('menu');
 
 /* ---------- hidden scoring panel: click the title 7 times quickly (or open the page with ?admin) ---------- */
 const AS=[{k:'ar',n:'AR',c:'#3987e5'},{k:'bpm',n:'BPM',c:'#d95926'},{k:'sr',n:'SR',c:'#199e70'},{k:'pp',n:'PP',c:'#c98500'}];
+let aName='';try{aName=localStorage.getItem('ozu:an')||''}catch(e){}
 let A=null,D=null,sel='ar',yMax=2,aKey='',drag=null,hx=null,tableOn=false;
 const XM=.6,W=640,H=360,ML=46,MR=16,MT=16,MB=40;
 const sx=e=>ML+e/XM*(W-ML-MR),sy=v=>MT+(1-v/yMax)*(H-MT-MB),ix=x=>(x-ML)/(W-ML-MR)*XM,iy=y=>(1-(y-MT)/(H-MT-MB))*yMax;
@@ -1077,19 +1184,19 @@ async function openAdmin(){
     try{aKey=sessionStorage.getItem('ozu:ak')||''}catch(e){}
     m.innerHTML=`<div class="admbox" role="dialog" aria-label="Scoring settings">
       <div class="admhead"><h2>Admin</h2><button class="btn" id="admClose" type="button">Close</button></div>
-      <div class="admkey"><input id="admkey" type="text" name="ozu-adm-key" class="secret" placeholder="Admin code" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" value=""><button class="btn" id="admUnlock" type="button">Unlock</button><span class="admst" id="admSt"></span></div>
-      <div id="admBody" hidden><div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button><button type="button" data-t="rep" aria-pressed="false" id="repTab">Reports</button><button type="button" data-t="health" aria-pressed="false">Health</button></div>
+      <div class="admkey"><input id="admkey" type="text" name="ozu-adm-key" class="secret" placeholder="Admin code" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" value=""><input id="admname" type="text" placeholder="Your name (for the log)" maxlength="24" autocomplete="off" spellcheck="false"><button class="btn" id="admUnlock" type="button">Unlock</button><span class="admst" id="admSt"></span></div>
+      <div id="admBody" hidden><div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button><button type="button" data-t="rep" aria-pressed="false" id="repTab">Reports</button><button type="button" data-t="health" aria-pressed="false">Health</button><button type="button" data-t="log" aria-pressed="false">Audit log</button></div>
       <div id="tab_sc"><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><div class="admgrid"><div>
         <div class="legend" id="legend"></div>
         <div class="chartwrap" id="cw"><svg id="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points by relative error for AR, BPM, SR and PP"></svg><div class="tip" id="tip" hidden></div></div>
         <div id="admTable" hidden></div>
         <div class="row"><button class="btn" id="admTbl" type="button">Table view</button></div>
-      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div><div id="tab_health" class="admp" hidden></div><div id="tab_rep" class="admp" hidden></div></div></div>`;
-    $('admkey').value=aKey;
+      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div><div id="tab_health" class="admp" hidden></div><div id="tab_log" class="admp" hidden></div><div id="tab_rep" class="admp" hidden></div></div></div>`;
+    $('admkey').value=aKey;$('admname').value=aName;
     $('admClose').onclick=closeAdmin;m.addEventListener('pointerdown',e=>{if(e.target===m)closeAdmin()});
     $('admTbl').onclick=()=>{tableOn=!tableOn;$('admTbl').textContent=tableOn?'Graph view':'Table view';$('cw').hidden=tableOn;$('legend').hidden=tableOn;$('admTable').hidden=!tableOn;drawTable()};
-    $('admUnlock').onclick=async()=>{aKey=$('admkey').value;try{sessionStorage.setItem('ozu:ak',aKey)}catch(e){}
-      try{const r=await fetch(API+'/admin/check',{headers:{'x-admin-key':aKey}}),d=await r.json();admSt(r.ok?'':d.error||'That code is not accepted.',false);if(r.ok){$('admBody').hidden=false;document.querySelector('#adm .admkey').hidden=true;repBadge()}}catch(e){admSt('Couldn’t reach the server.',false)}};
+    $('admUnlock').onclick=async()=>{aKey=$('admkey').value;aName=$('admname').value.trim().slice(0,24);try{localStorage.setItem('ozu:an',aName)}catch(e){}try{sessionStorage.setItem('ozu:ak',aKey)}catch(e){}
+      try{const r=await fetch(API+'/admin/check',{headers:{'x-admin-key':aKey,'x-admin-name':aName}}),d=await r.json();admSt(r.ok?'':d.error||'That code is not accepted.',false);if(r.ok){$('admBody').hidden=false;document.querySelector('#adm .admkey').hidden=true;repBadge()}}catch(e){admSt('Couldn’t reach the server.',false)}};
     bindChart();admTabs();$('admkey').addEventListener('keydown',e=>{if(e.key==='Enter')$('admUnlock').click()});if(aKey)$('admUnlock').click();else $('admkey').focus();
   }
   try{const r=await fetch(API+'/scoring'),d=await r.json();A=cl(d.cfg);D=cl(d.defaults)}catch(e){admSt('Couldn’t load the current scoring from the server.',false);if(!A){D=cl({w:{song:3,artist:2,ar:1,bpm:1,sr:1,pp:1},curve:Object.fromEntries(['ar','bpm','sr','pp'].map(k=>[k,{full:.02,zero:.2,k:2.5}])),bgMult:[1,1.5,2,2.5,3]});A=cl(D)}}
@@ -1146,7 +1253,7 @@ function buildCtl(){
   on('a_song',v=>A.w.song=r2(clampN(v,0,20)));on('a_artist',v=>A.w.artist=r2(clampN(v,0,20)));TIER.forEach((t,i)=>on('bg'+i,v=>A.bgMult[i]=r2(clampN(v,0,10))));
   $('admReset').onclick=()=>{A=cl(D);buildCtl();draw();admSt('Defaults loaded: press Save to apply them.',true)};
   $('admSave').onclick=async()=>{if(!aKey)return admSt('Enter the admin key first.',false);
-    try{const r=await fetch(API+'/admin/scoring',{method:'POST',headers:{'content-type':'application/json','x-admin-key':aKey},body:JSON.stringify(A)}),d=await r.json();
+    try{const r=await fetch(API+'/admin/scoring',{method:'POST',headers:{'content-type':'application/json','x-admin-key':aKey,'x-admin-name':aName},body:JSON.stringify(A)}),d=await r.json();
       if(!r.ok)return admSt(d.error||'Not saved.',false);A=cl(d.cfg);draw();admSt('Saved. New games use it right away (the daily set keeps the rules of its first game of the day).',true)}
     catch(e){admSt('Couldn’t reach the server.',false)}};
 }
@@ -1309,7 +1416,7 @@ addEventListener('keydown',e=>{const f=$('ozfx');if(f&&!f.hidden&&(e.key==='Esca
 
 /* ---------- admin: map pool + Ozillion tabs (the Scoring tab is above) ---------- */
 async function adm(path,body){aKey=($('admkey')&&$('admkey').value)||aKey;
-  const r=await fetch(API+path,body===undefined?{headers:{'x-admin-key':aKey}}:{method:'POST',headers:{'content-type':'application/json','x-admin-key':aKey},body:JSON.stringify(body)});
+  const r=await fetch(API+path,body===undefined?{headers:{'x-admin-key':aKey,'x-admin-name':aName}}:{method:'POST',headers:{'content-type':'application/json','x-admin-key':aKey,'x-admin-name':aName},body:JSON.stringify(body)});
   let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||('The server answered '+r.status+(r.status===401?' (check the admin key above)':'')));return d}
 const say=(e,t,k)=>{e.textContent=t||'';e.className='stat '+(k||'')};
 const dl=(name,obj)=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
@@ -1317,9 +1424,21 @@ const readJson=inp=>new Promise((res,rej)=>{const f=inp.files[0];if(!f)return re
 const inited={};
 async function repBadge(){try{const d=await adm('/admin/oz/overview'),b=$('repTab');if(b)b.textContent='Reports'+(d.reports?' ('+d.reports+')':'')}catch(e){}}
 function admTabs(){
-  const bar=$('admtabs'),T={sc:$('tab_sc'),maps:$('tab_maps'),clips:$('tab_clips'),oz:$('tab_oz'),rep:$('tab_rep'),health:$('tab_health')};
+  const bar=$('admtabs'),T={sc:$('tab_sc'),maps:$('tab_maps'),clips:$('tab_clips'),oz:$('tab_oz'),rep:$('tab_rep'),health:$('tab_health'),log:$('tab_log')};
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
-    for(const k in T)T[k].hidden=k!==b.dataset.t;if((b.dataset.t==='maps'||b.dataset.t==='clips')&&!inited[b.dataset.t]){inited[b.dataset.t]=1;initPool(b.dataset.t)}if((b.dataset.t==='oz'||b.dataset.t==='rep')&&!inited.oz){inited.oz=1;initOz()}if(b.dataset.t==='health'&&!inited.health){inited.health=1;initHealth()}})}
+    for(const k in T)T[k].hidden=k!==b.dataset.t;if((b.dataset.t==='maps'||b.dataset.t==='clips')&&!inited[b.dataset.t]){inited[b.dataset.t]=1;initPool(b.dataset.t)}if((b.dataset.t==='oz'||b.dataset.t==='rep')&&!inited.oz){inited.oz=1;initOz()}if(b.dataset.t==='health'&&!inited.health){inited.health=1;initHealth()}if(b.dataset.t==='log')initLog()})}
+
+/* ----- audit log: who changed what, and the aliases the server added by itself (undoable) ----- */
+async function initLog(){const box=$('tab_log');box.replaceChildren();const f=el('input'),rf=el('button','btn','Refresh'),out=el('div','alog');f.type='text';f.placeholder='Filter (name, action, text…)';rf.type='button';
+  box.append(el('p','muted','Every change made in this panel and every alias the server added by itself. The name is what the admin typed when unlocking; the device is a short fingerprint of the connection, so you can tell two people apart even if they share the code.'),f,rf,out);
+  const paint=list=>{const q=f.value.trim().toLowerCase(),rows=list.filter(e=>!q||JSON.stringify(e).toLowerCase().includes(q));out.replaceChildren(...rows.map(e=>{const r=el('div','lrow'+(e.undone?' undone':'')),d=new Date(e.at);
+      const who=e.by==='auto'?'server':(e.by||'no name')+(e.dev?' · '+e.dev:''),info=Object.entries(e.info||{}).map(([k,v])=>k+': '+v).join(' · ');
+      r.append(el('span','lt',d.toLocaleDateString()+' '+d.toLocaleTimeString()),el('b','lw',who),el('span','la',e.act+(e.undone?' (undone)':'')),el('span','li',info));
+      if(e.u&&!e.undone){const u=el('button','btn','Undo');u.type='button';u.onclick=async()=>{try{await adm('/admin/oz/alog/undo',{id:e.id});load()}catch(er){say(er.message)}};r.append(u)}return r}));
+    if(!rows.length)out.append(el('p','stat','Nothing to show.'))};
+  let cache=[];const load=async()=>{try{cache=(await adm('/admin/oz/alog?n=300')).list||[];paint(cache)}catch(e){out.textContent=e.message}};
+  f.oninput=()=>paint(cache);rf.onclick=load;load()}
+
 
 /* ----- health: osu!, Supabase, YouTube, storage and the size of every answer list ----- */
 function initHealth(){const box=$('tab_health'),go=el('button','btn go','Check now'),out=el('div','hl'),st=el('p','stat');go.type='button';
@@ -1442,7 +1561,10 @@ function initOz(){
           ad.onclick=async()=>{try{const x=await adm('/admin/oz/miss/alias',{qid:q.id,text:m.t,target:tg.value});msg('“'+m.t+'” is now an alias of '+x.name+'.','ok');edit()}catch(e){msg(e.message,'bad')}};
           dm.onclick=async()=>{try{await adm('/admin/oz/miss/del',{qid:q.id,k:m.k});edit()}catch(e){msg(e.message,'bad')}};
           r.append(el('div','mt',m.t+'  ×'+m.n),tg,ad,dm);dt.append(r)}
-        if(!ms.length)dt.append(el('p','stat','Nothing missed yet.'));ed.append(dt)}catch(e){}
+        if(!ms.length)dt.append(el('p','stat','Nothing missed yet.'));
+        try{const al=((await adm('/admin/oz/alog?auto=1&qid='+q.id)).list||[]).slice(0,8);if(al.length){dt.append(el('p','stat','Added by the server (typed 5+ times, one typo from an answer):'));
+          for(const e of al){const r=el('div','miss'),ud=el('button','btn',e.undone?'undone':'Undo');ud.type='button';ud.disabled=!!e.undone;ud.onclick=async()=>{try{await adm('/admin/oz/alog/undo',{id:e.id});edit()}catch(er){msg(er.message,'bad')}};r.append(el('div','mt','“'+e.u.text+'” → '+e.u.target),ud);dt.append(r)}}}catch(e){}
+        ed.append(dt)}catch(e){}
       const hasCat=q.ans.some(a=>a.cat),head=el('div','arow h'+(hasCat?' c':''));['Answer','Aliases (comma separated)','Count','Tier',...(hasCat?['Rarity list (the choice it belongs to)']:[]),''].forEach(h=>head.append(el('div',null,h)));ed.append(head);
       const row=(a)=>{const r=el('div','arow'+(hasCat?' c':'')),nm=el('input'),al=el('input'),n=el('input'),tr=el('select'),act=el('div','act');
         nm.type=al.type='text';n.type='number';n.min=0;nm.value=a.name||'';if(a.cat)nm.title='Rarity list: '+a.cat;nm.placeholder='New answer';al.value=(a.al||[]).join(', ');al.placeholder='aliases';n.value=a.n==null?1:a.n;
