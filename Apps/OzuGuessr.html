@@ -1467,7 +1467,9 @@ const authHdr=async()=>{const tk=await getTok();return tk?{authorization:'Bearer
 async function xApi(path,body){const r=await fetch(API+path,{method:'POST',headers:{'content-type':'application/json',...await authHdr()},body:JSON.stringify(body||{})});
   const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||('Server '+r.status));return d}
 const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-const cardImg=(u)=>{const d=el('div','himg');if(u)d.style.backgroundImage='url("'+u+'")';return d};
+const cardImg=(u)=>{const d=el('div','himg');if(!u)return d;   // the osu! site has several cover sizes: try the next one when a picture is missing
+  const urls=[u,u.replace('raw.jpg','cover@2x.jpg'),u.replace('raw.jpg','card@2x.jpg'),u.replace('raw.jpg','list@2x.jpg')];let n=0;
+  const tryNext=()=>{if(n>=urls.length)return;const im=new Image();im.onload=()=>{d.style.backgroundImage='url("'+im.src+'")'};im.onerror=tryNext;im.src=urls[n++]};tryNext();return d};
 
 /* ---------- duel: lock one field at a time, the first correct lock gets the point ---------- */
 function duelInit(q){
@@ -1517,7 +1519,7 @@ async function hlStart(){const box=$('hlBox');box.replaceChildren(el('p','muted'
   try{const d=await xApi('/hl/start');HLS={...d,streak:0};hlPaint()}catch(e){box.replaceChildren(el('p','muted',e.message||String(e)))}HLBUSY=false}
 function hlPaint(over,res){const box=$('hlBox'),S=HLS;$('hlStreak').textContent='Streak '+S.streak;$('hlBest').textContent='Best '+HLBEST;
   const row=el('div','hlrow'),ca=hlCard(S.a,true),cb=hlCard(S.b,!!res);row.append(ca,el('div','hlvs','VS'),cb);
-  if(res){cb.querySelector('.hpc').textContent='';countUp(cb.querySelector('.hpc'),res.bpc,0,700,0);cb.classList.add(res.correct?'ok':'bad')}
+  if(res){const pe=cb.querySelector('.hpc');cb.classList.add(res.correct?'ok':'bad');if(RMf())pe.textContent=plays(res.bpc)+' plays';else{const t0=performance.now(),step=()=>{const k=Math.min(1,(performance.now()-t0)/700);pe.textContent=plays(Math.round(res.bpc*(1-Math.pow(1-k,3))))+' plays';if(k<1)requestAnimationFrame(step)};step()}}
   const btns=el('div','hlbtns'),hi=el('button','btn go','Higher'),lo=el('button','btn','Lower');hi.type=lo.type='button';
   hi.dataset.sfx=lo.dataset.sfx='off';hi.onclick=()=>hlPick('higher');lo.onclick=()=>hlPick('lower');if(res||over)hi.disabled=lo.disabled=true;btns.append(hi,lo);
   box.replaceChildren(el('p','muted','Does the map on the right have more or fewer plays than the one on the left?'),row,...(over?[]:[btns]));
