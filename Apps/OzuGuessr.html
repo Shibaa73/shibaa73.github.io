@@ -1290,13 +1290,13 @@ function buildCtl(){
   const a=AS.find(x=>x.k===sel);
   const num=(id,l,min,max,step)=>`<label>${l}<input id="${id}" type="number" min="${min}" max="${max}" step="${step}"></label>`;
   $('admctl').innerHTML=`<h3 style="color:${a.c}">${a.n}</h3>`+num('a_w','Weight (max points)',0,20,.1)+num('a_full','Full points up to (% error)',0,50,1)+num('a_zero','Zero points from (% error)',1,100,1)+num('a_k','Steepness (negative = gentle)',-4,8,.1)+
-    num('a_ok','Counts as correct up to (% error)',0,50,1)+`<small class="muted">Used by bomb mode and duels. BPM also accepts half and double time.</small>`+
+    `<hr><h3>Counts as correct (bomb mode, duels)</h3><small class="muted">Largest % error that still counts as a correct answer, set separately for every stat. BPM also accepts half and double time.</small>`+AS.map(x=>num('a_ok_'+x.k,x.n+' error up to (%)',0,50,1)).join('')+
     `<hr><h3>Text answers</h3>`+num('a_song','Song name weight',0,20,.1)+num('a_artist','Artist weight',0,20,.1)+num('a_oksong','Song counts as correct from (% likeness)',50,100,1)+num('a_okartist','Artist counts as correct from (% likeness)',50,100,1)+
     `<hr><h3>Background multiplier</h3><div class="bgm">${TIER.map((t,i)=>`<label>${t}<input id="bg${i}" type="number" min="0" max="10" step=".1"></label>`).join('')}</div>`+
     `<div class="row"><button class="btn go" id="admSave" type="button">Save</button><button class="btn" id="admReset" type="button">Reset to defaults</button></div>`;
   const on=(id,fn)=>$(id).oninput=()=>{const v=parseFloat($(id).value);if(!isFinite(v))return;fn(v);draw()};
   on('a_w',v=>A.w[sel]=r2(clampN(v,0,20)));on('a_full',v=>{const c=A.curve[sel];c.full=r2(clampN(v/100,0,Math.min(.5,c.zero-.01)))});on('a_zero',v=>{const c=A.curve[sel];c.zero=r2(clampN(v/100,c.full+.01,1))});on('a_k',v=>A.curve[sel].k=r2(clampN(v,-4,8)));
-  on('a_ok',v=>A.ok[sel]=r2(clampN(v/100,0,.5)));on('a_oksong',v=>A.ok.song=r2(clampN(v/100,.5,1)));on('a_okartist',v=>A.ok.artist=r2(clampN(v/100,.5,1)));on('a_song',v=>A.w.song=r2(clampN(v,0,20)));on('a_artist',v=>A.w.artist=r2(clampN(v,0,20)));TIER.forEach((t,i)=>on('bg'+i,v=>A.bgMult[i]=r2(clampN(v,0,10))));
+  AS.forEach(x=>on('a_ok_'+x.k,v=>A.ok[x.k]=r2(clampN(v/100,0,.5))));on('a_oksong',v=>A.ok.song=r2(clampN(v/100,.5,1)));on('a_okartist',v=>A.ok.artist=r2(clampN(v/100,.5,1)));on('a_song',v=>A.w.song=r2(clampN(v,0,20)));on('a_artist',v=>A.w.artist=r2(clampN(v,0,20)));TIER.forEach((t,i)=>on('bg'+i,v=>A.bgMult[i]=r2(clampN(v,0,10))));
   $('admReset').onclick=()=>{A=cl(D);buildCtl();draw();admSt('Defaults loaded: press Save to apply them.',true)};
   $('admSave').onclick=async()=>{if(!aKey)return admSt('Enter the admin key first.',false);
     try{const r=await fetch(API+'/admin/scoring',{method:'POST',headers:{'content-type':'application/json','x-admin-key':aKey,'x-admin-name':aName},body:JSON.stringify(A)}),d=await r.json();
@@ -1304,7 +1304,7 @@ function buildCtl(){
     catch(e){admSt('Couldn’t reach the server.',false)}};
 }
 function syncCtl(){const c=A.curve[sel],set=(id,v)=>{const e=$(id);if(e&&document.activeElement!==e)e.value=v};
-  set('a_w',A.w[sel]);set('a_full',Math.round(c.full*100));set('a_zero',Math.round(c.zero*100));set('a_k',c.k);set('a_ok',Math.round(A.ok[sel]*100));set('a_oksong',Math.round(A.ok.song*100));set('a_okartist',Math.round(A.ok.artist*100));set('a_song',A.w.song);set('a_artist',A.w.artist);TIER.forEach((t,i)=>set('bg'+i,A.bgMult[i]))}
+  set('a_w',A.w[sel]);set('a_full',Math.round(c.full*100));set('a_zero',Math.round(c.zero*100));set('a_k',c.k);AS.forEach(x=>set('a_ok_'+x.k,Math.round(A.ok[x.k]*100)));set('a_oksong',Math.round(A.ok.song*100));set('a_okartist',Math.round(A.ok.artist*100));set('a_song',A.w.song);set('a_artist',A.w.artist);TIER.forEach((t,i)=>set('bg'+i,A.bgMult[i]))}
 
 /* ---------- Ozillion: rarity, the dive animation, answer tables, recaps, reports ---------- */
 const OZN=['Doo Doo','Those Who Know...','Ball Knowledge','WYSI','Ozillion!'],OZP=[10,30,50,80,100],OZC=['var(--t0)','var(--t1)','var(--t2)','var(--t3)','var(--t4)'];
