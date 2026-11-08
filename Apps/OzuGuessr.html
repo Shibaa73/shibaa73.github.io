@@ -674,6 +674,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
 .ptile small{color:var(--muted)}.ptile b{font-size:1.3rem}.ptile span{color:var(--muted);font-size:.85rem}
 .tbar{display:grid;grid-template-columns:150px 1fr 40px;gap:8px;align-items:center;margin:4px 0}.tbar .bar{background:rgba(255,255,255,.08);height:14px}.tbar .bar i{display:block;height:100%}
 @media(max-width:560px){.hlrow{grid-template-columns:1fr}.hlvs{display:none}.sitem{grid-template-columns:auto 70px 1fr}.sitem .himg{width:70px}.sctl{grid-column:1/-1;justify-content:flex-end}.tbar{grid-template-columns:100px 1fr 30px}}
+body.sorting #game{margin-bottom:12px}body.sorting #game .ghead,body.sorting #game .gright,body.sorting #game #ozq,body.sorting #game #wait,body.sorting #game #blurInfo{display:none}
+body.sorting #game .gcols{grid-template-columns:1fr}.sitem .btn.on{background:var(--panel-3)}
+body.sorting #game{position:sticky;top:0;z-index:5;padding:12px}body.sorting #game .clip{width:min(100%,340px)}
 </style>
 </head>
 <body>
@@ -957,6 +960,8 @@ let scr=null;
 function show(id){
   document.body.classList.toggle('ingame',id==='game');
   ['menu','lobby','game','end','hl','sort','prof'].forEach(s=>$(s).hidden=s!==id);duck(id==='game'&&!(st&&st.q&&(st.q.type==='bg'||st.q.type==='bg_map'||st.q.type==='oz')));   // the site music keeps playing during background questions (no clip audio)
+  if(scr==='sort'&&id!=='sort')stopClip();
+  $('game').hidden=id!=='game'&&id!=='sort';document.body.classList.toggle('sorting',id==='sort');if(id==='sort'){duck(true);$('ctl').hidden=false;$('vctl').hidden=false;$('clip').hidden=false;$('cover').hidden=true}   // Sort plays its clips in the same player
   const lb=id==='menu'||id==='end';$('lb').hidden=!lb;
   if(scr!==id){scr=id;for(const s of [$(id),lb?$('lb'):null]){if(!s)continue;s.classList.remove('enter');void s.offsetWidth;[...s.children].forEach((c,i)=>c.style.setProperty('--i',i));s.classList.add('enter');setTimeout(()=>s.classList.remove('enter'),1000)}
     if(lb)loadLb();if(id==='menu')setBgState()}
@@ -1534,13 +1539,13 @@ async function hlPick(pick){if(HLBUSY||!HLS)return;HLBUSY=true;
 let SORTS=null,SORTTOT=+lsGet('ozu:sorttot',0)||0,SORTBEST=+lsGet('ozu:sortbest',0)||0;
 async function openSort(){show('sort');await sortStart()}
 async function sortStart(){const box=$('sortBox');box.replaceChildren(el('p','muted','Loading…'));
-  try{const d=await xApi('/sort/start');SORTS={tok:d.tok,order:d.items,done:false};sortPaint()}catch(e){box.replaceChildren(el('p','muted',e.message||String(e)))}}
+  try{const d=await xApi('/sort/start');SORTS={tok:d.tok,order:d.items,done:false,playing:null,res:null};sortPaint()}catch(e){box.replaceChildren(el('p','muted',e.message||String(e)))}}
 function sortMove(i,j){const o=SORTS.order;if(j<0||j>=o.length)return;const [x]=o.splice(i,1);o.splice(j,0,x);sortPaint()}
 function sortPaint(res){const box=$('sortBox'),S=SORTS;$('sortBest').textContent='Best '+SORTBEST;
   const ul=el('div','sortlist');ul.setAttribute('role','list');
   S.order.forEach((m,i)=>{const r=el('div','sitem');r.setAttribute('role','listitem');r.draggable=!res;
     const info=el('div','sinfo');info.append(el('b',null,m.title),el('span',null,m.artist));
-    const ctl=el('div','sctl');
+    const ctl=el('div','sctl');if(m.clip){const pl=el('button','btn sm'+(S.playing===m.id?' on':''),'▶');pl.type='button';pl.dataset.sfx='off';pl.setAttribute('aria-label','Play this map’s clip');pl.onclick=()=>sortPlay(m);ctl.append(pl)}
     if(res){const p=res.per.find(x=>x.id===m.id),t=res.truth.find(x=>x.id===m.id);r.classList.add(p.d===0?'ok':p.d===1?'near':'bad');ctl.append(el('b',null,t.stars.toFixed(2)+'★'),el('small',null,t.version))}
     else{const up=el('button','btn sm','↑'),dn=el('button','btn sm','↓');up.type=dn.type='button';up.setAttribute('aria-label','Move up');dn.setAttribute('aria-label','Move down');up.disabled=i===0;dn.disabled=i===S.order.length-1;up.onclick=()=>sortMove(i,i-1);dn.onclick=()=>sortMove(i,i+1);ctl.append(up,dn)}
     r.append(el('span','srk',String(i+1)),cardImg(m.img),info,ctl);
@@ -1551,8 +1556,10 @@ function sortPaint(res){const box=$('sortBox'),S=SORTS;$('sortBest').textContent
   box.replaceChildren(el('p','muted','Order the five maps by star rating, the easiest at the top. Drag them or use the arrows. Maps next to their right place still earn points.'),ul,top);
   if(res){sfxp(res.perfect?'win':res.score>=60?'good':'ok');const m=el('p','big','Score: '+res.score+' / 100'+(res.perfect?' · perfect!':''));const n=el('button','btn go','Next round');n.type='button';n.onclick=sortStart;box.append(m,n)}
   else{const b=el('button','btn go','Lock in this order');b.type='button';b.onclick=sortSubmit;box.append(b)}}
+function sortPlay(m){if(!m.clip)return;SORTS.playing=m.id;playClip(m.clip);$('pp').textContent='Pause';sortPaint(SORTS.res)}
+setInterval(()=>{if($('sort').hidden||!V||V.preview||!ytReady)return;try{const t=yt.getCurrentTime();if(t>=V.end-.15||t<V.start-1.5)yt.seekTo(V.start,true);$('seek').value=Math.max(0,Math.min(V.end-V.start,t-V.start))}catch(e){}},250);
 async function sortSubmit(){const S=SORTS;if(!S||S.done)return;S.done=true;
-  try{const r=await xApi('/sort/answer',{tok:S.tok,order:S.order.map(m=>m.id)});SORTTOT+=r.score;lsSet('ozu:sorttot',SORTTOT);if(r.score>SORTBEST){SORTBEST=r.score;lsSet('ozu:sortbest',SORTBEST)}$('sortTot').textContent='Total '+SORTTOT;sortPaint(r)}
+  try{const r=await xApi('/sort/answer',{tok:S.tok,order:S.order.map(m=>m.id)});SORTTOT+=r.score;lsSet('ozu:sorttot',SORTTOT);if(r.score>SORTBEST){SORTBEST=r.score;lsSet('ozu:sortbest',SORTBEST)}$('sortTot').textContent='Total '+SORTTOT;SORTS.res=r;sortPaint(r)}
   catch(e){S.done=false;$('sortBox').append(el('p','muted',e.message||String(e)))}}
 
 /* ---------- player profile ---------- */
