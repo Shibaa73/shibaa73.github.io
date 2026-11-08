@@ -659,7 +659,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
 .arena .tile{width:100px;padding:10px 4px 7px}
 
 /* ---- extras ---- */
-.cover.blurry{transition:filter .2s linear}
+.cover.blurry{transition:filter .2s linear}.cover.blurry.shown{animation:none}
 .tapw{margin-top:8px;display:grid;gap:6px}.taprow{display:flex;gap:8px}.tapb{flex:1;padding:16px;font-size:1.05rem}.tapb.hit{animation:tapp .18s ease}
 @keyframes tapp{from{transform:scale(.96)}to{transform:none}}.tapi{color:var(--muted)}
 .fld .lk{margin-top:6px}.dst{display:block;color:var(--muted);margin-top:4px;min-height:1.2em}
@@ -716,17 +716,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px soli
       </button>
       <button class="mode" id="bgsolo" type="button">
         <b><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg>Backgrounds</b>
-        <span>Name the map from its background.</span>
+        <span>Name the map from a blurred background that sharpens. Early answers score more.</span>
         <em id="bgState"></em>
       </button>
       <button class="mode oz" id="ozsolo" type="button">
         <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 3v3M12 18v3"/></svg>Ozillion</b>
         <span>Name something that fits the question.</span>
         <em id="ozState"></em>
-      </button>
-      <button class="mode" id="blursolo" type="button">
-        <b><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="2 3"/></svg>Cover blur</b>
-        <span>A blurred cover sharpens over 20 s. Early answers score more.</span>
       </button>
       <button class="mode" id="hlsolo" type="button">
         <b><svg viewBox="0 0 24 24"><path d="M7 15l5-6 5 6M7 20h10"/></svg>Higher / Lower</b>
@@ -942,7 +938,7 @@ function connect(c,create){
   const name=$('nick').value.trim()||(solo()?'Player':'');if(!name){kind=null;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
   err('');svErr='';status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
-  ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':kind==='blursolo'?'blur':kind==='ozsolo'||kind==='ozdaily'?'oz':undefined,token});clearInterval(pingT);myPing=null;const pg=()=>{if(ws&&ws.readyState===1)tx({t:'ping',ts:Date.now()})};setTimeout(pg,600);pingT=setInterval(pg,3000)};
+  ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':kind==='ozsolo'||kind==='ozdaily'?'oz':undefined,token});clearInterval(pingT);myPing=null;const pg=()=>{if(ws&&ws.readyState===1)tx({t:'ping',ts:Date.now()})};setTimeout(pg,600);pingT=setInterval(pg,3000)};
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
     else if(m.t==='caps'){CAPS={...CAPS,bg:m.bg,why:m.why};setBgState();if(st&&st.phase==='lobby')renderLobby()}
@@ -1597,7 +1593,7 @@ async function shareCard(){if(!st)return;const c=drawShare(shareData()),url=c.to
   const a=document.createElement('a');a.href=url;a.download='ozu-daily.png';a.click();note.textContent='Saved as ozu-daily.png.'}
 
 /* ---------- buttons ---------- */
-$('blursolo').onclick=()=>makeLobby('blursolo');$('hlsolo').onclick=openHL;$('sortsolo').onclick=openSort;$('profbtn').onclick=openProf;
+$('hlsolo').onclick=openHL;$('sortsolo').onclick=openSort;$('profbtn').onclick=openProf;
 ['hlBack','sortBack','profBack'].forEach(id=>$(id).onclick=()=>show('menu'));$('shareCard').onclick=shareCard;
 
 /* ---------- admin: map pool + Ozillion tabs (the Scoring tab is above) ---------- */
