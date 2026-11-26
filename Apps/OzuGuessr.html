@@ -1814,6 +1814,36 @@ function initOz(){
 }
 </script>
 
+<!-- first-visit invitation to the Discord server -->
+<style>
+#dcBack{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(3,5,18,.72);backdrop-filter:blur(3px)}
+#dcBack[hidden]{display:none}
+#dcBox{width:min(440px,100%);background:var(--panel-2,#121a40);color:var(--text,#e8eeff);border:1px solid var(--border,rgba(160,190,255,.18));border-radius:14px;padding:22px 22px 18px;box-shadow:0 20px 60px rgba(0,0,0,.5);animation:dcIn .25s ease}
+#dcBox h2{margin:0 0 8px;font-size:1.25rem}
+#dcBox p{margin:0 0 16px;color:var(--muted,#8d9bc6);line-height:1.5}
+#dcBox .dcrow{display:flex;gap:10px;flex-wrap:wrap}
+#dcBox a.dcgo,#dcBox button{font:inherit;font-weight:700;padding:10px 16px;border-radius:10px;cursor:pointer;text-decoration:none;border:1px solid var(--border,rgba(160,190,255,.18));color:inherit;background:transparent}
+#dcBox a.dcgo{background:#5865f2;border-color:#5865f2;color:#fff}
+#dcBox a.dcgo:hover{filter:brightness(1.1)}#dcBox button:hover{background:rgba(160,190,255,.1)}
+@keyframes dcIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){#dcBox{animation:none}}
+</style>
+<div id="dcBack" hidden><div id="dcBox" role="dialog" aria-modal="true" aria-labelledby="dcT" aria-describedby="dcD">
+  <h2 id="dcT">Join the Discord server</h2>
+  <p id="dcD">Join my Discord server to challenge other players, share your scores or give feedback.</p>
+  <div class="dcrow"><a class="dcgo" id="dcJoin" href="https://discord.gg/f6SrqvkbRX" target="_blank" rel="noopener noreferrer">Join the Discord</a><button type="button" id="dcLater">Maybe later</button></div>
+</div></div>
+<script>
+(function(){
+  const K='ozu:discord',back=document.getElementById('dcBack');let seen=false;
+  try{seen=!!localStorage.getItem(K)}catch(e){}
+  const q=new URLSearchParams(location.search);if(seen||q.has('lobby')||q.has('admin'))return;   // once per browser; not when someone opens a friend's lobby link
+  const close=()=>{back.hidden=true;document.removeEventListener('keydown',key);try{localStorage.setItem(K,'1')}catch(e){}};
+  const key=e=>{if(e.key==='Escape')close();else if(e.key==='Tab'){const f=[document.getElementById('dcJoin'),document.getElementById('dcLater')],i=f.indexOf(document.activeElement);e.preventDefault();f[(i+(e.shiftKey?-1:1)+f.length)%f.length].focus()}};
+  document.getElementById('dcLater').onclick=close;document.getElementById('dcJoin').onclick=()=>setTimeout(close,50);back.onclick=e=>{if(e.target===back)close()};
+  setTimeout(()=>{back.hidden=false;document.addEventListener('keydown',key);document.getElementById('dcJoin').focus()},800);
+})();
+</script>
 <script src="../assets/site.js"></script>
 <script src="../assets/sfx.js"></script>
 <script src="../assets/auth.js"></script>
