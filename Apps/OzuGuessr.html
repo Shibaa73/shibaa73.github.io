@@ -1857,6 +1857,7 @@ function initOz(){
   function place(){const b=document.getElementById('acBtn');if(!b)return;if(b!==cur){cur=b;if(window.ResizeObserver){if(ro)ro.disconnect();ro=new ResizeObserver(place);ro.observe(b)}}
     const r=b.getBoundingClientRect();if(!r.width)return;d.style.right=Math.round(innerWidth-r.left+8)+'px';d.style.top=Math.round(r.top+(r.height-38)/2)+'px';d.hidden=false}
   addEventListener('resize',place);setInterval(place,500);place();
+  setTimeout(()=>{if(d.hidden)d.hidden=false},1500);   // fallback: never stay invisible if the login button is slow or missing
 })();
 </script>
 <script src="../assets/site.js"></script>
