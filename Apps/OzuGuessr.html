@@ -932,7 +932,7 @@ $('seek').oninput=e=>{if(V&&V.preview){pa.currentTime=+e.target.value;return}if(
 $('pp').onclick=()=>{if(V&&V.preview){pa.paused?pa.play().catch(()=>{}):pa.pause();return}if(!ytReady)return;const on=yt.getPlayerState()===1;on?yt.pauseVideo():yt.playVideo();$('pp').textContent=on?'Play':'Pause'};
 
 /* ---------- connection ---------- */
-let pingT=0,myPing=null;
+let pingT=0,myPing=null,idleClosed=false;
 const pbucket=ms=>ms==null?'x':ms<120?0:ms<300?1:2;
 const pdot=p=>{const ms=p.id===me&&myPing!=null?myPing:p.ms,d=el('b','pd l'+pbucket(ms));d.title=ms==null?'ping unknown':Math.round(ms)+' ms';return d};
 function paintPing(){const e=$('pingdot');if(!e)return;if(!ws||myPing==null){e.hidden=true;return}e.hidden=false;e.className='l'+pbucket(myPing);e.textContent=Math.round(myPing)+' ms';e.title='Your connection to the game server. If this is red, the lag is yours.'}
@@ -940,7 +940,7 @@ function connect(c,create){
   if(API.includes('YOURNAME'))return status('Not connected yet: paste your server URL into API in this page’s script.');
   const name=$('nick').value.trim()||(solo()?'Player':'');if(!name){kind=null;return status('Type a name first.')}
   try{localStorage.setItem('ozu:nick',name)}catch(e){}
-  err('');svErr='';status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
+  idleClosed=false;$('again').disabled=false;err('');svErr='';status('Connecting…');code=c;ws=new WebSocket(API.replace(/^http/,'ws')+'/lobby/'+c);
   ws.onopen=async()=>{const token=await getTok();tx({t:'join',name,create,daily:daily(),kind:kind==='bgsolo'?'bg':kind==='ozsolo'||kind==='ozdaily'?'oz':undefined,token});clearInterval(pingT);myPing=null;const pg=()=>{if(ws&&ws.readyState===1)tx({t:'ping',ts:Date.now()})};setTimeout(pg,600);pingT=setInterval(pg,3000)};
   ws.onmessage=e=>{const m=JSON.parse(e.data);
     if(m.t==='hello')me=m.id;else if(m.t==='names')NAMES={song:m.songs,artist:m.artists};
@@ -949,8 +949,10 @@ function connect(c,create){
     else if(m.t==='pong'){myPing=Math.max(0,Date.now()-m.ts);paintPing();tx({t:'lat',ms:myPing})}
     else if(m.t==='typing'){if(st&&st.q&&st.q.key===m.key){liveT=m.v;paintLive()}}
     else if(m.t==='reject'){sent=false;$('skip').disabled=false;$('submit').hidden=!!(st&&st.cfg.mode==='duel');$('form').querySelectorAll('input').forEach(i=>i.readOnly=false);$('form').querySelectorAll('select').forEach(i=>i.disabled=false);err(m.m);if(m.rep){const rb=el('button','repbtn','Report: it should count');rb.type='button';rb.onclick=()=>{tx({t:'reportnow',kind:'answer'});rb.textContent='Reported, thanks';rb.disabled=true};$('gerr').append(' ',rb)}clearTimeout(rejT);rejT=setTimeout(()=>err(''),m.rep?7000:4000);sfxp('miss');const f=$('g_a');if(f){f.focus();f.select()}}
-    else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
-  ws.onclose=()=>{clearInterval(pingT);myPing=null;paintPing();fxClear();const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
+    else if(m.t==='idle'){idleClosed=true}else if(m.t==='err'){svErr=m.m;status(m.m);err(m.m)}else if(m.t==='state'){st=m;off=m.now-Date.now();render()}};
+  ws.onclose=()=>{clearInterval(pingT);myPing=null;paintPing();
+    if(idleClosed&&st&&st.phase==='end'){idleClosed=false;ws=null;$('again').disabled=true;paintPing();return}   // the server freed the room after a few idle minutes: the results stay on screen (Leave goes back to the menu)
+    fxClear();const was=me;kind=null;ws=null;st=null;me=null;lastKey=null;V=null;duck(false);show('menu');err(svErr||(was?'Disconnected from the server.':'Couldn’t connect to the server.'));loadLb()};
   ws.onerror=()=>status('Couldn’t connect to the server.');
 }
 function leave(){fxClear();const w=ws;ws=null;st=null;me=null;lastKey=null;kind=null;V=null;duck(false);err('');status('');
@@ -1235,13 +1237,13 @@ async function openAdmin(){
     m.innerHTML=`<div class="admbox" role="dialog" aria-label="Scoring settings">
       <div class="admhead"><h2>Admin</h2><button class="btn" id="admClose" type="button">Close</button></div>
       <div class="admkey"><input id="admkey" type="text" name="ozu-adm-key" class="secret" placeholder="Admin code" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" value=""><input id="admname" type="text" placeholder="Your name (for the log)" maxlength="24" autocomplete="off" spellcheck="false"><button class="btn" id="admUnlock" type="button">Unlock</button><span class="admst" id="admSt"></span></div>
-      <div id="admBody" hidden><div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button><button type="button" data-t="rep" aria-pressed="false" id="repTab">Reports</button><button type="button" data-t="health" aria-pressed="false">Health</button><button type="button" data-t="log" aria-pressed="false">Audit log</button></div>
+      <div id="admBody" hidden><div class="admtabs" id="admtabs"><button type="button" data-t="sc" aria-pressed="true">Scoring</button><button type="button" data-t="maps" aria-pressed="false">Background maps</button><button type="button" data-t="clips" aria-pressed="false">Clips</button><button type="button" data-t="oz" aria-pressed="false">Ozillion</button><button type="button" data-t="rep" aria-pressed="false" id="repTab">Reports</button><button type="button" data-t="health" aria-pressed="false">Health</button><button type="button" data-t="log" aria-pressed="false">Audit log</button><button type="button" data-t="ann" aria-pressed="false">Announcement</button></div>
       <div id="tab_sc"><p class="muted">Drag the handles on the graph: the height at 0 % is the weight, the two flat ends are “full points up to” and “zero points from”, the middle handle bends the curve. Hover for exact values.</p><div class="admgrid"><div>
         <div class="legend" id="legend"></div>
         <div class="chartwrap" id="cw"><svg id="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points by relative error for AR, BPM, SR and PP"></svg><div class="tip" id="tip" hidden></div></div>
         <div id="admTable" hidden></div>
         <div class="row"><button class="btn" id="admTbl" type="button">Table view</button></div>
-      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div><div id="tab_health" class="admp" hidden></div><div id="tab_log" class="admp" hidden></div><div id="tab_rep" class="admp" hidden></div></div></div>`;
+      </div><div class="admctl" id="admctl"></div></div></div><div id="tab_maps" class="admp" hidden></div><div id="tab_clips" class="admp" hidden></div><div id="tab_oz" class="admp" hidden></div><div id="tab_health" class="admp" hidden></div><div id="tab_ann" class="admp" hidden></div><div id="tab_log" class="admp" hidden></div><div id="tab_rep" class="admp" hidden></div></div></div>`;
     $('admkey').value=aKey;$('admname').value=aName;
     $('admClose').onclick=closeAdmin;m.addEventListener('pointerdown',e=>{if(e.target===m)closeAdmin()});
     $('admTbl').onclick=()=>{tableOn=!tableOn;$('admTbl').textContent=tableOn?'Graph view':'Table view';$('cw').hidden=tableOn;$('legend').hidden=tableOn;$('admTable').hidden=!tableOn;drawTable()};
@@ -1615,11 +1617,24 @@ const readJson=inp=>new Promise((res,rej)=>{const f=inp.files[0];if(!f)return re
 const inited={};
 async function repBadge(){try{const d=await adm('/admin/oz/overview'),b=$('repTab');if(b)b.textContent='Reports'+(d.reports?' ('+d.reports+')':'')}catch(e){}}
 function admTabs(){
-  const bar=$('admtabs'),T={sc:$('tab_sc'),maps:$('tab_maps'),clips:$('tab_clips'),oz:$('tab_oz'),rep:$('tab_rep'),health:$('tab_health'),log:$('tab_log')};
+  const bar=$('admtabs'),T={sc:$('tab_sc'),maps:$('tab_maps'),clips:$('tab_clips'),oz:$('tab_oz'),rep:$('tab_rep'),health:$('tab_health'),log:$('tab_log'),ann:$('tab_ann')};
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{bar.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
-    for(const k in T)T[k].hidden=k!==b.dataset.t;if((b.dataset.t==='maps'||b.dataset.t==='clips')&&!inited[b.dataset.t]){inited[b.dataset.t]=1;initPool(b.dataset.t)}if((b.dataset.t==='oz'||b.dataset.t==='rep')&&!inited.oz){inited.oz=1;initOz()}if(b.dataset.t==='health'&&!inited.health){inited.health=1;initHealth()}if(b.dataset.t==='log')initLog()})}
+    for(const k in T)T[k].hidden=k!==b.dataset.t;if((b.dataset.t==='maps'||b.dataset.t==='clips')&&!inited[b.dataset.t]){inited[b.dataset.t]=1;initPool(b.dataset.t)}if((b.dataset.t==='oz'||b.dataset.t==='rep')&&!inited.oz){inited.oz=1;initOz()}if(b.dataset.t==='health'&&!inited.health){inited.health=1;initHealth()}if(b.dataset.t==='log')initLog();if(b.dataset.t==='ann')initAnn()})}
 
 /* ----- audit log: who changed what, and the aliases the server added by itself (undoable) ----- */
+/* ----- live announcement: a bar above the navbar for everybody, closable, gone by itself after the chosen time ----- */
+async function initAnn(){const box=$('tab_ann');box.replaceChildren();
+  const cur=el('div','stat'),ta=el('textarea'),cnt=el('small','muted'),dur=el('select'),sty=el('select'),pub=el('button','btn go','Publish'),clr=el('button','btn','Remove the current one'),pv=el('div','annbar info'),say2=el('div','stat');
+  ta.maxLength=280;ta.rows=3;ta.placeholder='What should everybody read? (links starting with https:// become clickable)';ta.style.cssText='width:100%;box-sizing:border-box';
+  [['15','15 minutes'],['60','1 hour'],['180','3 hours'],['720','12 hours'],['1440','1 day'],['4320','3 days'],['10080','7 days']].forEach(([v,t])=>{const o=el('option',null,t);o.value=v;dur.append(o)});dur.value='60';
+  [['info','Info (blue)'],['warn','Warning (amber)'],['good','Good news (green)']].forEach(([v,t])=>{const o=el('option',null,t);o.value=v;sty.append(o)});
+  pub.type=clr.type='button';pv.style.cssText='position:static;animation:none;margin:8px 0;border-radius:8px;border-width:0 0 2px';
+  const prev=()=>{cnt.textContent=ta.value.length+' / 280';pv.className='annbar '+sty.value;pv.textContent=ta.value.trim()||'Preview of the bar'};ta.oninput=prev;sty.onchange=prev;prev();
+  const row1=el('div','row'),row2=el('div','row');row1.append(el('label',null,'Stays for '),dur,el('label',null,' Colour '),sty);row2.append(pub,clr);
+  const load=async()=>{try{const d=await adm('/admin/announce');if(d.ann){const left=Math.max(0,Math.round((d.ann.until-Date.now())/60000));cur.className='stat ok';cur.textContent='Live now ('+(left>=120?Math.round(left/60)+' h':left+' min')+' left, until '+new Date(d.ann.until).toLocaleString()+'): '+d.ann.text}else{cur.className='stat';cur.textContent='No announcement is live.'}}catch(e){say(cur,e.message,'bad')}};
+  pub.onclick=async()=>{if(!ta.value.trim())return say(say2,'Write the text first.','bad');pub.disabled=true;try{await adm('/admin/announce',{text:ta.value,minutes:+dur.value,style:sty.value});say(say2,'Published. Visitors with the site open see it within about 2 minutes; everybody else when they arrive.','ok');await load()}catch(e){say(say2,e.message,'bad')}pub.disabled=false};
+  clr.onclick=async()=>{try{await adm('/admin/announce',{clear:true});say(say2,'Removed.','ok');await load()}catch(e){say(say2,e.message,'bad')}};
+  box.append(el('p','muted','A thin bar above the navbar on every page. People can close it with the ×; it disappears by itself when the time is up. A new announcement shows again even for people who closed the last one.'),cur,ta,cnt,row1,pv,row2,say2);load()}
 async function initLog(){const box=$('tab_log');box.replaceChildren();const f=el('input'),rf=el('button','btn','Refresh'),out=el('div','alog');f.type='text';f.placeholder='Filter (name, action, text…)';rf.type='button';
   box.append(el('p','muted','Every change made in this panel and every alias the server added by itself. The name is what the admin typed when unlocking; the device is a short fingerprint of the connection, so you can tell two people apart even if they share the code.'),f,rf,out);
   const paint=list=>{const q=f.value.trim().toLowerCase(),rows=list.filter(e=>!q||JSON.stringify(e).toLowerCase().includes(q));out.replaceChildren(...rows.map(e=>{const r=el('div','lrow'+(e.undone?' undone':'')),d=new Date(e.at);

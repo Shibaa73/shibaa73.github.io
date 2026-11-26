@@ -263,3 +263,37 @@ async function verify(){const code=box().querySelector('#acCode').value.trim();i
   if(error){st.msg=nice(error);st.ok=false;return render()}
   if(st.kind==='recovery'){st.view='newpass';st.msg='';return render()}try{SFX.play('good')}catch(e){}closeModal()}
 })();
+
+/* ---------- live announcement bar (set in the Ozu Guessr admin panel, tab "Announcement") ----------
+   A thin bar above the navbar with a close button. It is drawn by the top page only (the shell), so apps inside the frame don't show a second one. */
+(()=>{
+const st=document.createElement('style');
+st.textContent=`.annbar{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 44px 8px 16px;min-height:40px;box-sizing:border-box;font:600 .85rem/1.35 'Inter',system-ui,sans-serif;color:#fff;text-align:center;border-bottom:2px solid;animation:annIn .25s ease}
+.annbar.info{background:#112a6b;border-color:#4fd8ff}.annbar.warn{background:#4a3410;border-color:#f0b94a}.annbar.good{background:#10381f;border-color:#8fd19e}
+.annbar a{color:inherit;text-decoration:underline}.annbar .annx{position:absolute;right:8px;top:50%;translate:0 -50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:6px;background:transparent;color:inherit;font-size:1.2rem;line-height:1;cursor:pointer}
+.annbar .annx:hover{background:rgba(255,255,255,.16)}.annbar .annx:focus-visible{outline:2px solid #fff;outline-offset:1px}
+@keyframes annIn{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}html.calm .annbar{animation:none}
+html.has-ann body{padding-top:var(--annh,0)}
+html.has-ann #siteVol,html.has-ann #acBtn,html.has-ann #shellHome,html.has-ann .home-btn{margin-top:var(--annh,0)}
+html.has-ann #view{top:var(--annh,0);height:calc(100% - var(--annh,0px))}`;
+document.head.append(st);
+if(window!==window.top)return;
+const API='https://ozu-server.shibagd73.workers.dev',K='ozu:ann-closed';
+let bar=null,timer=0,ro=null,lastPoll=0;
+const closedId=()=>{try{return localStorage.getItem(K)}catch(e){return null}};
+const root=document.documentElement;
+function hide(){clearTimeout(timer);if(ro){ro.disconnect();ro=null}if(bar){bar.remove();bar=null}root.classList.remove('has-ann');root.style.removeProperty('--annh')}
+function fill(el,text){el.textContent='';const re=/(https?:\/\/[^\s<>"']+)/g;text.split(re).forEach((part,i)=>{if(i%2){const a=document.createElement('a');a.href=part;a.textContent=part;a.target='_blank';a.rel='noopener noreferrer';el.append(a)}else if(part)el.append(document.createTextNode(part))})}
+function show(a,now){
+  if(!a||closedId()===a.id){hide();return}
+  const left=a.until-(now||Date.now());if(left<=0){hide();return}
+  if(!bar||bar.dataset.id!==a.id){hide();
+    bar=document.createElement('div');bar.className='annbar '+(a.style||'info');bar.dataset.id=a.id;bar.setAttribute('role','status');
+    const t=document.createElement('span');fill(t,a.text);const x=document.createElement('button');x.type='button';x.className='annx';x.textContent='×';x.setAttribute('aria-label','Dismiss announcement');
+    x.onclick=()=>{try{localStorage.setItem(K,a.id)}catch(e){}hide()};bar.append(t,x);document.body.prepend(bar);root.classList.add('has-ann');
+    const fit=()=>root.style.setProperty('--annh',bar.offsetHeight+'px');fit();if(window.ResizeObserver){ro=new ResizeObserver(fit);ro.observe(bar)}else addEventListener('resize',fit)}
+  clearTimeout(timer);timer=setTimeout(hide,left+200)}
+async function poll(){lastPoll=Date.now();try{const r=await fetch(API+'/announce',{cache:'no-store'});if(!r.ok)return;const d=await r.json();show(d.ann,d.now)}catch(e){}}
+const start=()=>{poll();setInterval(()=>{if(!document.hidden)poll()},120000);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastPoll>60000)poll()})};
+if(document.body)start();else addEventListener('DOMContentLoaded',start);
+})();
