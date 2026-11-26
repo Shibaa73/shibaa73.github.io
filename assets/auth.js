@@ -66,6 +66,7 @@ css.textContent=`
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
 @media (max-width:520px){#acBtn .n{display:none}#acBtn{padding:0 7px}}
 #dcIcon{position:fixed;top:16px;right:120px;z-index:50;width:38px;height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:var(--panel-2,#121a40);border:1px solid var(--border,rgba(160,190,255,.18));border-radius:10px;color:#8c97ff;cursor:pointer;transition:border-color .15s,transform .14s,color .15s}
+#dcIcon[hidden]{display:none}
 #dcIcon:hover{color:#fff;border-color:#5865f2;transform:translateY(-1px)}#dcIcon:active{transform:scale(.96)}#dcIcon:focus-visible{outline:2px solid var(--pink,#ff7ab3);outline-offset:2px}#dcIcon svg{width:20px;height:20px;fill:currentColor}`;
 document.head.append(css);
 const hue=n=>{let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))%360;return h};
@@ -77,12 +78,13 @@ const btn=document.createElement('button');btn.id='acBtn';btn.type='button';
 if(!document.getElementById('siteVol'))btn.style.right='16px';   // no volume button on this page
 btn.onclick=()=>{if(A.user)toggleMenu();else openModal('login')};
 document.body.append(btn);
-if(/ozuguessr/i.test(location.pathname)){   // Ozu Guessr only: a Discord button to the left of the login / profile button
+if(window===window.top){   // the shell page (or the app opened directly) owns the header; an app inside the shell's frame must not draw its own
+  // Ozu Guessr only: a Discord button to the left of the login / profile button (the shell shows the app as #Apps/OzuGuessr.html)
   const dc=document.createElement('button');dc.id='dcIcon';dc.type='button';dc.title='Join the Ozu Guessr Discord';dc.setAttribute('aria-label','Join the Ozu Guessr Discord server');
   dc.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>';
   dc.onclick=()=>window.open('https://discord'+'.gg/f6SrqvkbRX','_blank','noopener,noreferrer');document.body.append(dc);
-  const place=()=>{const r=btn.getBoundingClientRect();if(!r.width)return;dc.style.right=Math.round(innerWidth-r.left+8)+'px';dc.style.top=Math.round(r.top+(r.height-38)/2)+'px'};
-  addEventListener('resize',place);if(window.ResizeObserver)new ResizeObserver(place).observe(btn);setInterval(place,500);place();
+  const place=()=>{dc.hidden=!/ozuguessr/i.test(location.pathname+location.hash);const r=btn.getBoundingClientRect();if(!r.width)return;dc.style.right=Math.round(innerWidth-r.left+8)+'px';dc.style.top=Math.round(r.top+(r.height-38)/2)+'px'};
+  addEventListener('resize',place);addEventListener('hashchange',place);if(window.ResizeObserver)new ResizeObserver(place).observe(btn);setInterval(place,500);place();
 }
 let menu=null;
 function closeMenu(){if(menu){menu.remove();menu=null}}
